@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="TypeProvidersTst.fs" />
+    <Compile Include="cheatsheet.fs" />
+    <Compile Include="OptionBuilderTests.fs" />
+    <Compile Include="TypeProvidersTests.fs" />
+    <Compile Include="Types.fs" />
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.JsonProvider" Version="1.0.0" />
+    <PackageReference Include="Fable.SimpleHttp" Version="2.6.0" />
+    <PackageReference Include="FSharp.Data" Version="3.3.2" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService1";
+
+service Customer {
+	rpc GetNewCustomers (Unit) returns (stream CustomerModel);
+}
+
+message Unit {
+}
+
+message CustomerModel{
+	string firstName = 1;
+	string lastName = 2;
+	int32 age = 3;
+}
