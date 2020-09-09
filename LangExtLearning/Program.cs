@@ -9,12 +9,12 @@ namespace LangExtLearning
     {
         static void Main(string[] args)
         {
-            var p1 = Person.New("asdasd", "dasdasd");
-            var refp1 = Ref(p1);
-            sync(() =>
-            {
-                return refp1.Swap(p => p.With(Name: "Kappa"));
-            });
+            //var p1 = Person.New("asdasd", "dasdasd");
+            //var refp1 = Ref(p1);
+            //sync(() =>
+            //{
+            //    return refp1.Swap(p => p.With(Name: "Kappa"));
+            //});
 
         }
         // you can use C# pattern matching like F#

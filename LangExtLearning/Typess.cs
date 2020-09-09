@@ -14,17 +14,5 @@ namespace LangExtLearning
         Shape Prism(float width, float height);
     }
 
-    [Record]
-    public partial class Person
-    {
-        public readonly string Name;
-        public readonly string Surname;
-
-        public Person(string name, string surname)
-        {
-            Name = name;
-            Surname = surname;
-        }
-    }
 
 }
