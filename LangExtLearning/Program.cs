@@ -2,26 +2,20 @@
 using LanguageExt;
 using static LanguageExt.Prelude;
 
-namespace FunctionalLibs
+
+namespace LangExtLearning
 {
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-            Lst<int> test = List(1, 2, 3, 4, 5);
+            var p1 = Person.New("asdasd", "dasdasd");
+            var refp1 = Ref(p1);
+            sync(() =>
+            {
+                return refp1.Swap(p => p.With(Name: "Kappa"));
+            });
 
-            var rctngl = Rectangle.New(0, 0);
-
-            Either<int, string> a = Right("");
-        }
-
-        [Union]
-        public interface Shape
-        {
-            Shape Rectangle(float width, float length);
-            Shape Circle(float radius);
-            Shape Prism(float width, float height);
         }
         // you can use C# pattern matching like F#
         public static double GetArea(Shape shape)

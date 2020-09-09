@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -360,8 +361,28 @@ namespace MarcinGajda.RXTests
             return new BehaviorSubject<string>("test")
                 .Window(TimeSpan.FromSeconds(1))
                 .SelectMany(x => { return x; })
-                .Select(x => { Console.WriteLine(x); return x; })
+                .Do(Console.WriteLine)
+                .Select(x => { return x; })
                 .ToTask();
+        }
+
+        public static Task Splitt()
+        {
+            Observable.Range(0, 10)
+                .Scan(ImmutableDictionary<int, string>.Empty,
+                (accumulator, element) =>
+                {
+                    return accumulator.Add(element, element.ToString());
+                })
+                .Select(dict => dict);
+
+            return Task.CompletedTask;
+        }
+        public static async Task ReadFile()
+        {
+            var fileRead = Observable.FromAsync(() => File.ReadAllTextAsync(""))
+                .Replay();
+
         }
     }
 }
