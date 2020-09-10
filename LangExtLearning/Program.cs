@@ -1,6 +1,4 @@
 ﻿using System;
-using LanguageExt;
-using static LanguageExt.Prelude;
 
 
 namespace LangExtLearning
@@ -16,6 +14,11 @@ namespace LangExtLearning
             //    return refp1.Swap(p => p.With(Name: "Kappa"));
             //});
 
+            var l = "asdasd" switch
+            {
+                "xd" or "cx" => 1,
+                _ => 2,
+            };
         }
         // you can use C# pattern matching like F#
         public static double GetArea(Shape shape)
