@@ -102,6 +102,15 @@ namespace MarcinGajda
             ParrallelTests();
         }
 
+        private static async Task TestAsyncRef(int x)
+        {
+            static int X(ref int x1)
+            {
+                return x1;
+            }
+            _ = X(ref x);
+        }
+
         private static void ParrallelTests()
             => new int[] { 1, 2, 3 }
             .AsParallel()
