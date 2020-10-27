@@ -209,12 +209,14 @@ namespace MarcinGajda.RXTests
 
         public static async Task AndThenWhen()
         {
-            Pattern<int, int> pattern = Observable.Range(1, 10).And(Observable.Range(10, 10));
-            Plan<int> plain = pattern.Then((left, right) => left + right);
-            IObservable<int> sums = Observable.When(plain);
+            Pattern<int, string> pattern = Observable.Range(1, 10)
+                .And(Observable.Range(10, 10).Select(x => x.ToString()));
+            Plan<string> plain = pattern.Then((left, right) => left.ToString() + " " + right);
+            IObservable<string> sums = Observable.When(plain);
             using IDisposable sub = sums.Subscribe(Console.WriteLine);
             _ = await sums;
         }
+
         public static async void Randomm()
         {
 
@@ -264,6 +266,19 @@ namespace MarcinGajda.RXTests
                 .SelectMany(async group => new { group.Key, List = await group.ToList() })
                 .ToDictionary(group => group.Key, group => group.List);
 
+            var a = Observable
+                .Create<int>(observer =>
+                {
+                    observer.OnNext(1);
+                    observer.OnNext(2);
+                    return Disposable.Create(observer.OnCompleted);
+                });
+            var asdasda = Observable.Return(new { a = 1 });
+            var plain = Observable.Repeat("Path")
+                .And(Observable.Repeat(1))
+                .And(Observable.Repeat(new { a = 5 }));
+
+            Observable.When(plain.Then((arg1, arg2, arg3) => ""));
         }
         public static IObservable<Site> GetSource()
         {

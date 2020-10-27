@@ -43,18 +43,17 @@ namespace MarcinGajda
 
         public static async Task Main()
         {
-
+            await Observables.AndThenWhen();
+            await Task.Delay(-1);
 
             await Observables.ObservableBuff();
             await Observables.ObservableColections();
             await WorkObservable.TestSplit(default);
 
             Observables.TestQ();
-            await Task.Delay(-1);
 
             Observables.Windows();
             Observables.Schedulerss();
-            await Observables.AndThenWhen();
             Observables.Generate();
             Observables.Throws();
             Observables.SubjectTest1();
