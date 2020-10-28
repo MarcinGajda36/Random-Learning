@@ -1,52 +1,71 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.DataflowTests
 {
     public class Cache<TKey, TVal>
+        where TKey : notnull
     {
-        public Dictionary<TKey, TVal> cached = new Dictionary<TKey, TVal>();
-        private readonly ActionBlock<(TKey, TaskCompletionSource<TVal>)> getBlock;
-        private readonly ActionBlock<(TKey, TaskCompletionSource<TVal>)> addOrUpdateBlock; //TODO?
+        private readonly Dictionary<TKey, TVal> cache = new Dictionary<TKey, TVal>();
+        private readonly ActionBlock<Command> commandBlock;
 
         public Cache()
         {
-            getBlock = new ActionBlock<(TKey, TaskCompletionSource<TVal>)>(GetOrDownloadVal);
-
+            commandBlock = new ActionBlock<Command>(command =>
+            {
+                if (command is GetOrAddCommand getOrAdd)
+                {
+                    GetOrAdd(getOrAdd);
+                }
+            });
         }
 
-        private async Task GetOrDownloadVal((TKey, TaskCompletionSource<TVal>) keyTcs)
+        public Task<TVal> GetOrAdd(TKey key, Func<TKey, TVal> func)
         {
-            try
+            var getOrAddCommand = new GetOrAddCommand(key, func);
+            _ = commandBlock.Post(getOrAddCommand);
+            return getOrAddCommand.Result.Task;
+        }
+
+        private void GetOrAdd(GetOrAddCommand getOrAddCommand)
+        {
+            if (cache.TryGetValue(getOrAddCommand.Key, out var existing))
             {
-                if (cached.TryGetValue(keyTcs.Item1, out TVal found))
-                {
-                    keyTcs.Item2.SetResult(found);
-                }
-                else
-                {
-                    TVal fetched = await Task.FromResult(default(TVal));//Db select
-                    cached.Add(keyTcs.Item1, fetched);
-                    keyTcs.Item2.SetResult(fetched);
-                }
+                getOrAddCommand.Result.SetResult(existing);
             }
-            catch (Exception ex)
+            else
             {
-                keyTcs.Item2.SetException(ex);
+                try
+                {
+                    TVal val = getOrAddCommand.Func(getOrAddCommand.Key);
+                    getOrAddCommand.Result.SetResult(val);
+                    cache.Add(getOrAddCommand.Key, val);
+                }
+                catch (Exception ex)
+                {
+                    getOrAddCommand.Result.TrySetException(ex);
+                }
             }
         }
 
-        public Task<TVal> GetOrFetch(TKey key)
+        private abstract class Command
         {
-            var tcs = new TaskCompletionSource<TVal>();
-            _ = getBlock.Post((key, tcs));
-            return tcs.Task;
+            public abstract TKey Key { get; }
+        }
+        private class GetOrAddCommand : Command
+        {
+            public override TKey Key { get; }
+            public TaskCompletionSource<TVal> Result { get; }
+            public Func<TKey, TVal> Func { get; }
+
+            public GetOrAddCommand(TKey key, Func<TKey, TVal> func)
+            {
+                Result = new TaskCompletionSource<TVal>();
+                Key = key;
+                Func = func;
+            }
         }
     }
 }
