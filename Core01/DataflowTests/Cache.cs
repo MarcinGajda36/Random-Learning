@@ -24,6 +24,7 @@ namespace MarcinGajda.DataflowTests
 
         public Task<TVal> GetOrAdd(TKey key, Func<TKey, TVal> func)
         {
+            //hmmm with immutable dictionary i could first check here 
             var getOrAddCommand = new GetOrAddCommand(key, func);
             _ = commandBlock.Post(getOrAddCommand);
             return getOrAddCommand.Result.Task;
