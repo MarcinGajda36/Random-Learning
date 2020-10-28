@@ -278,7 +278,7 @@ namespace MarcinGajda.RXTests
                 .And(Observable.Repeat(1))
                 .And(Observable.Repeat(new { a = 5 }));
 
-            Observable.When(plain.Then((arg1, arg2, arg3) => ""));
+            Observable.When(plain.Then((arg1, arg2, arg3) => arg3));
         }
         public static IObservable<Site> GetSource()
         {

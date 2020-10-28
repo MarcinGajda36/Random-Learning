@@ -5,27 +5,17 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.LocksAndSemaphores
 {
-    public class PerKeyGenericSynchronizer<TKey>
-    {
-        private readonly PerKeySynchronizer<TKey, object> perKeySynchronizer = new PerKeySynchronizer<TKey, object>();
-
-        public async Task<TValue> DoAsync<TValue>(TKey key, Func<Task<TValue>> toDo)
-            => (TValue)await perKeySynchronizer.Do(key, async () => await toDo().ConfigureAwait(false)).ConfigureAwait(false);
-
-        public async Task<TValue> DoSync<TValue>(TKey key, Func<TValue> toDo)
-            => (TValue)await perKeySynchronizer.Do(key, () => Task.FromResult<object>(toDo())).ConfigureAwait(false);
-    }
-
     public class PerKeySynchronizer<TKey, TValue>
+        where TKey : notnull
     {
         private readonly Dictionary<TKey, ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)>> _synchronizers
             = new Dictionary<TKey, ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)>>();
 
-        private readonly ActionBlock<(TKey, TaskCompletionSource<TValue>, Func<Task<TValue>>)> Synchronizers;
+        private readonly ActionBlock<(TKey, TaskCompletionSource<TValue>, Func<Task<TValue>>)> Synchronizer;
 
         public PerKeySynchronizer()
         {
-            Synchronizers = new ActionBlock<(TKey key, TaskCompletionSource<TValue> tcs, Func<Task<TValue>> func)>(keyTcsFunc =>
+            Synchronizer = new ActionBlock<(TKey key, TaskCompletionSource<TValue> tcs, Func<Task<TValue>> func)>(keyTcsFunc =>
             {
                 if (_synchronizers.TryGetValue(keyTcsFunc.key, out var existing))
                 {
@@ -53,11 +43,41 @@ namespace MarcinGajda.LocksAndSemaphores
                 }
             });
 
-        public Task<TValue> Do(TKey key, Func<Task<TValue>> toDo)
+        public Task<TValue> DoAsync(TKey key, Func<Task<TValue>> toDo)
         {
             var tcs = new TaskCompletionSource<TValue>();
-            _ = Synchronizers.Post((key, tcs, toDo));
+            _ = Synchronizer.Post((key, tcs, toDo));
             return tcs.Task;
         }
+
+        public Task<TValue> DoSync(TKey key, Func<TValue> toDo)
+            => DoAsync(key, ToTaskFunc(toDo));
+
+        private Func<Task<TValue>> ToTaskFunc(Func<TValue> toDo)
+            => () => Task.FromResult(toDo());
+    }
+
+    public class PerKeySynchronizer<TKey>
+        where TKey : notnull
+    {
+        private readonly PerKeySynchronizer<TKey, object> perKeySynchronizer = new PerKeySynchronizer<TKey, object>();
+
+        public async Task<TValue> DoAsync<TValue>(TKey key, Func<Task<TValue>> toDo)
+            => (TValue)await perKeySynchronizer.DoAsync(key, async () => await toDo().ConfigureAwait(false)).ConfigureAwait(false);
+
+        public async Task<TValue> DoSync<TValue>(TKey key, Func<TValue> toDo)
+            => (TValue)await perKeySynchronizer.DoSync(key, () => toDo()).ConfigureAwait(false);
+    }
+
+    public static class PerKey<TKey>
+        where TKey : notnull
+    {
+        private static readonly PerKeySynchronizer<TKey> perKeySynchronizer = new PerKeySynchronizer<TKey>();
+
+        public static Task<TValue> DoAsync<TValue>(TKey key, Func<Task<TValue>> toDo)
+            => perKeySynchronizer.DoAsync(key, toDo);
+
+        public static Task<TValue> DoSync<TValue>(TKey key, Func<TValue> toDo)
+            => perKeySynchronizer.DoSync(key, toDo);
     }
 }
