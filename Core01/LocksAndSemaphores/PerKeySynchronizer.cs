@@ -31,15 +31,15 @@ namespace MarcinGajda.LocksAndSemaphores
         }
 
         private static ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)> CreateSynchronizationBlock()
-            => new ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)>(async tcsFunc =>
+            => new ActionBlock<(TaskCompletionSource<TValue> tcs, Func<Task<TValue>> func)>(async tcsFunc =>
             {
                 try
                 {
-                    tcsFunc.Item1.SetResult(await tcsFunc.Item2().ConfigureAwait(false));
+                    tcsFunc.tcs.SetResult(await tcsFunc.func().ConfigureAwait(false));
                 }
                 catch (Exception ex)
                 {
-                    _ = tcsFunc.Item1.TrySetException(ex);
+                    _ = tcsFunc.tcs.TrySetException(ex);
                 }
             });
 
