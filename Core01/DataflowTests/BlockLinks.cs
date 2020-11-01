@@ -17,7 +17,7 @@ namespace MarcinGajda.DataflowTests
             var batchJoined = new BatchedJoinBlock<int[], string>(10, new GroupingDataflowBlockOptions { });
             batch.LinkTo(batchJoined.Target1, new DataflowLinkOptions { }, ints => ints[0] > 0);
             var action2 = new ActionBlock<Tuple<IList<int[]>, IList<string>>>(x => { });
-            using var linkBJA = batchJoined.LinkTo(action2, new DataflowLinkOptions { }, x => x.Item1.Count == x.Item2.Count);//does this always recive 10-10 or any 10 total (like 7 -3) trigger link?
+            using var linkBJA = batchJoined.LinkTo(action2, new DataflowLinkOptions { }, x => x.Item1.Count == x.Item2.Count);//it's 10 total so 7-3 or 0-10 will propagate 
 
             var broadcast = new BroadcastBlock<int>(cloningFunction: x => x, new DataflowBlockOptions { });
             var action3 = new ActionBlock<int>(x => { });
