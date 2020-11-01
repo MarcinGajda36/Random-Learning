@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.DataflowTests
@@ -47,6 +46,16 @@ namespace MarcinGajda.DataflowTests
             var writeOnce = new WriteOnceBlock<int>(cloningFunction: x => x, new DataflowBlockOptions { });// it gets and stores 1 element but gives clones to linked blocks? 
             var action9 = new ActionBlock<int>(x => { });
             writeOnce.LinkTo(action9);
+
+            var bufferC1 = new BufferBlock<int>();
+            var bufferC2 = new BufferBlock<string>();
+            var actionIdx = DataflowBlock.Choose<int, string>(
+                bufferC1, x => Console.WriteLine(x + 1),
+                bufferC2, str => Console.WriteLine(str + ""));
+
+            var actionE1 = new ActionBlock<int>(x => { });
+            var bufferE1 = new BufferBlock<string>();
+            var propagator = DataflowBlock.Encapsulate<int, string>(actionE1, bufferE1);
         }
     }
 }
