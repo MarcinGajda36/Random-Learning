@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.DataflowTests
@@ -56,6 +57,10 @@ namespace MarcinGajda.DataflowTests
             var actionE1 = new ActionBlock<int>(x => { });
             var bufferE1 = new BufferBlock<string>();
             var propagator = DataflowBlock.Encapsulate<int, string>(actionE1, bufferE1);
+
+            var scheduler = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, Environment.ProcessorCount, int.MaxValue);
+            var concurrent = scheduler.ConcurrentScheduler;
+            var exclusive = scheduler.ExclusiveScheduler;
         }
     }
 }
