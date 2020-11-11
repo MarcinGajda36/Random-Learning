@@ -17,7 +17,10 @@ namespace MarcinGajda.DataflowTests
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 return new Remover();
-            }, new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded });
+            }, new ExecutionDataflowBlockOptions {
+                MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
+                //EnsureOrdered = false //in case of different delays
+            });
             _changer.LinkTo(removers, changer => changer is Adder);
             removers.LinkTo(_changer);
 
