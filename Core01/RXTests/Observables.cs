@@ -393,11 +393,14 @@ namespace MarcinGajda.RXTests
 
             return Task.CompletedTask;
         }
-        public static async Task ReadFile()
-        {
-            var fileRead = Observable.FromAsync(() => File.ReadAllTextAsync(""))
-                .Replay();
 
+        public static async Task ReadFile(string file)
+        {
+            var fileRead = Observable
+                .FromAsync(() => File.ReadAllTextAsync(file));
+            
         }
+
+
     }
 }
