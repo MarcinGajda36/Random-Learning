@@ -10,10 +10,12 @@ namespace MarcinGajda.DataflowTests
     class Sessions
     {
         private readonly BroadcastBlock<Changer> _changer = new BroadcastBlock<Changer>(x => x);
+        private readonly TransformBlock<Changer, Remover> _removers;
+        private readonly ActionBlock<Changer> _stateCalculator;
 
         public Sessions()
         {
-            var removers = new TransformBlock<Changer, Remover>(async changer =>
+            _removers = new TransformBlock<Changer, Remover>(async changer =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 return new Remover();
@@ -21,11 +23,11 @@ namespace MarcinGajda.DataflowTests
                 MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
                 //EnsureOrdered = false //in case of different delays
             });
-            _changer.LinkTo(removers, changer => changer is Adder);
-            removers.LinkTo(_changer);
+            _changer.LinkTo(_removers, changer => changer is Adder);
+            _removers.LinkTo(_changer);
 
             var state = new State();
-            var stateCalculator = new ActionBlock<Changer>(changer =>
+            _stateCalculator = new ActionBlock<Changer>(changer =>
             {
                 if (changer is Adder adder)
                 {
@@ -38,7 +40,7 @@ namespace MarcinGajda.DataflowTests
                 }
             });
 
-            _changer.LinkTo(stateCalculator);
+            _changer.LinkTo(_stateCalculator);
         }
         public Task<int> Add()
         {
