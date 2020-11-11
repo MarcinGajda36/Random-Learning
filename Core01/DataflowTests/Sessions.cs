@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -25,20 +26,26 @@ namespace MarcinGajda.DataflowTests
             {
                 if (changer is Adder adder)
                 {
-                    state.state.Add(1);
+                    state.state += 1;
+                    adder.Result.SetResult(state.state);
                 }
                 else if (changer is Remover remover)
                 {
-                    state.state.Remove(1);
+                    state.state -= 1;
                 }
             });
 
             _changer.LinkTo(stateCalculator);
         }
-
+        public Task<int> Add()
+        {
+            var adder = new Adder();
+            _changer.Post(adder);
+            return adder.Result.Task;
+        }
         class State
         {
-            public HashSet<int> state = new HashSet<int>();
+            public int state = 0;
         }
         class Changer
         {
@@ -46,7 +53,7 @@ namespace MarcinGajda.DataflowTests
         }
         class Adder : Changer
         {
-
+            public TaskCompletionSource<int> Result = new TaskCompletionSource<int>();
         }
         class Remover : Changer
         {
