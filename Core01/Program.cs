@@ -43,8 +43,10 @@ namespace MarcinGajda
 
         public static async Task Main()
         {
-            await Observables.AndThenWhen();
+            await BroadcastBlockTest.Test();
+
             await Task.Delay(-1);
+            await Observables.AndThenWhen();
 
             await Observables.ObservableBuff();
             await Observables.ObservableColections();
