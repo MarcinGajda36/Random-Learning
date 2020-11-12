@@ -10,7 +10,7 @@ namespace MarcinGajda.DataflowTests
         private readonly TransformBlock<Changer, Remover> _removers;
         private readonly TransformBlock<Changer, int> _stateCalculator;
         private readonly BroadcastBlock<int> _states;
-        private readonly ActionBlock<int> _stateUpdater;
+        private readonly ActionBlock<int> _summaryUpdater;
 
         public ISourceBlock<int> States => _states;
 
@@ -49,8 +49,8 @@ namespace MarcinGajda.DataflowTests
             _states = new BroadcastBlock<int>(__ => __);
             _ = _stateCalculator.LinkTo(_states);
 
-            _stateUpdater = new ActionBlock<int>(state => StateSummary = state);
-            _ = _states.LinkTo(_stateUpdater);
+            _summaryUpdater = new ActionBlock<int>(state => StateSummary = state);
+            _ = _states.LinkTo(_summaryUpdater);
         }
         public Task<int> Add()
         {
