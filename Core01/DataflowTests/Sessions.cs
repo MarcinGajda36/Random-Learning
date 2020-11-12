@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -9,25 +6,31 @@ namespace MarcinGajda.DataflowTests
 {
     class Sessions
     {
-        private readonly BroadcastBlock<Changer> _changer = new BroadcastBlock<Changer>(x => x);
+        private readonly BroadcastBlock<Changer> _changer;
         private readonly TransformBlock<Changer, Remover> _removers;
-        private readonly ActionBlock<Changer> _stateCalculator;
+        private readonly TransformBlock<Changer, int> _stateCalculator;
+        private readonly BroadcastBlock<int> _states;
+        private readonly ActionBlock<int> _stateUpdater;
+
+        public ISourceBlock<int> States => _states;
+
+        public int StateSummary { get; private set; }
 
         public Sessions()
         {
+            _changer = new BroadcastBlock<Changer>(__ => __);
             _removers = new TransformBlock<Changer, Remover>(async changer =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 return new Remover();
             }, new ExecutionDataflowBlockOptions {
                 MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
-                //EnsureOrdered = false //in case of different delays
+                EnsureOrdered = false
             });
-            _changer.LinkTo(_removers, changer => changer is Adder);
-            _removers.LinkTo(_changer);
+            _ = _changer.LinkTo(_removers, changer => changer is Adder);
 
             var state = new State();
-            _stateCalculator = new ActionBlock<Changer>(changer =>
+            _stateCalculator = new TransformBlock<Changer, int>(changer =>
             {
                 if (changer is Adder adder)
                 {
@@ -38,9 +41,16 @@ namespace MarcinGajda.DataflowTests
                 {
                     state.state -= 1;
                 }
+                return state.state;
             });
+            _ = _changer.LinkTo(_stateCalculator);
+            _ = _removers.LinkTo(_stateCalculator);
 
-            _changer.LinkTo(_stateCalculator);
+            _states = new BroadcastBlock<int>(__ => __);
+            _ = _stateCalculator.LinkTo(_states);
+
+            _stateUpdater = new ActionBlock<int>(state => StateSummary = state);
+            _ = _states.LinkTo(_stateUpdater);
         }
         public Task<int> Add()
         {
