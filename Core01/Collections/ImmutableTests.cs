@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Text;
 
 namespace MarcinGajda
 {
@@ -29,6 +28,15 @@ namespace MarcinGajda
             var arr2 = build1.ToImmutable();
             var a = new ConcurrentStack<int>();
             var s = new Stack<int>();
+
+            var iarr = ImmutableArray<int>.Empty;
+            var iss = ImmutableSortedSet<int>.Empty;
+            var ihs = ImmutableHashSet<int>.Empty;
+            var idic = ImmutableDictionary<int, string>.Empty;
+            var isdic = ImmutableSortedDictionary<int, string>.Empty;
+            var ilist = ImmutableList<int>.Empty;
+            var iq = ImmutableQueue<int>.Empty;
+            var ist = ImmutableStack<int>.Empty;
         }
     }
 }

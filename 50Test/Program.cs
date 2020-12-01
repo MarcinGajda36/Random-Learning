@@ -15,12 +15,12 @@ namespace _50Test
             //Person brother = person with { FirstName = "Paul" };
         }
 
-    public record Person
-    {
-        public string LastName { get; }
-        public string FirstName { get; }
+        public record Person
+        {
+            public string LastName { get; }
+            public string FirstName { get; }
 
-        public Person(string first, string last) => (FirstName, LastName) = (first, last);
+            public Person(string first, string last) => (FirstName, LastName) = (first, last);
+        }
     }
-}
 }
