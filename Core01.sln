@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AkkaLearning", "AkkaLearnin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LangExtLearning", "LangExtLearning\LangExtLearning.csproj", "{8612F747-33CB-4FAC-96B9-5F7AC0CB5DDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "50Test", "50Test\50Test.csproj", "{AE181789-E177-4064-91E5-A97DB7672808}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "50Test", "50Test\50Test.csproj", "{AE181789-E177-4064-91E5-A97DB7672808}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlocksApi", "BlocksApi\BlocksApi.csproj", "{1FF3C541-9D9C-4B58-BA68-82B68001B1FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{AE181789-E177-4064-91E5-A97DB7672808}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE181789-E177-4064-91E5-A97DB7672808}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE181789-E177-4064-91E5-A97DB7672808}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FF3C541-9D9C-4B58-BA68-82B68001B1FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FF3C541-9D9C-4B58-BA68-82B68001B1FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FF3C541-9D9C-4B58-BA68-82B68001B1FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FF3C541-9D9C-4B58-BA68-82B68001B1FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using MarcinGajda.AsyncDispose_;
 using MarcinGajda.Collections;
 using MarcinGajda.ContractsT;
 using MarcinGajda.Copy;
-using MarcinGajda.DataflowLoggers;
 using MarcinGajda.DataflowTests;
 using MarcinGajda.Fs;
-using MarcinGajda.LocksAndSemaphores;
 using MarcinGajda.PeriodicCheckers;
 using MarcinGajda.RXTests;
 using MarcinGajda.Structsssss;
 using MarcinGajda.WORK_observable;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace MarcinGajda
 {
@@ -43,9 +39,11 @@ namespace MarcinGajda
 
         public static async Task Main()
         {
+            await TestEviction();
+            await Task.Delay(-1);
+
             await BroadcastBlockTest.Test();
 
-            await Task.Delay(-1);
             await Observables.AndThenWhen();
 
             await Observables.ObservableBuff();
@@ -101,6 +99,21 @@ namespace MarcinGajda
             (string _, double _, int _, int pop1, int _, int pop2) = QueryCityDataForYears("New York City", 1960, 2010);
             Console.WriteLine($"Population change, 1960 to 2010: {pop2 - pop1:N0}");
             ParrallelTests();
+        }
+
+        private static async Task TestEviction()
+        {
+            using MemoryCache memoryCache = new MemoryCache(Options.Create(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(3) }));
+            memoryCache.GetOrCreate("xd", entry =>
+            {
+                entry.RegisterPostEvictionCallback((key, value, _, _) =>
+                {
+                    Console.WriteLine("aaaaa");
+                });
+                entry.SetSlidingExpiration(TimeSpan.FromSeconds(2));
+                return "a";
+            });
+            await Task.Delay(-1);
         }
 
         private static async Task TestAsyncRef(int x)
