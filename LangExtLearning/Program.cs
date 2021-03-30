@@ -1,5 +1,7 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using LanguageExt.ClassInstances;
+using static LanguageExt.Prelude;
 
 namespace LangExtLearning
 {
@@ -19,6 +21,11 @@ namespace LangExtLearning
                 "xd" or "cx" => 1,
                 _ => 2,
             };
+
+            var map = HashMap<EqStringOrdinalIgnoreCase, string, int>(("a", 1), ("b", 2));
+            var set = Set<OrdInt, int>(1, 2, 3);
+            var querey = Query(1, 2, 3);
+            var queue = Queue<int>(2, 3, 4);
         }
         // you can use C# pattern matching like F#
         public static double GetArea(Shape shape)
