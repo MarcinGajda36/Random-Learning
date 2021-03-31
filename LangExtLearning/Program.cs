@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using LanguageExt;
 using LanguageExt.ClassInstances;
 using static LanguageExt.Prelude;
 
@@ -22,10 +22,21 @@ namespace LangExtLearning
                 _ => 2,
             };
 
+            var atomMap = Atom(HashMap<EqStringOrdinal, string, HashSet<object>>());
+
+            atomMap.Swap("", new object(),
+                static (key, value, map) => map.AddOrUpdate(key,
+                    previous => previous.Add(value), HashSet(value)));
+
             var map = HashMap<EqStringOrdinalIgnoreCase, string, int>(("a", 1), ("b", 2));
+            map = map.TryAdd("c", 3);
             var set = Set<OrdInt, int>(1, 2, 3);
+            set = set.TryAdd(4);
+            var hset = HashSet<EqInt, int>(1, 2, 3);
+            hset = hset.TryAdd(4);
             var querey = Query(1, 2, 3);
-            var queue = Queue<int>(2, 3, 4);
+            var queue = Queue(2, 3, 4);
+            queue = queue.Enqueue(5);
         }
         // you can use C# pattern matching like F#
         public static double GetArea(Shape shape)
