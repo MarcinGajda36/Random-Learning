@@ -7,14 +7,24 @@ namespace LangExtLearning
 {
     class Program
     {
+        record Person
+        {
+            public string Name { get; init; }
+        }
         static void Main(string[] args)
         {
-            //var p1 = Person.New("asdasd", "dasdasd");
-            //var refp1 = Ref(p1);
-            //sync(() =>
-            //{
-            //    return refp1.Swap(p => p.With(Name: "Kappa"));
-            //});
+            var p1 = new Person { Name = "asdasd" };
+            var refp1 = Ref(p1);
+            var refp2 = Ref(p1);
+            _ = sync(() =>
+            {
+                return refp1.Swap(p => p with { Name = "Kappa" });
+            });
+
+            var (pp1, pp2) = sync(() =>
+            {
+                return (refp1.Value, refp2.Value);
+            });
 
             var l = "asdasd" switch
             {

@@ -29,8 +29,7 @@ namespace MarcinGajda
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (long, TR) Mesure<TR>(Func<TR> toTest)
         {
-            var stopper = new Stopwatch();
-            stopper.Start();
+            var stopper = Stopwatch.StartNew();
             TR r = toTest();
             stopper.Stop();
             return (stopper.ElapsedTicks, r);
