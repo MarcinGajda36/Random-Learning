@@ -18,13 +18,11 @@ namespace LangExtLearning
             var refp2 = Ref(p1);
             _ = sync(() =>
             {
-                return refp1.Swap(p => p with { Name = "Kappa" });
+                refp1.Swap(p => p with { Name = "Kappa" });
+                refp2.Swap(p => p with { Name = "LOL" });
             });
 
-            var (pp1, pp2) = sync(() =>
-            {
-                return (refp1.Value, refp2.Value);
-            });
+            var (pp1, pp2) = sync(() => (refp1.Value, refp2.Value));
 
             var l = "asdasd" switch
             {

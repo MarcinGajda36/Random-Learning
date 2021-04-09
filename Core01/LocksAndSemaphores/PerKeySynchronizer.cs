@@ -11,42 +11,46 @@ namespace MarcinGajda.LocksAndSemaphores
         private readonly Dictionary<TKey, ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)>> _synchronizers
             = new Dictionary<TKey, ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)>>();
 
-        private readonly ActionBlock<(TKey, TaskCompletionSource<TValue>, Func<Task<TValue>>)> Synchronizer;
+        private readonly ActionBlock<(TKey, TaskCompletionSource<TValue>, Func<Task<TValue>>)> _synchronizer;
+        private readonly ConcurrentExclusiveSchedulerPair _pair;
 
-        public PerKeySynchronizer()
+        public PerKeySynchronizer(int? degreeOfParalelism = null)
         {
-            Synchronizer = new ActionBlock<(TKey key, TaskCompletionSource<TValue> tcs, Func<Task<TValue>> func)>(keyTcsFunc =>
+            _pair = new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, degreeOfParalelism ?? Environment.ProcessorCount);
+            _synchronizer = new ActionBlock<(TKey, TaskCompletionSource<TValue>, Func<Task<TValue>>)>(keyTcsFunc =>
             {
-                if (_synchronizers.TryGetValue(keyTcsFunc.key, out var existing))
+                var (key, tcs, func) = keyTcsFunc;
+                if (_synchronizers.TryGetValue(key, out var existing))
                 {
-                    _ = existing.Post((keyTcsFunc.tcs, keyTcsFunc.func));
+                    _ = existing.Post((tcs, func));
                 }
                 else
                 {
                     var @new = CreateSynchronizationBlock();
-                    _synchronizers.Add(keyTcsFunc.key, @new);
-                    _ = @new.Post((keyTcsFunc.tcs, keyTcsFunc.func));
+                    _synchronizers.Add(key, @new);
+                    _ = @new.Post((tcs, func));
                 }
             });
         }
 
-        private static ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)> CreateSynchronizationBlock()
-            => new ActionBlock<(TaskCompletionSource<TValue> tcs, Func<Task<TValue>> func)>(async tcsFunc =>
+        private ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)> CreateSynchronizationBlock()
+            => new ActionBlock<(TaskCompletionSource<TValue>, Func<Task<TValue>>)>(static async tcsFunc =>
             {
+                var (tcs, func) = tcsFunc;
                 try
                 {
-                    tcsFunc.tcs.SetResult(await tcsFunc.func().ConfigureAwait(false));
+                    tcs.SetResult(await func().ConfigureAwait(false));
                 }
                 catch (Exception ex)
                 {
-                    _ = tcsFunc.tcs.TrySetException(ex);
+                    _ = tcs.TrySetException(ex);
                 }
-            });
+            }, new ExecutionDataflowBlockOptions { TaskScheduler = _pair.ConcurrentScheduler });
 
         public Task<TValue> DoAsync(TKey key, Func<Task<TValue>> toDo)
         {
             var tcs = new TaskCompletionSource<TValue>();
-            _ = Synchronizer.Post((key, tcs, toDo));
+            _ = _synchronizer.Post((key, tcs, toDo));
             return tcs.Task;
         }
 
