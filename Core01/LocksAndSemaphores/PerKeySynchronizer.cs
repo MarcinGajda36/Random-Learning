@@ -64,24 +64,27 @@ namespace MarcinGajda.LocksAndSemaphores
     public class PerKeySynchronizer<TKey>
         where TKey : notnull
     {
-        private readonly PerKeySynchronizer<TKey, object> perKeySynchronizer = new PerKeySynchronizer<TKey, object>();
+        private readonly PerKeySynchronizer<TKey, object> _perKeySynchronizer;
+
+        public PerKeySynchronizer(int? degreeOfParalelism = null)
+            => _perKeySynchronizer = new PerKeySynchronizer<TKey, object>(degreeOfParalelism);
 
         public async Task<TValue> DoAsync<TValue>(TKey key, Func<Task<TValue>> toDo)
-            => (TValue)await perKeySynchronizer.DoAsync(key, async () => await toDo().ConfigureAwait(false)).ConfigureAwait(false);
+            => (TValue)await _perKeySynchronizer.DoAsync(key, async () => await toDo().ConfigureAwait(false)).ConfigureAwait(false);
 
         public async Task<TValue> DoSync<TValue>(TKey key, Func<TValue> toDo)
-            => (TValue)await perKeySynchronizer.DoSync(key, () => toDo()).ConfigureAwait(false);
+            => (TValue)await _perKeySynchronizer.DoSync(key, () => toDo()).ConfigureAwait(false);
     }
 
     public static class PerKey<TKey>
         where TKey : notnull
     {
-        private static readonly PerKeySynchronizer<TKey> perKeySynchronizer = new PerKeySynchronizer<TKey>();
+        private static readonly PerKeySynchronizer<TKey> _perKeySynchronizer = new PerKeySynchronizer<TKey>();
 
         public static Task<TValue> DoAsync<TValue>(TKey key, Func<Task<TValue>> toDo)
-            => perKeySynchronizer.DoAsync(key, toDo);
+            => _perKeySynchronizer.DoAsync(key, toDo);
 
         public static Task<TValue> DoSync<TValue>(TKey key, Func<TValue> toDo)
-            => perKeySynchronizer.DoSync(key, toDo);
+            => _perKeySynchronizer.DoSync(key, toDo);
     }
 }
