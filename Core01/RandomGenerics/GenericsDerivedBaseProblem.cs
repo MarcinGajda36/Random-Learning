@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MarcinGajda.RandomGenerics
 {
@@ -36,5 +34,18 @@ namespace MarcinGajda.RandomGenerics
             Test f = c2.First();
             Base abcq = f.Abc;
         }
+
     }
+
+    public record Xd(int cx)
+    {
+        public int xd { get; set; }
+        public int xx { get; init; }
+
+        static Xd TEEST()
+        {
+            return new Xd(2) { xd = 1, xx = 2 };
+        }
+    }
+
 }
