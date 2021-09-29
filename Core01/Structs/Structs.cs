@@ -12,8 +12,10 @@ namespace MarcinGajda.Structsssss
     {
         public MutationsTests MutationsTests { get; set; }
 
-        public static void Test()
+        public static void Test(Index index)
         {
+            Test(^1);
+            var idx = ^1;
             var newTest = new MutationTest2 { MutationsTests = new MutationsTests() { X = 1 } };
             var dupa = newTest.MutationsTests;
             dupa.X = 5;
