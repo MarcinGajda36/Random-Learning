@@ -36,16 +36,4 @@ namespace MarcinGajda.RandomGenerics
         }
 
     }
-
-    public record Xd(int cx)
-    {
-        public int xd { get; set; }
-        public int xx { get; init; }
-
-        static Xd TEEST()
-        {
-            return new Xd(2) { xd = 1, xx = 2 };
-        }
-    }
-
 }

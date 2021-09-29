@@ -9,7 +9,7 @@ namespace LangExtLearning
     {
         record Person
         {
-            public string Name { get; init; }
+            public string Name { get; init; } 
         }
         static void Main(string[] args)
         {

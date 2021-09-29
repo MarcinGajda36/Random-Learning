@@ -1,9 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Disposables;
 
 namespace MarcinGajda.Structsssss
 {
+    public struct MutationsTests
+    {
+        public int X { get; set; }
+    }
+    public record MutationTest2
+    {
+        public MutationsTests MutationsTests { get; set; }
+
+        public static void Test()
+        {
+            var newTest = new MutationTest2 { MutationsTests = new MutationsTests() { X = 1 } };
+            var dupa = newTest.MutationsTests;
+            dupa.X = 5;
+            var a = new HttpStyleUriParser() { };
+            var cd = new CompositeDisposable(Disposable.Empty, Disposable.Empty) { };
+        }
+    }
     public readonly ref struct ReadOnlyRefStruct
     {
         private readonly string Y { get; }
