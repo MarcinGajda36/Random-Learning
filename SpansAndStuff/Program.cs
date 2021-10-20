@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace SpansAndStuff
 {
@@ -19,6 +21,8 @@ namespace SpansAndStuff
                 Memory<char> memory = owner.Memory;
                 WriteInt32ToBuffer(value, memory);
                 DisplayBufferToConsole(memory.Slice(0, value.ToString().Length));
+                var list = new List<int>();
+                var listSpan = CollectionsMarshal.AsSpan(list);
             }
             catch (FormatException)
             {
