@@ -17,7 +17,6 @@ namespace SpansAndStuff
             try
             {
                 int value = int.Parse(Console.ReadLine());
-
                 Memory<char> memory = owner.Memory;
                 WriteInt32ToBuffer(value, memory);
                 DisplayBufferToConsole(memory.Slice(0, value.ToString().Length));

@@ -1,13 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Copy
 {
     public static class CopyingTest
     {
+        public static T? Idk<T>(T? t)
+            where T : struct
+        {
+            return t;
+        }
+        public static T Idk<T>(T? t)
+            where T : class
+        {
+            return t;
+        }
+
         public static async Task CopyFileAsync(string sourcePath, string destinationPath, int bufferSize = 4096, bool overwrite = true)
         {
             FileMode createMode = overwrite ? FileMode.Create : FileMode.CreateNew;
