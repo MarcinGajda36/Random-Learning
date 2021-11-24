@@ -64,7 +64,7 @@ namespace MarcinGajda.Synchronizers
             private readonly ConcurrentDictionary<TKey, PerfPerKeySynchronizer<TKey>.Synchronizer> synchronizers;
             private readonly TKey key;
 
-            public bool AddedToDictionary { get; set; }
+            public bool AddedToDictionary;
 
             public Synchronizer(ConcurrentDictionary<TKey, Synchronizer> synchronizers, TKey key)
             {
