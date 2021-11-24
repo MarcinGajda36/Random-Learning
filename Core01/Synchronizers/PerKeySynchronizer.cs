@@ -10,23 +10,12 @@ namespace MarcinGajda.Synchronizers
     {
         private sealed class Locker : IDisposable
         {
-            public sealed class Releaser : IDisposable
-            {
-                private SemaphoreSlim semaphoreSlim;
-
-                public Releaser(SemaphoreSlim semaphoreSlim)
-                    => this.semaphoreSlim = semaphoreSlim;
-
-                public void Dispose()
-                    => Interlocked.Exchange(ref semaphoreSlim, null)?.Release();
-            }
-
             private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
 
             public async Task<IDisposable> AcquireLock(CancellationToken cancellationToken)
             {
-                await semaphoreSlim.WaitAsync(cancellationToken);
-                return new Releaser(semaphoreSlim);
+                await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                return Disposable.Create(() => semaphoreSlim.Release());
             }
 
             public void Dispose()
@@ -38,13 +27,20 @@ namespace MarcinGajda.Synchronizers
             public sealed class LockHolder : IDisposable
             {
                 private IDisposable disposable;
+
                 public bool LockAquired { get; }
 
-                public LockHolder(bool lockAquired, IDisposable disposable)
+                private LockHolder(bool lockAquired, IDisposable disposable)
                 {
                     LockAquired = lockAquired;
                     this.disposable = disposable;
                 }
+
+                public static LockHolder SuccessfulLock(IDisposable disposable)
+                    => new LockHolder(true, disposable);
+
+                public static LockHolder FailedLock(IDisposable disposable)
+                    => new LockHolder(false, disposable);
 
                 public void Dispose()
                     => Interlocked.Exchange(ref disposable, null)?.Dispose();
@@ -67,17 +63,17 @@ namespace MarcinGajda.Synchronizers
                 refCountDisposable = new RefCountDisposable(disposable);
             }
 
-            public async ValueTask<LockHolder> GetLock(CancellationToken cancellationToken)
+            public async Task<LockHolder> GetLock(CancellationToken cancellationToken)
             {
                 var refCount = refCountDisposable.GetDisposable();
                 if (refCountDisposable.IsDisposed)
                 {
-                    return new LockHolder(false, refCount);
+                    return LockHolder.FailedLock(refCount);
                 }
                 else
                 {
                     var @lock = await locker.AcquireLock(cancellationToken).ConfigureAwait(false);
-                    return new LockHolder(true, new CompositeDisposable(@lock, refCount));
+                    return LockHolder.SuccessfulLock(new CompositeDisposable(@lock, refCount));
                 }
             }
 
