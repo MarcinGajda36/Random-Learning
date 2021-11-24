@@ -43,7 +43,7 @@ namespace MarcinGajda.Synchronizers
                 private readonly IDisposable refCount;
                 private readonly PerfPerKeySynchronizer<TKey>.Releaser releaser;
 
-                public bool LockAquired { get; }
+                public readonly bool LockAquired;
 
                 public LockHolder(bool lockAquired, IDisposable refCount, Releaser releaser)
                 {
