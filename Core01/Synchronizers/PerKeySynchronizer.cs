@@ -7,73 +7,65 @@ using System.Threading.Tasks;
 namespace MarcinGajda.Synchronizers
 {
     public sealed class PerKeySynchronizer<TKey>
+        where TKey : notnull
     {
-        private sealed class Locker : IDisposable
-        {
-            private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
-
-            public async Task<IDisposable> AcquireLock(CancellationToken cancellationToken)
-            {
-                await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-                return Disposable.Create(() => semaphoreSlim.Release());
-            }
-
-            public void Dispose()
-                => Interlocked.Exchange(ref semaphoreSlim, null)?.Dispose();
-        }
-
         private sealed class Synchronizer : IDisposable
         {
-            public sealed class LockHolder : IDisposable
+            public readonly struct LockHolder : IDisposable
             {
-                private IDisposable disposable;
+                private readonly IDisposable refCount;
+                private readonly SemaphoreSlim? toRelease;
 
-                public bool LockAquired { get; }
+                public readonly bool LockAquired;
 
-                private LockHolder(bool lockAquired, IDisposable disposable)
+                public LockHolder(bool lockAquired, IDisposable refCount, SemaphoreSlim? toRelease)
                 {
                     LockAquired = lockAquired;
-                    this.disposable = disposable;
+                    this.refCount = refCount;
+                    this.toRelease = toRelease;
                 }
 
-                public static LockHolder SuccessfulLock(IDisposable disposable)
-                    => new LockHolder(true, disposable);
-
-                public static LockHolder FailedLock(IDisposable disposable)
-                    => new LockHolder(false, disposable);
-
                 public void Dispose()
-                    => Interlocked.Exchange(ref disposable, null)?.Dispose();
+                {
+                    toRelease?.Release();
+                    refCount.Dispose();
+                }
             }
 
-            private readonly Locker locker = new Locker();
+            private readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
             private readonly RefCountDisposable refCountDisposable;
-            public bool AddedToDictionary { get; set; }
+            private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers;
+            private readonly TKey key;
 
-            public Synchronizer(Action removeFromDictionary)
+            public bool AddedToDictionary;
+
+            public Synchronizer(ConcurrentDictionary<TKey, Synchronizer> synchronizers, TKey key)
             {
-                var disposable = Disposable.Create(() =>
+                this.synchronizers = synchronizers;
+                this.key = key;
+
+                var disposable = Disposable.Create(this, static @this =>
                 {
-                    if (AddedToDictionary)
+                    if (@this.AddedToDictionary)
                     {
-                        removeFromDictionary();
+                        @this.synchronizers.TryRemove(@this.key, out _);
                     }
-                    locker.Dispose();
+                    @this.semaphoreSlim.Dispose();
                 });
                 refCountDisposable = new RefCountDisposable(disposable);
             }
 
-            public async Task<LockHolder> GetLock(CancellationToken cancellationToken)
+            public async ValueTask<LockHolder> GetLockAsync(CancellationToken cancellationToken)
             {
                 var refCount = refCountDisposable.GetDisposable();
                 if (refCountDisposable.IsDisposed)
                 {
-                    return LockHolder.FailedLock(refCount);
+                    return new LockHolder(false, refCount, null);
                 }
                 else
                 {
-                    var @lock = await locker.AcquireLock(cancellationToken).ConfigureAwait(false);
-                    return LockHolder.SuccessfulLock(new CompositeDisposable(@lock, refCount));
+                    await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    return new LockHolder(true, refCount, semaphoreSlim);
                 }
             }
 
@@ -84,51 +76,34 @@ namespace MarcinGajda.Synchronizers
         private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers
             = new ConcurrentDictionary<TKey, Synchronizer>();
 
-        public async Task<TResult> SynchronizeAsync<TResult>(
+        public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
             TKey key,
-            Func<Task<TResult>> resultFactory,
+            TArgument argument,
+            Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
             CancellationToken cancellationToken = default)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var (runSuccessfully, result) = await TrySynchronizeAndRun(key, resultFactory, cancellationToken).ConfigureAwait(false);
-                if (runSuccessfully)
+                if (synchronizers.TryGetValue(key, out var oldSynchronizer))
                 {
-                    return result;
-                }
-            }
-            return await Task.FromCanceled<TResult>(cancellationToken);
-        }
-
-        private async Task<(bool, TResult)> TrySynchronizeAndRun<TResult>(
-            TKey key,
-            Func<Task<TResult>> resultFactory,
-            CancellationToken cancellationToken)
-        {
-            if (synchronizers.TryGetValue(key, out var synchronizer))
-            {
-                using var @lock = await synchronizer.GetLock(cancellationToken).ConfigureAwait(false);
-                if (@lock.LockAquired)
-                {
-                    var result = await resultFactory().ConfigureAwait(false);
-                    return (true, result);
-                }
-            }
-            else
-            {
-                using var newSynchronizer = new Synchronizer(() => synchronizers.TryRemove(key, out _));
-                if (synchronizers.TryAdd(key, newSynchronizer))
-                {
-                    newSynchronizer.AddedToDictionary = true;
-                    using var @lock = await newSynchronizer.GetLock(cancellationToken).ConfigureAwait(false);
+                    using var @lock = await oldSynchronizer.GetLockAsync(cancellationToken).ConfigureAwait(false);
                     if (@lock.LockAquired)
                     {
-                        var result = await resultFactory().ConfigureAwait(false);
-                        return (true, result);
+                        return await resultFactory(argument, cancellationToken).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    using var newSynchronizer = new Synchronizer(synchronizers, key);
+                    if (synchronizers.TryAdd(key, newSynchronizer))
+                    {
+                        newSynchronizer.AddedToDictionary = true;
+                        using var @lock = await newSynchronizer.GetLockAsync(cancellationToken).ConfigureAwait(false);
+                        return await resultFactory(argument, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
-            return (false, default);
+            return await Task.FromCanceled<TResult>(cancellationToken).ConfigureAwait(false);
         }
     }
 }
