@@ -29,7 +29,7 @@ namespace MarcinGajda.Fs
 
         public static async Task SameSlnShare()
         {
-            string tst = await TypeProvidersTst.GetCoinsTask(TypeProvidersTst.coinmarketcap);
+            //string tst = await TypeProvidersTst.GetCoinsTask(TypeProvidersTst.coinmarketcap);
 
             var p = new Person("Marcin", "Gajda", 25);
             Person ma = Marcin;
