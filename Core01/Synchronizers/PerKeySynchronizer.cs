@@ -64,7 +64,15 @@ namespace MarcinGajda.Synchronizers
                 }
                 else
                 {
-                    await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        refCount.Dispose();
+                        throw;
+                    }
                     return new LockHolder(true, refCount, semaphoreSlim);
                 }
             }
