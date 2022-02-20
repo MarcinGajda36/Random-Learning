@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MarcinGajda.DataflowLoggers
+namespace MarcinGajda.Loggers
 {
     public class ObservableLogger : IDisposable
     {

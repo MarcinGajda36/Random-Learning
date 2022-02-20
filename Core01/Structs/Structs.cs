@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 
-namespace MarcinGajda.Structsssss
+namespace MarcinGajda.Structs
 {
     public struct MutationsTests
     {
@@ -103,7 +103,7 @@ namespace MarcinGajda.Structsssss
 
             public override int GetHashCode()
             {
-                return (Slug.GetHashCode() * 17 + Title.GetHashCode() + Body.GetHashCode() + DatePublished.GetHashCode());
+                return Slug.GetHashCode() * 17 + Title.GetHashCode() + Body.GetHashCode() + DatePublished.GetHashCode();
             }
 
             public void Deconstruct(out string Slug, out string Title, out string Body, out DateTime DatePublished)

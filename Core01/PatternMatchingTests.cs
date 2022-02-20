@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using MarcinGajda.Structsssss;
+using MarcinGajda.Structs;
 
 namespace MarcinGajda
 {

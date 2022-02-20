@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace MarcinGajda
+namespace MarcinGajda.Collections
 {
     public static class WeakRefTest
     {
@@ -65,7 +65,7 @@ namespace MarcinGajda
             public ClassData()
             {
                 CreationTime = DateTime.Now;
-                this.Data = new object();
+                Data = new object();
             }
         }
     }

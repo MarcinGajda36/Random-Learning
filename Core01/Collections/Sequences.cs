@@ -6,7 +6,7 @@ using LanguageExt;
 using static LanguageExt.Prelude;
 using Age = System.Int32;
 
-namespace MarcinGajda
+namespace MarcinGajda.Collections
 {
     public class Sequences
     {

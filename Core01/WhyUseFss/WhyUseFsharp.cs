@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using WhyUseFsharp;
 
-namespace WhyUseFsharp
+namespace MarcinGajda.WhyUseFss
 {
 
     public class ShoppingCart<TItem>

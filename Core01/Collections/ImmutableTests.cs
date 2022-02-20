@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace MarcinGajda
+namespace MarcinGajda.Collections
 {
     public static class ImmutableTests
     {
