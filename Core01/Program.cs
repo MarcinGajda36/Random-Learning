@@ -15,7 +15,7 @@ using MarcinGajda.DataflowTests;
 using MarcinGajda.Fs;
 using MarcinGajda.PeriodicCheckers;
 using MarcinGajda.RXTests;
-using MarcinGajda.Structsssss;
+using MarcinGajda.Structs;
 using MarcinGajda.WORK_observable;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
