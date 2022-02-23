@@ -25,8 +25,8 @@ namespace MarcinGajda.Synchronizers
             Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
             CancellationToken cancellationToken = default)
         {
-            var index = key.GetHashCode() % pool.Length;
-            var semaphore = pool[index];
+            uint index = (uint)key.GetHashCode() % (uint)pool.Length;
+            var semaphore = pool[(int)index];
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
