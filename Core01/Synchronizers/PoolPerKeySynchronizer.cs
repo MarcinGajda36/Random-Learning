@@ -10,9 +10,14 @@ namespace MarcinGajda.Synchronizers
         private readonly SemaphoreSlim[] pool;
         private bool disposedValue;
 
-        public PoolPerKeySynchronizer()
+        public PoolPerKeySynchronizer(int? poolSize = null)
         {
-            pool = new SemaphoreSlim[Environment.ProcessorCount];
+            if (poolSize.HasValue && poolSize.Value < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(poolSize), poolSize, "Pool size has to be bigger then 0.");
+            }
+
+            pool = new SemaphoreSlim[poolSize ?? Environment.ProcessorCount];
             for (int index = 0; index < pool.Length; index++)
             {
                 pool[index] = new SemaphoreSlim(1);
@@ -22,21 +27,31 @@ namespace MarcinGajda.Synchronizers
         public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
             TKey key,
             TArgument argument,
-            Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
+            Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
             CancellationToken cancellationToken = default)
         {
-            uint index = (uint)key.GetHashCode() % (uint)pool.Length;
-            var semaphore = pool[(int)index];
+            long index = (uint)key.GetHashCode() % pool.Length;
+            var semaphore = pool[index];
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                return await resultFactory(argument, cancellationToken).ConfigureAwait(false);
+                return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
-                semaphore.Release();
+                _ = semaphore.Release();
             }
         }
+
+        public Task<TResult> SynchronizeAsync<TResult>(
+            TKey key,
+            Func<TKey, CancellationToken, Task<TResult>> resultFactory,
+            CancellationToken cancellationToken = default)
+            => SynchronizeAsync(
+                key,
+                resultFactory,
+                static (key, factory, cancellation) => factory(key, cancellation),
+                cancellationToken);
 
         private void Dispose(bool disposing)
         {
@@ -44,7 +59,7 @@ namespace MarcinGajda.Synchronizers
             {
                 if (disposing)
                 {
-                    Array.ForEach(pool, semaphore => semaphore.Dispose());
+                    Array.ForEach(pool, static semaphore => semaphore.Dispose());
                 }
 
                 disposedValue = true;
