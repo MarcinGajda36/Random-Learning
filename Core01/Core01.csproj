@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="1.8.2" />
     <PackageReference Include="FTypesSharingTest" Version="1.0.0" />
     <PackageReference Include="LanguageExt.Core" Version="3.4.13" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.0" />
