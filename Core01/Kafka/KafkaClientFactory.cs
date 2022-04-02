@@ -77,7 +77,6 @@ public class KafkaClientFactory
         ITargetBlock<ConsumeResult<TKey, TValue>> processorBlock,
         CancellationToken cancellationToken)
     {
-        var consumerCancellation = Tuple.Create(consumer, cancellationToken);
         while (!cancellationToken.IsCancellationRequested)
         {
             try
