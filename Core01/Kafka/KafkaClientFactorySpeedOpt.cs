@@ -6,20 +6,8 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Kafka;
 
-public record KafkaSettings(string Topic, string BootstrapServers, string GroupId);
-
-public class KafkaClientFactory
+public class KafkaClientFactorySpeedOpt
 {
-    public Task AtLeastOnceClient<TKey, TValue>(
-        KafkaSettings kafkaSettings,
-        Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
-        CancellationToken cancellationToken)
-        => AtLeastOnceClient(
-            kafkaSettings,
-            processor,
-            DataflowBlockOptions.Unbounded,
-            cancellationToken);
-
     public async Task AtLeastOnceClient<TKey, TValue>(
         KafkaSettings kafkaSettings,
         Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
@@ -82,7 +70,14 @@ public class KafkaClientFactory
         {
             try
             {
-                var kafkaMessage = await Task.Run(() => consumer.Consume(cancellationToken), cancellationToken);
+                var kafkaMessage = await Task.Factory.StartNew(
+                    static consumerCancellation =>
+                    {
+                        var (consumer, cancellationToken) = (Tuple<IConsumer<TKey, TValue>, CancellationToken>)consumerCancellation!;
+                        return consumer.Consume(cancellationToken);
+                    },
+                    consumerCancellation,
+                    cancellationToken);
                 if (!await processorBlock.SendAsync(kafkaMessage, cancellationToken))
                 {
                     return;
