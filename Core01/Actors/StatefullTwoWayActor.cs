@@ -40,7 +40,11 @@ namespace MarcinGajda.Actors
         public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions)
             => block.LinkTo(target, linkOptions);
 
-        public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
+        public DataflowMessageStatus OfferMessage(
+            DataflowMessageHeader messageHeader,
+            TInput messageValue,
+            ISourceBlock<TInput>? source,
+            bool consumeToAccept)
             => ((ITargetBlock<TInput>)block).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
 
         public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
@@ -64,7 +68,9 @@ namespace MarcinGajda.Actors
 
     public static class StatefullTwoWayActor
     {
-        public static StatefullTwoWayActor<TState, TInput, TOutput> Create<TState, TInput, TOutput>(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
+        public static StatefullTwoWayActor<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
+            TState startingState,
+            Func<TState, TInput, (TState, TOutput)> operation)
             => new(startingState, operation);
 
         public static void Test()
