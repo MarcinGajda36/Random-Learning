@@ -65,7 +65,7 @@ internal static class Testtt
     internal static void Testttasdasd()
     {
         var arr = new int[] { 1, 2, 3 };
-        arr
+        var iterator = arr
             .CreateByIndexEnumerator()
             .Select("", (in int x, in string y) => x);
     }
