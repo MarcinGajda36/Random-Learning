@@ -8,12 +8,12 @@ internal delegate (bool, TResult) ArgumentBoolFunc<TElement, TArgument, TResult>
 
 internal readonly record struct ByIndexEnumerator<TElement>(IReadOnlyList<TElement> Elements)
 {
-    internal void Select<TArgument, TResult>(in TArgument argument, ArgumentFunc<TElement, TArgument, TResult> func)
+    internal FirstIterator<TElement, KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>>, TResult> Select<TArgument, TResult>(in TArgument argument, ArgumentFunc<TElement, TArgument, TResult> func)
         => ByIndexEnumerator.CreateFirstIterator(
             Elements,
             KeyValuePair.Create(argument, func),
             static (in TElement element, in KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>> arguments)
-                => (true, arguments.Value(element, arguments.Key)));
+            => (true, arguments.Value(element, arguments.Key)));
 }
 
 internal static class ByIndexEnumerator
