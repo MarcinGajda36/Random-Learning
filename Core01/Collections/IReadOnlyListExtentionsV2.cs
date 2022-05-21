@@ -8,12 +8,23 @@ internal delegate (bool, TResult) ArgumentBoolFunc<TElement, TArgument, TResult>
 
 internal readonly record struct ByIndexEnumerator<TElement>(IReadOnlyList<TElement> Elements)
 {
-    internal FirstIterator<TElement, KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>>, TResult> Select<TArgument, TResult>(in TArgument argument, ArgumentFunc<TElement, TArgument, TResult> func)
+    internal FirstIterator<TElement, KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>>, TResult> Select<TArgument, TResult>(
+        in TArgument argument,
+        ArgumentFunc<TElement, TArgument, TResult> func)
         => ByIndexEnumerator.CreateFirstIterator(
             Elements,
             KeyValuePair.Create(argument, func),
             static (in TElement element, in KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>> arguments)
-            => (true, arguments.Value(element, arguments.Key)));
+                => (true, arguments.Value(element, arguments.Key)));
+
+    internal FirstIterator<TElement, KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, bool>>, TElement> Where<TArgument>(
+        in TArgument argument,
+        ArgumentFunc<TElement, TArgument, bool> func)
+        => ByIndexEnumerator.CreateFirstIterator(
+            Elements,
+            KeyValuePair.Create(argument, func),
+            static (in TElement element, in KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, bool>> arguments)
+                => (arguments.Value(element, arguments.Key), element));
 }
 
 internal static class ByIndexEnumerator
@@ -23,12 +34,12 @@ internal static class ByIndexEnumerator
 
     internal static FirstIterator<
         TElement,
-        KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>>,
-        TResult>
-        CreateFirstIterator<TElement, TArgument, TResult>(
+        KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TFuncResult>>,
+        TIteratorResult>
+        CreateFirstIterator<TElement, TArgument, TFuncResult, TIteratorResult>(
         IReadOnlyList<TElement> elements,
-        in KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>> argument,
-        ArgumentBoolFunc<TElement, KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TResult>>, TResult> func)
+        in KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TFuncResult>> argument,
+        ArgumentBoolFunc<TElement, KeyValuePair<TArgument, ArgumentFunc<TElement, TArgument, TFuncResult>>, TIteratorResult> func)
         => new(elements, argument, func);
 }
 
@@ -67,6 +78,6 @@ internal static class Testtt
         var arr = new int[] { 1, 2, 3 };
         var iterator = arr
             .CreateByIndexEnumerator()
-            .Select("", static (in int x, in string y) => x);
+            .Where("", static (in int x, in string y) => x < 1);
     }
 }
