@@ -78,6 +78,7 @@ internal static class Testtt
         var arr = new int[] { 1, 2, 3 };
         var iterator = arr
             .CreateByIndexEnumerator()
-            .Where("", static (in int x, in string y) => x < 1);
+            .Where("", static (in int x, in string y) => x < 1)
+            .ToList();
     }
 }
