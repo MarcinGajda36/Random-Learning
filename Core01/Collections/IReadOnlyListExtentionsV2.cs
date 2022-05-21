@@ -3,6 +3,7 @@
 namespace MarcinGajda.Collections;
 
 
+// Could take Func<> from user but pass ArgumentBoolFunc internally hmm
 internal delegate TResult ArgumentFunc<TElement, TArgument, out TResult>(in TElement element, in TArgument argument);
 internal delegate (bool, TResult) ArgumentBoolFunc<TElement, TArgument, TResult>(in TElement element, in TArgument argument);
 
