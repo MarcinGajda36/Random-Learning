@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MarcinGajda.RandomGenerics
@@ -35,6 +36,7 @@ namespace MarcinGajda.RandomGenerics
             Base abcq = f.Abc;
 
             var refLambda = (in int x) => x + 5;
+            Func<int, int>? lambda = (int x) => x + 5;
         }
 
     }
