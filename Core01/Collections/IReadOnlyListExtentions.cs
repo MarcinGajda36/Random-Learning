@@ -50,6 +50,18 @@ internal readonly record struct ReadOnlyListEnumerator1<TArgument, TElement, TRe
         }
     }
 
+    public void Execute2<TArgument2, TResult2>(TArgument2 argument2, Func<TResult, TArgument2, TResult2> func)
+    {
+        for (int index = 0; index < Elements.Count; index++)
+        {
+            var (success1, result1) = Func(Elements[index], Argument);
+            if (success1)
+            {
+                func(result1, argument2);
+            }
+        }
+    }
+
     public List<TResult> ToList()
     {
         var results = new List<TResult>(Elements.Count);
@@ -81,17 +93,9 @@ internal readonly record struct ReadOnlyListEnumerator2<TArgument1, TElement1, T
     Func<TResult1, TArgument2, (bool, TResult2)> Func)
 {
     public void Execute()
-    {
-        var (elements, argument1, func1) = Enumerator1;
-        for (int index = 0; index < elements.Count; index++)
-        {
-            var (success, result1) = func1(elements[index], argument1);
-            if (success)
-            {
-                Func(result1, Argument);
-            }
-        }
-    }
+        => Enumerator1.Execute2(
+            (Argument, Func),
+            static (element, arguments) => arguments.Func(element, arguments.Argument));
 
     public List<TResult2> ToList()
     {
@@ -127,8 +131,8 @@ internal static class Test
         var arr = new int[] { 1, 2, 3 };
         var results = arr
             .CreateEnumerator()
-            .Select(0, (element, argument) => element + argument)
-            .Select("", (element, argument) => argument)
+            .Select(0, static (element, argument) => element + argument)
+            .Select("", static (element, argument) => argument)
             .ToList();
 
     }
