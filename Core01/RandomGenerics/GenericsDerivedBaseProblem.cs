@@ -33,6 +33,8 @@ namespace MarcinGajda.RandomGenerics
             IEnumerable<Test> c2 = c;//Działa 😮
             Test f = c2.First();
             Base abcq = f.Abc;
+
+            var refLambda = (in int x) => x + 5;
         }
 
     }
