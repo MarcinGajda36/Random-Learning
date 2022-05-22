@@ -1,17 +1,18 @@
-﻿using System;
-using LanguageExt;
+﻿using LanguageExt;
 using LanguageExt.ClassInstances;
+using System;
 using static LanguageExt.Prelude;
 
 namespace LangExtLearning
 {
-    class Program
+    internal class Program
     {
-        record Person
+        private record Person
         {
-            public string Name { get; init; } 
+            public string Name { get; init; }
         }
-        static void Main(string[] args)
+
+        private static void Main(string[] args)
         {
             var p1 = new Person { Name = "asdasd" };
             var refp1 = Ref(p1);

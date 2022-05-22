@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using MarcinGajda.AsyncDispose_;
+﻿using MarcinGajda.AsyncDispose_;
 using MarcinGajda.Collections;
 using MarcinGajda.ContractsT;
 using MarcinGajda.Copy;
@@ -19,20 +10,29 @@ using MarcinGajda.Structs;
 using MarcinGajda.WORK_observable;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace MarcinGajda
 {
-    class Program
+    internal class Program
     {
-        const int i = 1 << 2;
+        private const int i = 1 << 2;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (long, TR) Mesure<TR>(Func<TR> toTest)
+        public static (TimeSpan, TResult) Measure<TResult>(Func<TResult> toTest)
         {
-            var stopper = Stopwatch.StartNew();
-            TR r = toTest();
-            stopper.Stop();
-            return (stopper.ElapsedTicks, r);
+            var start = Stopwatch.GetTimestamp();
+            TResult result = toTest();
+            var elapsed = Stopwatch.GetTimestamp() - start;
+            return (TimeSpan.FromTicks(elapsed), result);
         }
 
 
@@ -117,10 +117,7 @@ namespace MarcinGajda
 
         private static async Task TestAsyncRef(int x)
         {
-            static int X(ref int x1)
-            {
-                return x1;
-            }
+            static int X(ref int x1) => x1;
             _ = X(ref x);
         }
 
@@ -189,10 +186,7 @@ namespace MarcinGajda
             }
         }
         public static TGeneric GenericTest<TGeneric>(TGeneric generic)
-            where TGeneric : Delegate
-        {
-            return generic;
-        }
+            where TGeneric : Delegate => generic;
         //static async Task Main(string[] args)
         //{
 
@@ -239,7 +233,10 @@ namespace MarcinGajda
                     case IEnumerable<int> childSequence:
                         {
                             foreach (int item in childSequence)
+                            {
                                 sum += (item > 0) ? item : 0;
+                            }
+
                             break;
                         }
                     case int n when n > 0:
@@ -256,39 +253,54 @@ namespace MarcinGajda
         public static IEnumerable<char> AlphabetSubset3(char start, char end)
         {
             if (start < 'a' || start > 'z')
+            {
                 throw new ArgumentOutOfRangeException(paramName: nameof(start), message: "start must be a letter");
+            }
+
             if (end < 'a' || end > 'z')
+            {
                 throw new ArgumentOutOfRangeException(paramName: nameof(end), message: "end must be a letter");
+            }
 
             if (end <= start)
+            {
                 throw new ArgumentException($"{nameof(end)} must be greater than {nameof(start)}");
+            }
 
             return alphabetSubsetImplementation();
 
             IEnumerable<char> alphabetSubsetImplementation()
             {
                 for (char c = start; c < end; c++)
+                {
                     yield return c;
+                }
             }
         }
         public Task<string> PerformLongRunningWork(string address, int index, string name)
         {
             if (string.IsNullOrWhiteSpace(address))
+            {
                 throw new ArgumentException(message: "An address is required", paramName: nameof(address));
+            }
+
             if (index < 0)
+            {
                 throw new ArgumentOutOfRangeException(paramName: nameof(index), message: "The index must be non-negative");
+            }
+
             if (string.IsNullOrWhiteSpace(name))
+            {
                 throw new ArgumentException(message: "You must supply a name", paramName: nameof(name));
+            }
 
             return longRunningWorkImplementation();
 
-            async Task<string> longRunningWorkImplementation()
-            {
+            async Task<string> longRunningWorkImplementation() =>
                 //var interimResult = await FirstWork(address);
                 //var secondResult = await SecondStep(index, name);
                 //return $"The results are {interimResult} and {secondResult}. Enjoy.";
-                return "";
-            }
+                "";
         }
     }
 }
