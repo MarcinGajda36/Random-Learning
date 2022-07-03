@@ -1,21 +1,18 @@
-﻿using System;
+﻿using LanguageExt;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Joins;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-using System.Runtime.ExceptionServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using LanguageExt;
 
 namespace MarcinGajda.RXTests
 {
@@ -90,23 +87,17 @@ namespace MarcinGajda.RXTests
                 return Disposable.Empty;
             });
             IObservable<int> Never = Observable.Create<int>(observer => Disposable.Empty);
-            IObservable<T> Throw<T>(Exception exception)
-            {
-                return Observable.Create<T>(observer =>
-                {
-                    observer.OnError(exception);
-                    return Disposable.Empty;
-                });
-            }
-            IObservable<T> Return<T>(T t)
-            {
-                return Observable.Create<T>(observer =>
-                {
-                    observer.OnNext(t);
-                    observer.OnCompleted();
-                    return Disposable.Empty;
-                });
-            }
+            IObservable<T> Throw<T>(Exception exception) => Observable.Create<T>(observer =>
+                                                                         {
+                                                                             observer.OnError(exception);
+                                                                             return Disposable.Empty;
+                                                                         });
+            IObservable<T> Return<T>(T t) => Observable.Create<T>(observer =>
+                                                          {
+                                                              observer.OnNext(t);
+                                                              observer.OnCompleted();
+                                                              return Disposable.Empty;
+                                                          });
         }
         public static void Generate()
         {
@@ -280,10 +271,7 @@ namespace MarcinGajda.RXTests
 
             Observable.When(plain.Then((arg1, arg2, arg3) => arg3));
         }
-        public static IObservable<Site> GetSource()
-        {
-            return default;
-        }
+        public static IObservable<Site> GetSource() => default;
         public class Site
         {
             public int SiteId { get; set; }
@@ -371,15 +359,12 @@ namespace MarcinGajda.RXTests
                     .ConfigureAwait(true);
             }
         }
-        public static Task BehaviourWindow()
-        {
-            return new BehaviorSubject<string>("test")
+        public static Task BehaviourWindow() => new BehaviorSubject<string>("test")
                 .Window(TimeSpan.FromSeconds(1))
                 .SelectMany(x => { return x; })
                 .Do(Console.WriteLine)
                 .Select(x => { return x; })
                 .ToTask();
-        }
 
         public static Task Splitt()
         {
@@ -398,9 +383,37 @@ namespace MarcinGajda.RXTests
         {
             var fileRead = Observable
                 .FromAsync(() => File.ReadAllTextAsync(file));
-            
+
         }
 
+        public static async Task LinqQueryTests()
+        {
+            var elements =
+                from x in Observable.Range(1, 2)
+                from y in new[] { "Test1", "Test2" }.ToObservable()
+                select (x, y);
 
+            Console.WriteLine("elements");
+            await elements.Do(x => Console.WriteLine(x));
+
+            var query =
+                from x in Observable.FromAsync(() => Task.FromResult(1))
+                from y in Task.FromResult(x)
+                from z in Observable.FromAsync(() => Task.FromResult(y))
+                select (x, y, z);
+
+            Console.WriteLine("query");
+            await query.Do(x => Console.WriteLine(x));
+
+            var whtType =
+                from number in Enumerable.Range(0, 100).ToObservable()
+                from asyncNumer in Observable.Return(number)
+                from idk in Task.FromResult(number + asyncNumer)
+                select idk;
+
+            Console.WriteLine("whtType");
+            await whtType.Do(x => Console.WriteLine(x));
+
+        }
     }
 }

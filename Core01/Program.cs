@@ -38,8 +38,10 @@ namespace MarcinGajda
 
         public static async Task Main()
         {
-            await TestEviction();
+            await Observables.LinqQueryTests();
+
             await Task.Delay(-1);
+            await TestEviction();
 
             await BroadcastBlockTest.Test();
 

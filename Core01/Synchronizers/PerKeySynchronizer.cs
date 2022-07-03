@@ -4,123 +4,122 @@ using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.Synchronizers
+namespace MarcinGajda.Synchronizers;
+
+public sealed class PerKeySynchronizer<TKey>
+    where TKey : notnull
 {
-    public sealed class PerKeySynchronizer<TKey>
-        where TKey : notnull
+    private sealed class Synchronizer : IDisposable
     {
-        private sealed class Synchronizer : IDisposable
+        public readonly struct Lease : IDisposable
         {
-            public readonly struct Lease : IDisposable
+            private readonly IDisposable refCount;
+            private readonly SemaphoreSlim? toRelease;
+
+            public bool IsAquired { get; }
+
+            public Lease(bool isAquired, IDisposable refCount, SemaphoreSlim? toRelease)
             {
-                private readonly IDisposable refCount;
-                private readonly SemaphoreSlim? toRelease;
-
-                public bool IsAquired { get; }
-
-                public Lease(bool isAquired, IDisposable refCount, SemaphoreSlim? toRelease)
-                {
-                    IsAquired = isAquired;
-                    this.refCount = refCount;
-                    this.toRelease = toRelease;
-                }
-
-                public void Dispose()
-                {
-                    _ = toRelease?.Release();
-                    refCount.Dispose();
-                }
-            }
-
-            private readonly SemaphoreSlim semaphoreSlim = new(1);
-            private readonly RefCountDisposable refCountDisposable;
-            private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers;
-            private readonly TKey key;
-
-            public bool AddedToDictionary { get; set; }
-
-            public Synchronizer(ConcurrentDictionary<TKey, Synchronizer> synchronizers, TKey key)
-            {
-                this.synchronizers = synchronizers;
-                this.key = key;
-
-                var disposable = Disposable.Create(this, static @this =>
-                {
-                    if (@this.AddedToDictionary)
-                    {
-                        _ = @this.synchronizers.TryRemove(@this.key, out _);
-                    }
-                    @this.semaphoreSlim.Dispose();
-                });
-                refCountDisposable = new RefCountDisposable(disposable);
-            }
-
-            public async ValueTask<Lease> Acquire(CancellationToken cancellationToken)
-            {
-                var refCount = refCountDisposable.GetDisposable();
-                if (refCountDisposable.IsDisposed)
-                {
-                    return new Lease(false, refCount, null);
-                }
-                else
-                {
-                    try
-                    {
-                        await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-                    }
-                    catch
-                    {
-                        refCount.Dispose();
-                        throw;
-                    }
-                    return new Lease(true, refCount, semaphoreSlim);
-                }
+                IsAquired = isAquired;
+                this.refCount = refCount;
+                this.toRelease = toRelease;
             }
 
             public void Dispose()
-                => refCountDisposable.Dispose();
+            {
+                _ = toRelease?.Release();
+                refCount.Dispose();
+            }
         }
 
-        private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers = new();
+        private readonly SemaphoreSlim semaphoreSlim = new(1);
+        private readonly RefCountDisposable refCountDisposable;
+        private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers;
+        private readonly TKey key;
 
-        public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
-            TKey key,
-            TArgument argument,
-            Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
-            CancellationToken cancellationToken = default)
+        public bool AddedToDictionary { get; set; }
+
+        public Synchronizer(ConcurrentDictionary<TKey, Synchronizer> synchronizers, TKey key)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            this.synchronizers = synchronizers;
+            this.key = key;
+
+            var disposable = Disposable.Create(this, static @this =>
             {
-                if (synchronizers.TryGetValue(key, out var oldSynchronizer))
+                if (@this.AddedToDictionary)
                 {
-                    using var lease = await oldSynchronizer.Acquire(cancellationToken).ConfigureAwait(false);
-                    if (lease.IsAquired)
-                    {
-                        return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
-                    }
+                    _ = @this.synchronizers.TryRemove(@this.key, out _);
                 }
-                else
+                @this.semaphoreSlim.Dispose();
+            });
+            refCountDisposable = new RefCountDisposable(disposable);
+        }
+
+        public async ValueTask<Lease> Acquire(CancellationToken cancellationToken)
+        {
+            var refCount = refCountDisposable.GetDisposable();
+            if (refCountDisposable.IsDisposed)
+            {
+                return new Lease(false, refCount, null);
+            }
+            else
+            {
+                try
                 {
-                    using var newSynchronizer = new Synchronizer(synchronizers, key);
-                    if (synchronizers.TryAdd(key, newSynchronizer))
-                    {
-                        newSynchronizer.AddedToDictionary = true;
-                        using var lease = await newSynchronizer.Acquire(cancellationToken).ConfigureAwait(false);
-                        return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
-                    }
+                    await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch
+                {
+                    refCount.Dispose();
+                    throw;
+                }
+                return new Lease(true, refCount, semaphoreSlim);
+            }
+        }
+
+        public void Dispose()
+            => refCountDisposable.Dispose();
+    }
+
+    private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers = new();
+
+    public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
+        TKey key,
+        TArgument argument,
+        Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            if (synchronizers.TryGetValue(key, out var oldSynchronizer))
+            {
+                using var lease = await oldSynchronizer.Acquire(cancellationToken).ConfigureAwait(false);
+                if (lease.IsAquired)
+                {
+                    return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
                 }
             }
-            return await Task.FromCanceled<TResult>(cancellationToken).ConfigureAwait(false);
+            else
+            {
+                using var newSynchronizer = new Synchronizer(synchronizers, key);
+                if (synchronizers.TryAdd(key, newSynchronizer))
+                {
+                    newSynchronizer.AddedToDictionary = true;
+                    using var lease = await newSynchronizer.Acquire(cancellationToken).ConfigureAwait(false);
+                    return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
-
-        public Task<TResult> SynchronizeAsync<TResult>(
-            TKey key,
-            Func<TKey, CancellationToken, Task<TResult>> resultFactory,
-            CancellationToken cancellationToken = default)
-            => SynchronizeAsync(
-                key,
-                resultFactory,
-                static (key, factory, cancellation) => factory(key, cancellation),
-                cancellationToken);
+        return await Task.FromCanceled<TResult>(cancellationToken).ConfigureAwait(false);
     }
+
+    public Task<TResult> SynchronizeAsync<TResult>(
+        TKey key,
+        Func<TKey, CancellationToken, Task<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+        => SynchronizeAsync(
+            key,
+            resultFactory,
+            static (key, factory, cancellation) => factory(key, cancellation),
+            cancellationToken);
 }
