@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MarcinGajda
+﻿namespace MarcinGajda
 {
-    class PasteJsonAsClass
+    internal class PasteJsonAsClass
     {
         public class Rootobject
         {

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Runtime.ExceptionServices;
-using System.Text;
-using Microsoft.Data.SqlClient;
 
 namespace MarcinGajda.SQL
 {
-    class SQLTests
+    internal class SQLTests
     {
         public static void Test()
         {

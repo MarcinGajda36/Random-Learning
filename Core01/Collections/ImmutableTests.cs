@@ -14,9 +14,13 @@ namespace MarcinGajda.Collections
         public static int? Get(string key)
         {
             if (immutableDictionary.TryGetValue(key, out int val))
+            {
                 return val;
+            }
             else
+            {
                 return null;
+            }
         }
 
         public static void TestArr()

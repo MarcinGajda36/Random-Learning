@@ -6,15 +6,9 @@ namespace MarcinGajda.Copy
     public static class CopyingTest
     {
         public static T? Idk<T>(T? t)
-            where T : struct
-        {
-            return t;
-        }
+            where T : struct => t;
         public static T Idk<T>(T? t)
-            where T : class
-        {
-            return t;
-        }
+            where T : class => t;
 
         public static async Task CopyFileAsync(string sourcePath, string destinationPath, int bufferSize = 4096, bool overwrite = true)
         {
@@ -27,9 +21,7 @@ namespace MarcinGajda.Copy
             await source.CopyToAsync(destination);
         }
 
-        public static void CopyFileSync(string sourcePath, string destinationPath)
-        {
-            File.Copy(sourcePath, destinationPath);
-        }
+        public static void CopyFileSync(string sourcePath, string destinationPath) 
+            => File.Copy(sourcePath, destinationPath);
     }
 }

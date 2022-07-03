@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Text;
-
-namespace MarcinGajda
+﻿namespace MarcinGajda
 {
-    class ObservaleTests
+    internal class ObservaleTests
     {
         public static void Test()
         {

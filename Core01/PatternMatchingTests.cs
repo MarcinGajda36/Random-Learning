@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MarcinGajda.Structs;
+﻿using MarcinGajda.Structs;
 
 namespace MarcinGajda
 {
-    class PatternMatchingTests
+    internal class PatternMatchingTests
     {
         public int Match<T>(T t) => t switch
         {

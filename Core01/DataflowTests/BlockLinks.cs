@@ -6,7 +6,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.DataflowTests
 {
-    class BlockLinks
+    internal class BlockLinks
     {
         public void Test()
         {

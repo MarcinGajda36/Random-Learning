@@ -4,7 +4,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.DataflowTests
 {
-    class Sessions
+    internal class Sessions
     {
         private readonly BroadcastBlock<Changer> _changer;
         private readonly TransformBlock<Changer, Remover> _removers;
@@ -23,7 +23,8 @@ namespace MarcinGajda.DataflowTests
             {
                 await Task.Delay(TimeSpan.FromSeconds(1));
                 return new Remover();
-            }, new ExecutionDataflowBlockOptions {
+            }, new ExecutionDataflowBlockOptions
+            {
                 MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
                 EnsureOrdered = false
             });
@@ -58,19 +59,23 @@ namespace MarcinGajda.DataflowTests
             _changer.Post(adder);
             return adder.Result.Task;
         }
-        class State
+
+        private class State
         {
             public int state = 0;
         }
-        class Changer
+
+        private class Changer
         {
 
         }
-        class Adder : Changer
+
+        private class Adder : Changer
         {
             public TaskCompletionSource<int> Result = new TaskCompletionSource<int>();
         }
-        class Remover : Changer
+
+        private class Remover : Changer
         {
 
         }

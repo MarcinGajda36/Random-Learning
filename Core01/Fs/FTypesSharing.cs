@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using FsCsConnection;
-using FTypesSharingTest;
+﻿using FTypesSharingTest;
 using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
-using static Microsoft.FSharp.Core.OptimizedClosures;
+using System;
+using System.Threading.Tasks;
 using static Types;
 
 
 namespace MarcinGajda.Fs
 {
-    class FTypesSharing
+    internal class FTypesSharing
     {
         public static void Test()
         {
@@ -40,10 +36,7 @@ namespace MarcinGajda.Fs
 
             //var a = TypeProvidersTests.Todos
         }
-        public static void FsLib()
-        {
-            ListModule.MinBy(FSharpFunc<int, int>.FromConverter(x => x * 2), ListModule.OfArray(Array.Empty<int>()));
-
-        }
+        public static void FsLib() 
+            => ListModule.MinBy(FSharpFunc<int, int>.FromConverter(x => x * 2), ListModule.OfArray(Array.Empty<int>()));
     }
 }

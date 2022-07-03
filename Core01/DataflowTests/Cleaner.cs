@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Disposables;
-using System.Text;
+﻿using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
-using Polly;
 
 namespace MarcinGajda.DataflowTests
 {
@@ -15,7 +11,9 @@ namespace MarcinGajda.DataflowTests
             new ActionBlock<(string Path, CancellationToken CancellationToken)>(pathCancelPair =>
             {
                 if (pathCancelPair.CancellationToken.IsCancellationRequested)
+                {
                     return;
+                }
             });
 
         private readonly SerialDisposable serialDisp = new SerialDisposable();

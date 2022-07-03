@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Toolkit.HighPerformance.Buffers;
+﻿using Microsoft.Toolkit.HighPerformance.Buffers;
+using System;
 
 namespace HighPerf
 {
@@ -9,12 +9,16 @@ namespace HighPerf
         public static double Distance(string s1, string s2)
         {
             if (s1.Equals(s2))
+            {
                 return 0.0;
+            }
 
             int m_len = Math.Max(s1.Length, s2.Length);
 
             if (m_len == 0)
+            {
                 return 0.0;
+            }
 
             return ChangesRequired(s1, s2) / m_len;
         }
@@ -22,13 +26,19 @@ namespace HighPerf
         public static double ChangesRequired(string s1, string s2)
         {
             if (s1.Equals(s2))
+            {
                 return 0d;
+            }
 
             if (s1.Length == 0)
+            {
                 return s2.Length;
+            }
 
             if (s2.Length == 0)
+            {
                 return s1.Length;
+            }
 
             using SpanOwner<int> v0Owner = SpanOwner<int>.Allocate(s2.Length + 1);
             using SpanOwner<int> v1Owner = SpanOwner<int>.Allocate(s2.Length + 1);

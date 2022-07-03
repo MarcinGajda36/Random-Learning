@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace MarcinGajda.WhyUseFss
@@ -29,9 +28,7 @@ namespace MarcinGajda.WhyUseFss
         public class ActiveState
         {
             public ActiveState(IEnumerable<TItem> items)
-            {
-                Items = items;
-            }
+                => Items = items;
 
             public IEnumerable<TItem> Items { get; private set; }
 
@@ -100,19 +97,13 @@ namespace MarcinGajda.WhyUseFss
         }
 
         public static ShoppingCart<TItem> FromState(EmptyState state)
-        {
-            return new ShoppingCart<TItem>(Tag.Empty, state);
-        }
+            => new ShoppingCart<TItem>(Tag.Empty, state);
 
         public static ShoppingCart<TItem> FromState(ActiveState state)
-        {
-            return new ShoppingCart<TItem>(Tag.Active, state);
-        }
+            => new ShoppingCart<TItem>(Tag.Active, state);
 
         public static ShoppingCart<TItem> FromState(PaidForState state)
-        {
-            return new ShoppingCart<TItem>(Tag.PaidFor, state);
-        }
+            => new ShoppingCart<TItem>(Tag.PaidFor, state);
 
         /// <summary>         
         /// Create a new empty cart         
@@ -132,17 +123,14 @@ namespace MarcinGajda.WhyUseFss
         public TResult Do<TResult>(
             Func<EmptyState, TResult> emptyFn,
             Func<ActiveState, TResult> activeFn,
-            Func<PaidForState, TResult> paidForyFn
-            )
-        {
-            return _tag switch
+            Func<PaidForState, TResult> paidForyFn)
+            => _tag switch
             {
                 Tag.Empty => emptyFn(_state as EmptyState),
                 Tag.Active => activeFn(_state as ActiveState),
                 Tag.PaidFor => paidForyFn(_state as PaidForState),
                 _ => throw new InvalidOperationException(string.Format("Tag {0} not recognized", _tag)),
             };
-        }
 
         /// <summary>         
         /// Do an action without a return value         
@@ -150,16 +138,13 @@ namespace MarcinGajda.WhyUseFss
         public void Do(
             Action<EmptyState> emptyFn,
             Action<ActiveState> activeFn,
-            Action<PaidForState> paidForyFn
-            )
-        {
-            //convert the Actions into Funcs by returning a dummy value             
+            Action<PaidForState> paidForyFn)
+            =>
+            //convert the Actions into Funcs by returning a dummy value
             Do(
                 state => { emptyFn(state); return 0; },
                 state => { activeFn(state); return 0; },
-                state => { paidForyFn(state); return 0; }
-                );
-        }
+                state => { paidForyFn(state); return 0; });
 
 
 
@@ -174,37 +159,28 @@ namespace MarcinGajda.WhyUseFss
         /// Helper method to Add         
         /// </summary>         
         public static ShoppingCart<TItem> Add<TItem>(this ShoppingCart<TItem> cart, TItem item)
-        {
-            return cart.Do(
+            => cart.Do(
                 empty => empty.Add(item), //empty case                 
                 active => active.Add(item), //active case                 
-                paid => { Console.WriteLine("ERROR: The cart is paid for and items cannot be added"); return cart; } //paid for case             
-                );
-        }
+                paid => { Console.WriteLine("ERROR: The cart is paid for and items cannot be added"); return cart; }); //paid for case             
 
         /// <summary>         
         /// Helper method to Remove         
         /// </summary>         
         public static ShoppingCart<TItem> Remove<TItem>(this ShoppingCart<TItem> cart, TItem item)
-        {
-            return cart.Do(
+            => cart.Do(
                 empty => { Console.WriteLine("ERROR: The cart is empty and items cannot be removed"); return cart; }, //empty case                 
                 active => active.Remove(item), //active case                 
-                paid => { Console.WriteLine("ERROR: The cart is paid for and items cannot be removed"); return cart; } //paid for case             
-                );
-        }
+                paid => { Console.WriteLine("ERROR: The cart is paid for and items cannot be removed"); return cart; }); //paid for case             
 
         /// <summary>         
         /// Helper method to Display         
         /// </summary>         
         public static void Display<TItem>(this ShoppingCart<TItem> cart)
-        {
-            cart.Do(
+            => cart.Do(
                 empty => Console.WriteLine("The cart is empty"),
                 active => Console.WriteLine("The active cart contains {0} items", active.Items.Count()),
-                paid => Console.WriteLine("The paid cart contains {0} items. Amount paid {1}", paid.Items.Count(), paid.Amount)
-            );
-        }
+                paid => Console.WriteLine("The paid cart contains {0} items. Amount paid {1}", paid.Items.Count(), paid.Amount));
     }
 
     [NUnit.Framework.TestFixture]

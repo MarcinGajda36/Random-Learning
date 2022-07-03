@@ -11,16 +11,14 @@ namespace MarcinGajda.DataflowTests
         private readonly Dictionary<TKey, TVal> cache = new Dictionary<TKey, TVal>();
         private readonly ActionBlock<Command> commandBlock;
 
-        public Cache()
-        {
-            commandBlock = new ActionBlock<Command>(command =>
+        public Cache() => commandBlock
+            = new ActionBlock<Command>(command =>
             {
                 if (command is GetOrAddCommand getOrAdd)
                 {
                     GetOrAdd(getOrAdd);
                 }
             });
-        }
 
         public Task<TVal> GetOrAdd(TKey key, Func<TKey, TVal> func)
         {

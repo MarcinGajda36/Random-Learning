@@ -2,7 +2,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Collections
@@ -47,7 +46,10 @@ namespace MarcinGajda.Collections
 
         public static IEnumerable<List<T>> Batch<T>(this IEnumerable<T> toBatch, int size)
         {
-            if (size <= 0) throw new ArgumentException("Size must be bigger then 0", nameof(size));
+            if (size <= 0)
+            {
+                throw new ArgumentException("Size must be bigger then 0", nameof(size));
+            }
 
             var currentBatch = new List<T>(size);
             foreach (T element in toBatch)

@@ -50,7 +50,7 @@ namespace MarcinGajda.Structs
             => (this.x, Y) = (x, y);
 
         private readonly double x;
-        public double X { get => x; }
+        public double X => x;
         //public double X { get; }
         public double Y { get; }
 
@@ -61,7 +61,7 @@ namespace MarcinGajda.Structs
     }
     public static class Structs
     {
-        static void TestSpan()
+        private static void TestSpan()
         {
             int[] arr = new int[] { 1, 2, 3, 4 };
             Span<int> span = arr.AsSpan(1, 2);
@@ -92,19 +92,13 @@ namespace MarcinGajda.Structs
                 => (Slug, Title, Body, DatePublished) = (slug, title, body, datePublished);
 
             public bool Equals(BlogPost other)
-            {
-                return Equals(Slug, other.Slug) && Equals(Title, other.Title) && Equals(Body, other.Body) && Equals(DatePublished, other.DatePublished);
-            }
+                => Equals(Slug, other.Slug) && Equals(Title, other.Title) && Equals(Body, other.Body) && Equals(DatePublished, other.DatePublished);
 
             public override bool Equals(object? other)
-            {
-                return (other as BlogPost)?.Equals(this) == true;
-            }
+                => (other as BlogPost)?.Equals(this) == true;
 
             public override int GetHashCode()
-            {
-                return Slug.GetHashCode() * 17 + Title.GetHashCode() + Body.GetHashCode() + DatePublished.GetHashCode();
-            }
+                => Slug.GetHashCode() * 17 + Title.GetHashCode() + Body.GetHashCode() + DatePublished.GetHashCode();
 
             public void Deconstruct(out string Slug, out string Title, out string Body, out DateTime DatePublished)
             {

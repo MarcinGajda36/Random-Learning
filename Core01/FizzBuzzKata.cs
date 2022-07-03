@@ -10,13 +10,21 @@ namespace MarcinGajda
             for (int i = 0; i < 100; i++)
             {
                 if (i % 5 == 0 && i % 3 == 0)
+                {
                     Console.WriteLine("FizzBuzz");
+                }
                 else if (i % 5 == 0)
+                {
                     Console.WriteLine("Fizz");
+                }
                 else if (i % 3 == 0)
+                {
                     Console.WriteLine("Buzz");
+                }
                 else
+                {
                     Console.WriteLine(i);
+                }
             }
         }
         public static void FizzBuzzMy(int start = 0, int limit = 100)
@@ -46,10 +54,8 @@ namespace MarcinGajda
         /*
          * Presentation way
          */
-        public static void Print()
-        {
-            Console.WriteLine(FizzBuzzStr(0, 100));
-        }
+        public static void Print() 
+            => Console.WriteLine(FizzBuzzStr(0, 100));
 
         public static string FizzBuzzStr(int start = 0, int end = 100)
             => Enumerable

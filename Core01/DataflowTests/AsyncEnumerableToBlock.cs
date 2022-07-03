@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -55,7 +53,7 @@ namespace MarcinGajda.DataflowTests
         }
 
 
-        public static async IAsyncEnumerable<int> AsyncEnumerable([EnumeratorCancellation]CancellationToken cancellationToken = default)
+        public static async IAsyncEnumerable<int> AsyncEnumerable([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             int i = 0;
             while (cancellationToken.IsCancellationRequested is false)

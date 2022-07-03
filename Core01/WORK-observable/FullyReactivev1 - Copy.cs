@@ -1,12 +1,11 @@
-﻿using System;
+﻿using LanguageExt;
+using System;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
-using LanguageExt;
 
 
 namespace MarcinGajda.WORK_observable1
@@ -19,10 +18,8 @@ namespace MarcinGajda.WORK_observable1
 
         private readonly string contextId = "";
 
-        public NotifierHub1(NotifierHubContext1 notifierHubContext1)
-        {
-            _notifierHubContext1 = notifierHubContext1;
-        }
+        public NotifierHub1(NotifierHubContext1 notifierHubContext1) 
+            => _notifierHubContext1 = notifierHubContext1;
 
         public void OnExit()
         {
@@ -75,10 +72,7 @@ namespace MarcinGajda.WORK_observable1
         private readonly ISubject<int> _notifications =
             Subject.Synchronize(new BehaviorSubject<int>(Empty), TaskPoolScheduler.Default);
 
-        public Notifier2(string path)
-        {
-            Path = path;
-        }
+        public Notifier2(string path) => Path = path;
 
         public void Notify(int notif) =>
             _notifications.OnNext(notif);

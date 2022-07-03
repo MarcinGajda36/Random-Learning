@@ -2,11 +2,9 @@
 
 namespace LeetCode
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+        private static void Main(string[] args) 
+            => Console.WriteLine("Hello World!");
     }
 }

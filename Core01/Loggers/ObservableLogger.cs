@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -14,14 +12,12 @@ namespace MarcinGajda.Loggers
         private readonly IDisposable sub;
 
         public ObservableLogger()
-        {
-            sub = sourceBlock
-                .AsObservable()
-                .Window(TimeSpan.FromSeconds(5), 127)
-                .Select(LogSomwhere)
-                .Concat()//Sequencial
-                .Subscribe();
-        }
+            => sub = sourceBlock
+            .AsObservable()
+            .Window(TimeSpan.FromSeconds(5), 127)
+            .Select(LogSomwhere)
+            .Concat()//Sequencial
+            .Subscribe();
 
         public void Log(string toLog) => sourceBlock.Post(toLog);
         private async Task<Unit> LogSomwhere(IObservable<string> toLog)

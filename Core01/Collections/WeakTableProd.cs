@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Collections
@@ -24,7 +21,9 @@ namespace MarcinGajda.Collections
             //var langCode = Lang2Iso639.Iso2Char(lang);
             string langCode = lang;
             if (LangDictionaryCache.TryGetValue(langCode, out Dictionary<string, string>? cachedIdWordPairs))
+            {
                 return cachedIdWordPairs;
+            }
 
             var idWordPairs = new Dictionary<string, string>();
             string langContent = await GetLang(authorization, langCode);
@@ -47,7 +46,9 @@ namespace MarcinGajda.Collections
         private async Task<string> GetLang(string authorization, string langId)
         {
             if (TranslationsCache.TryGetValue(langId, out string? cached))
+            {
                 return cached;
+            }
             else
             {
                 string result = await Task.FromResult("lang");
@@ -59,11 +60,10 @@ namespace MarcinGajda.Collections
     public static class WeakTableCache<T>
         where T : class, new()
     {
-        private static readonly ConditionalWeakTable<string, T> LangDictionaryCache = new ConditionalWeakTable<string, T>();
+        private static readonly ConditionalWeakTable<string, T> LangDictionaryCache 
+            = new ConditionalWeakTable<string, T>();
 
-        public static T GetOrAdd(string key, Func<string, T> valueFactory)
-        {
-            return LangDictionaryCache.GetValue(key, k => valueFactory(k));
-        }
+        public static T GetOrAdd(string key, Func<string, T> valueFactory) 
+            => LangDictionaryCache.GetValue(key, k => valueFactory(k));
     }
 }

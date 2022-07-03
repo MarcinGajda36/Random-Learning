@@ -1,17 +1,19 @@
 ﻿namespace Functional_CS_V2
 {
-    record Address(string Country);
-    record UsAddress(string State) : Address("us");
-    record Product(string Name, decimal Price, bool IsFood);
+    internal record Address(string Country);
 
-    record Order(Product Product, int Quantity)
+    internal record UsAddress(string State) : Address("us");
+
+    internal record Product(string Name, decimal Price, bool IsFood);
+
+    internal record Order(Product Product, int Quantity)
     {
         public decimal NetPrice => Product.Price * Quantity;
     }
 
     public static class Chapter01
     {
-        static decimal RateByCountry(string country)
+        private static decimal RateByCountry(string country)
            => country switch
            {
                "it" => 0.22m,
@@ -19,10 +21,10 @@
                _ => throw new ArgumentException($"Missing rate for {country}")
            };
 
-        static decimal Vat(decimal rate, Order order)
+        private static decimal Vat(decimal rate, Order order)
            => order.NetPrice * rate;
 
-        static decimal Vat(Address address, Order order)
+        private static decimal Vat(Address address, Order order)
            => address switch
            {
                Address("xD") adrs => DeVat(order),
@@ -33,10 +35,10 @@
                (var country) _ => Vat(RateByCountry(country), order),
            };
 
-        static decimal DeVat(Order order)
+        private static decimal DeVat(Order order)
            => order.NetPrice * (order.Product.IsFood ? 0.08m : 0.2m);
 
-        static decimal RateByState(string state)
+        private static decimal RateByState(string state)
            => state switch
            {
                "ca" => 0.1m,

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MarcinGajda.Collections
+﻿namespace MarcinGajda.Collections
 {
     public class SortedSetTst
     {

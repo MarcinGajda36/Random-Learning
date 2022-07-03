@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -79,7 +77,7 @@ namespace MarcinGajda.WORK_observable
         public NotificationFactory(Func<int, Task> hub, int state)
         {
             this.state = state;
-            this.notifier = new ActionBlock<int>(x => hub(x));
+            notifier = new ActionBlock<int>(x => hub(x));
         }
 
         public Notifier Create() =>

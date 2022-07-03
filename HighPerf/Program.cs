@@ -1,14 +1,12 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using Microsoft.Toolkit.HighPerformance.Buffers;
+﻿using Microsoft.Toolkit.HighPerformance.Buffers;
 using Microsoft.Toolkit.HighPerformance.Helpers;
+using System;
 
 namespace HighPerf
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var dis = Levenshtein.Distance("aaaaa", "aaaab");
 
@@ -35,26 +33,20 @@ namespace HighPerf
         {
             private readonly float factor;
 
-            public ItemsMultiplier(float factor)
-            {
-                this.factor = factor;
-            }
+            public ItemsMultiplier(float factor) 
+                => this.factor = factor;
 
-            public void Invoke(ref float x) => x *= this.factor;
+            public void Invoke(ref float x) => x *= factor;
         }
         public readonly struct ArrayInitializer : IAction
         {
             private readonly int[] array;
 
-            public ArrayInitializer(int[] array)
-            {
-                this.array = array;
-            }
+            public ArrayInitializer(int[] array) 
+                => this.array = array;
 
-            public void Invoke(int i)
-            {
-                this.array[i] = i;
-            }
+            public void Invoke(int i) 
+                => array[i] = i;
         }
     }
 }

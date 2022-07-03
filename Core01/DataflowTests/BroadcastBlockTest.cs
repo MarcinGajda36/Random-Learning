@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -9,8 +7,8 @@ namespace MarcinGajda.DataflowTests
 {
     public class BroadcastBlockTest
     {
-        static BroadcastBlock<int> bb = new BroadcastBlock<int>(x => x);
-        static int sum;
+        private static readonly BroadcastBlock<int> bb = new BroadcastBlock<int>(x => x);
+        private static int sum;
         public static async Task Test()
         {
             bb

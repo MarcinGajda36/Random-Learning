@@ -3,11 +3,10 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.DataflowTests
 {
-    class LongLink
+    internal class LongLink
     {
-        static BufferBlock<int> queue = new BufferBlock<int>();
-
-        static Dictionary<int, string> hmm = new Dictionary<int, string>();
+        private static readonly BufferBlock<int> queue = new BufferBlock<int>();
+        private static readonly Dictionary<int, string> hmm = new Dictionary<int, string>();
         public static void Test()
         {
 

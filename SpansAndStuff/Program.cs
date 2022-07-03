@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace SpansAndStuff
 {
-    class Program
+    internal class Program
     {
-        static void Main()
+        private static void Main()
         {
             ArraySegments.Test4();
             Test();
@@ -33,7 +33,7 @@ namespace SpansAndStuff
             }
         }
 
-        static void WriteInt32ToBuffer(int value, Memory<char> buffer)
+        private static void WriteInt32ToBuffer(int value, Memory<char> buffer)
         {
             string strValue = value.ToString();
 
@@ -41,10 +41,10 @@ namespace SpansAndStuff
             strValue.AsSpan().CopyTo(span);
         }
 
-        static void DisplayBufferToConsole(Memory<char> buffer) =>
+        private static void DisplayBufferToConsole(Memory<char> buffer) =>
             Console.WriteLine($"Contents of the buffer: '{buffer}'");
 
-        static void Test()
+        private static void Test()
         {
             string str = "Marcin";
             ReadOnlyMemory<char> mem = str.AsMemory();

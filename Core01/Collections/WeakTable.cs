@@ -5,7 +5,7 @@ namespace MarcinGajda.Collections
 {
     public static class WeakRefTest
     {
-        static readonly object first = new { Test = 1 };
+        private static readonly object first = new { Test = 1 };
         public static void Test1()
         {
             var cwt = new ConditionalWeakTable<object, string>();
@@ -33,10 +33,12 @@ namespace MarcinGajda.Collections
             ManagedClass? mc2 = new ManagedClass();
             var mc3 = new ManagedClass();
 
-            var cwt = new ConditionalWeakTable<ManagedClass, ClassData>();
-            cwt.Add(mc1, new ClassData());
-            cwt.Add(mc2, new ClassData());
-            cwt.Add(mc3, new ClassData());
+            var cwt = new ConditionalWeakTable<ManagedClass, ClassData>
+            {
+                { mc1, new ClassData() },
+                { mc2, new ClassData() },
+                { mc3, new ClassData() }
+            };
 
             var wr2 = new WeakReference(mc2);
             mc2 = null;
@@ -46,11 +48,17 @@ namespace MarcinGajda.Collections
             ClassData data = null;
 
             if (wr2.Target == null)
+            {
                 Console.WriteLine("No strong reference to mc2 exists.");
+            }
             else if (cwt.TryGetValue((ManagedClass)wr2.Target, out data))
+            {
                 Console.WriteLine("Data created at {0}", data.CreationTime);
+            }
             else
+            {
                 Console.WriteLine("mc2 not found in the table.");
+            }
         }
 
         public class ManagedClass

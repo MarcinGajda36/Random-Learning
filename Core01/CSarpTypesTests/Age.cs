@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace MarcinGajda.CSarpTypesTests
 {
     public struct Age : IEquatable<Age>
     {
         private readonly uint _age;
-        private Age(uint age)
-        {
-            _age = age;
-        }
+        private Age(uint age) => _age = age;
 
         public static Age? Of(uint age)
         {
             if (age < 0 || age > 150)
+            {
                 return null;
+            }
             else
+            {
                 return new Age(age);
+            }
         }
 
         public override bool Equals(object? obj) => obj is Age age && Equals(age);

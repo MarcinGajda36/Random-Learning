@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MarcinGajda.Foreaches
+﻿namespace MarcinGajda.Foreaches
 {
     public class MyCollection
     {
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator();
-        }
+        public Enumerator GetEnumerator() 
+            => new Enumerator();
         public class Enumerator
         {
             public int Current => 1;

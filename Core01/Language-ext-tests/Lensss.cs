@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LanguageExt;
+﻿using LanguageExt;
 using LanguageExt.ClassInstances;
+using System;
 using static LanguageExt.Prelude;
 
 namespace MarcinGajda.Language_ext_tests
