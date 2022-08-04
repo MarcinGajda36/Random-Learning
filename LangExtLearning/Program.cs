@@ -1,5 +1,6 @@
 ﻿using LanguageExt;
 using LanguageExt.ClassInstances;
+using LanguageExt.Common;
 using System;
 using static LanguageExt.Prelude;
 
@@ -46,6 +47,8 @@ namespace LangExtLearning
             var querey = Query(1, 2, 3);
             var queue = Queue(2, 3, 4);
             queue = queue.Enqueue(5);
+            var restult1 = Try(() => 1).Try();
+            var result2 = new Result<int>(1);
         }
         // you can use C# pattern matching like F#
         public static double GetArea(Shape shape)
