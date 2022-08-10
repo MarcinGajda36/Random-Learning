@@ -31,6 +31,10 @@ namespace SpansAndStuff
             {
                 Console.WriteLine($"You entered a number less than {int.MinValue:N0} or greater than {int.MaxValue:N0}.");
             }
+            var test = new Test();
+            ITest test1 = test;
+            _ = test1.Name;
+            test1.Method();
         }
 
         private static void WriteInt32ToBuffer(int value, Memory<char> buffer)
