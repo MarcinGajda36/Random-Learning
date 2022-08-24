@@ -5,7 +5,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Synchronizers;
 
-internal class ReadWriteSynchronizer
+internal class ConcurrentExclusiveSynchronizer
 {
     private sealed class Operation : IAsyncDisposable
     {
@@ -46,20 +46,20 @@ internal class ReadWriteSynchronizer
         public ValueTask DisposeAsync() => taskCancellation.DisposeAsync();
     }
 
-    private readonly ActionBlock<Operation> writes;
-    private readonly ActionBlock<Operation> reads;
+    private readonly ActionBlock<Operation> exclusive;
+    private readonly ActionBlock<Operation> concurrent;
 
-    public ReadWriteSynchronizer()
+    public ConcurrentExclusiveSynchronizer()
     {
         var concurrentExclusive = new ConcurrentExclusiveSchedulerPair();
-        writes = new ActionBlock<Operation>(
+        exclusive = new ActionBlock<Operation>(
             static operation => operation.Run(),
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = concurrentExclusive.ExclusiveScheduler
             });
 
-        reads = new ActionBlock<Operation>(
+        concurrent = new ActionBlock<Operation>(
             static operation => operation.Run(),
             new ExecutionDataflowBlockOptions
             {
@@ -68,11 +68,11 @@ internal class ReadWriteSynchronizer
             });
     }
 
-    public Task<TResult> Write<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
-        => RunOperation(writes, operation, cancellationToken);
+    public Task<TResult> Exclusive<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
+        => RunOperation(exclusive, operation, cancellationToken);
 
-    public Task<TResult> Read<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
-        => RunOperation(reads, operation, cancellationToken);
+    public Task<TResult> Concurrent<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
+        => RunOperation(concurrent, operation, cancellationToken);
 
     private static async Task<TResult> RunOperation<TResult>(
         ActionBlock<Operation> runner,

@@ -8,11 +8,11 @@ namespace MarcinGajda.Synchronizers;
 
 public enum OperationType
 {
-    Read = 0,
-    Write = 1,
+    Concurrent = 0,
+    Exclusive = 1,
 }
 
-public sealed class PerKeyReadWriteSynchronizer<TKey>
+public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
     where TKey : notnull
 {
     private sealed class Synchronizer : IDisposable
@@ -32,7 +32,7 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
             public void Dispose() => refCount.Dispose();
         }
 
-        private readonly ReadWriteSynchronizer readWriteSynchronizer = new();
+        private readonly ConcurrentExclusiveSynchronizer concurrentExclusiveSynchronizer = new();
         private readonly RefCountDisposable refCountDisposable;
         private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers;
         private readonly TKey key;
@@ -41,16 +41,16 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
 
         public Synchronizer(ConcurrentDictionary<TKey, Synchronizer> synchronizers, TKey key)
         {
-            this.synchronizers = synchronizers;
             this.key = key;
-            var disposable = Disposable.Create(this, static @this =>
+            this.synchronizers = synchronizers;
+            var keyRemoval = Disposable.Create(this, static @this =>
             {
                 if (@this.AddedToDictionary)
                 {
                     _ = @this.synchronizers.TryRemove(@this.key, out _);
                 }
             });
-            refCountDisposable = new RefCountDisposable(disposable);
+            refCountDisposable = new RefCountDisposable(keyRemoval);
         }
 
         public Lease Acquire()
@@ -66,8 +66,8 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
             CancellationToken cancellationToken)
             => operationType switch
             {
-                OperationType.Write => readWriteSynchronizer.Write(operation, cancellationToken),
-                OperationType.Read => readWriteSynchronizer.Read(operation, cancellationToken),
+                OperationType.Exclusive => concurrentExclusiveSynchronizer.Exclusive(operation, cancellationToken),
+                OperationType.Concurrent => concurrentExclusiveSynchronizer.Concurrent(operation, cancellationToken),
                 var unknown => throw new ArgumentOutOfRangeException(nameof(operationType), unknown, "Unknown value."),
             };
 
@@ -79,7 +79,7 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
     public async Task<TResult> SynchronizeAsync<TResult>(
         TKey key,
         OperationType operationType,
-        Func<CancellationToken, Task<TResult>> resultFactory,
+        Func<CancellationToken, Task<TResult>> operation,
         CancellationToken cancellationToken = default)
     {
         while (cancellationToken.IsCancellationRequested is false)
@@ -89,7 +89,7 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
                 using var lease = oldSynchronizer.Acquire();
                 if (lease.IsAquired)
                 {
-                    return await oldSynchronizer.Run(operationType, resultFactory, cancellationToken);
+                    return await oldSynchronizer.Run(operationType, operation, cancellationToken);
                 }
             }
             else
@@ -99,7 +99,7 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
                 {
                     newSynchronizer.AddedToDictionary = true;
                     using var lease = newSynchronizer.Acquire();
-                    return await newSynchronizer.Run(operationType, resultFactory, cancellationToken);
+                    return await newSynchronizer.Run(operationType, operation, cancellationToken);
                 }
             }
         }
