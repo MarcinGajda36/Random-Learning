@@ -53,7 +53,7 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
             refCountDisposable = new RefCountDisposable(keyRemoval);
         }
 
-        public Lease Acquire()
+        public Lease GetLease()
         {
             var refCount = refCountDisposable.GetDisposable();
             bool isAquired = refCountDisposable.IsDisposed is false;
@@ -86,7 +86,7 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
         {
             if (synchronizers.TryGetValue(key, out var oldSynchronizer))
             {
-                using var lease = oldSynchronizer.Acquire();
+                using var lease = oldSynchronizer.GetLease();
                 if (lease.IsAquired)
                 {
                     return await oldSynchronizer.Run(operationType, operation, cancellationToken);
@@ -98,7 +98,6 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
                 if (synchronizers.TryAdd(key, newSynchronizer))
                 {
                     newSynchronizer.AddedToDictionary = true;
-                    using var lease = newSynchronizer.Acquire();
                     return await newSynchronizer.Run(operationType, operation, cancellationToken);
                 }
             }
