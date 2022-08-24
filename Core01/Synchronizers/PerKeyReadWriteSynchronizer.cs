@@ -34,16 +34,20 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
 
         private readonly ReadWriteSynchronizer readWriteSynchronizer = new();
         private readonly RefCountDisposable refCountDisposable;
+        private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers;
+        private readonly TKey key;
 
         public bool AddedToDictionary { get; set; }
 
         public Synchronizer(ConcurrentDictionary<TKey, Synchronizer> synchronizers, TKey key)
         {
-            var disposable = Disposable.Create(() =>
+            this.synchronizers = synchronizers;
+            this.key = key;
+            var disposable = Disposable.Create(this, static @this =>
             {
-                if (AddedToDictionary)
+                if (@this.AddedToDictionary)
                 {
-                    _ = synchronizers.TryRemove(key, out _);
+                    _ = @this.synchronizers.TryRemove(@this.key, out _);
                 }
             });
             refCountDisposable = new RefCountDisposable(disposable);
@@ -52,9 +56,8 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
         public Lease Acquire()
         {
             var refCount = refCountDisposable.GetDisposable();
-            return refCountDisposable.IsDisposed
-                ? new Lease(false, refCount)
-                : new Lease(true, refCount);
+            bool isAquired = refCountDisposable.IsDisposed is false;
+            return new Lease(isAquired, refCount);
         }
 
         public Task<TResult> Run<TResult>(
@@ -101,6 +104,6 @@ public sealed class PerKeyReadWriteSynchronizer<TKey>
             }
         }
 
-        return await Task.FromCanceled<TResult>(cancellationToken).ConfigureAwait(false);
+        return await Task.FromCanceled<TResult>(cancellationToken);
     }
 }
