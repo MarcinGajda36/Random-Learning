@@ -23,7 +23,7 @@ internal sealed class PerKeyConcurrentExclusiveScheduler<TKey>
         }
     }
 
-    public Task<TResult> Schedule<TArgument, TResult>(
+    public Task<TResult> Schedule<TResult>(
         TKey key,
         OperationType operationType,
         Func<object?, TResult> operation,
