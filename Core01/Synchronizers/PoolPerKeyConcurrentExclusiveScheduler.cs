@@ -26,7 +26,7 @@ internal sealed class PerKeyConcurrentExclusiveScheduler<TKey>
     public Task<TResult> Schedule<TArgument, TResult>(
         TKey key,
         OperationType operationType,
-        Func<object?, TResult> resultFactory,
+        Func<object?, TResult> operation,
         object? argument = null,
         TaskCreationOptions taskCreationOptions = TaskCreationOptions.None,
         CancellationToken cancellationToken = default)
@@ -35,7 +35,7 @@ internal sealed class PerKeyConcurrentExclusiveScheduler<TKey>
         var concurrentExclusive = pool[index];
         var scheduler = GetScheduler(operationType, concurrentExclusive);
         return Task.Factory.StartNew(
-            resultFactory,
+            operation,
             argument,
             cancellationToken,
             taskCreationOptions,
