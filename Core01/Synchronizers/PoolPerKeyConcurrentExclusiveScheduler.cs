@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
 
-internal sealed class PoolPerKeyConcurrentExclusiveScheduler<TKey>
+internal sealed class PerKeyConcurrentExclusiveScheduler<TKey>
     where TKey : notnull
 {
     private readonly ConcurrentExclusiveSchedulerPair[] pool;
 
-    public PoolPerKeyConcurrentExclusiveScheduler(int? poolSize = null)
+    public PerKeyConcurrentExclusiveScheduler(int? poolSize = null)
     {
         if (poolSize.HasValue && poolSize.Value < 1)
         {
@@ -25,9 +25,9 @@ internal sealed class PoolPerKeyConcurrentExclusiveScheduler<TKey>
 
     public Task<TResult> Schedule<TArgument, TResult>(
         TKey key,
-        TArgument argument,
         OperationType operationType,
-        Func<TKey, TArgument, CancellationToken, TResult> resultFactory,
+        Func<object?, TResult> resultFactory,
+        object? argument = null,
         TaskCreationOptions taskCreationOptions = TaskCreationOptions.None,
         CancellationToken cancellationToken = default)
     {
@@ -35,7 +35,8 @@ internal sealed class PoolPerKeyConcurrentExclusiveScheduler<TKey>
         var concurrentExclusive = pool[index];
         var scheduler = GetScheduler(operationType, concurrentExclusive);
         return Task.Factory.StartNew(
-            () => resultFactory(key, argument, cancellationToken),
+            resultFactory,
+            argument,
             cancellationToken,
             taskCreationOptions,
             scheduler);
