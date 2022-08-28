@@ -6,7 +6,6 @@ type Person = {
     Age: int
 }
 
-
 let Marcin = { Name = "Marcin"; LastName = "Gajda"; Age = 1 }
 let Michal = { Marcin with Name = "Michal" }
 
@@ -49,3 +48,23 @@ let testConstructors =
 
 let testOption i =
     i |> Option.map (fun x -> x * 3)
+
+
+[<NoComparison; NoEquality>]
+type Test0001 = {
+    Test1: string
+}
+
+
+type Test0002 = {
+    test2: string
+}
+
+let testinstance1 = { Test1 = "" }
+let testinstance2 = { test2 = "" }
+
+let x = 
+    if 5 > 0 then 
+        Choice1Of2 1 
+    else
+        Choice2Of2 ""
