@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HighPerf", "HighPerf\HighPe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LangExtLearning", "LangExtLearning\LangExtLearning.csproj", "{8612F747-33CB-4FAC-96B9-5F7AC0CB5DDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Functional_CS_V2", "Functional_CS_V2\Functional_CS_V2.csproj", "{6843051B-5FAC-42FF-B2CD-3D289102BCD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functional_CS_V2", "Functional_CS_V2\Functional_CS_V2.csproj", "{6843051B-5FAC-42FF-B2CD-3D289102BCD7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication2", "WebApplication2\WebApplication2.csproj", "{0D62DB22-E020-47C7-8B23-2111F4622C8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{6843051B-5FAC-42FF-B2CD-3D289102BCD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6843051B-5FAC-42FF-B2CD-3D289102BCD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6843051B-5FAC-42FF-B2CD-3D289102BCD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D62DB22-E020-47C7-8B23-2111F4622C8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D62DB22-E020-47C7-8B23-2111F4622C8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D62DB22-E020-47C7-8B23-2111F4622C8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D62DB22-E020-47C7-8B23-2111F4622C8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
