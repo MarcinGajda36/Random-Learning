@@ -12,7 +12,7 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         _ = builder.Services.AddEndpointsApiExplorer();
         _ = builder.Services.AddSwaggerGen();
-        _ = builder.Services.AddSingleton<ClientFactory<object>>(provider => client => new object());
+        _ = builder.Services.AddSingleton<ClientFactory<object>>((url, client) => new { url, client });
 
         var app = builder.Build();
 
