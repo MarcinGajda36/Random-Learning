@@ -10,7 +10,7 @@ public record KafkaSettings(string Topic, string BootstrapServers, string GroupI
 
 public sealed class KafkaFactory
 {
-    public Task UnboundedParallelismAtLeastOnceClient<TKey, TValue>(
+    public static Task UnboundedParallelismAtLeastOnceClient<TKey, TValue>(
         KafkaSettings kafkaSettings,
         Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
         CancellationToken cancellationToken)
@@ -20,7 +20,7 @@ public sealed class KafkaFactory
             DataflowBlockOptions.Unbounded,
             cancellationToken);
 
-    public async Task AtLeastOnceClient<TKey, TValue>(
+    public static async Task AtLeastOnceClient<TKey, TValue>(
         KafkaSettings kafkaSettings,
         Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
         int maxDegreeOfParallelism,
@@ -28,7 +28,7 @@ public sealed class KafkaFactory
     {
         var configuration = AutoOffsetDisabledConfig(kafkaSettings);
         using var client = new ConsumerBuilder<TKey, TValue>(configuration).Build();
-        var topic = kafkaSettings.Topic;
+        string topic = kafkaSettings.Topic;
         client.Subscribe(topic);
 
         try
@@ -57,7 +57,7 @@ public sealed class KafkaFactory
         CancellationToken cancellationToken)
     {
         var processingBlock = CreateProcessingBlock(processor, maxDegreeOfParallelism, cancellationToken);
-        var offsetBlock = CreateOffsetBlock(consumer, cancellationToken);
+        var offsetBlock = CreateOffsetBlock(consumer);
         using var link = processingBlock.LinkTo(offsetBlock, new DataflowLinkOptions { PropagateCompletion = true });
 
         await Task.WhenAll(
@@ -77,9 +77,9 @@ public sealed class KafkaFactory
             try
             {
                 var kafkaMessage = consumer.Consume(cancellationToken);
-                if (!await processorBlock.SendAsync(kafkaMessage, cancellationToken))
+                if (!processorBlock.Post(kafkaMessage))
                 {
-                    await processorBlock.Completion;
+                    return;
                 }
             }
             catch (ConsumeException ex)
@@ -113,11 +113,10 @@ public sealed class KafkaFactory
             {
                 MaxDegreeOfParallelism = maxDegreeOfParallelism,
                 CancellationToken = cancellationToken,
+                SingleProducerConstrained = true
             });
 
-    private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock<TKey, TValue>(
-        IConsumer<TKey, TValue> consumer,
-        CancellationToken cancellationToken)
+    private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock<TKey, TValue>(IConsumer<TKey, TValue> consumer)
         => new(
             kafkaMessage =>
             {
@@ -125,7 +124,7 @@ public sealed class KafkaFactory
                 {
                     consumer.StoreOffset(kafkaMessage);
                 }
-                catch (KafkaException) { }
+                catch (KafkaException) { /*maybe log*/ }
             },
-            new ExecutionDataflowBlockOptions { CancellationToken = cancellationToken });
+            new ExecutionDataflowBlockOptions { SingleProducerConstrained = true });
 }
