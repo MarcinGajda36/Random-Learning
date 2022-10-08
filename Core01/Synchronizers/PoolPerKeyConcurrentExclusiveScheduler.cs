@@ -4,6 +4,12 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
 
+public enum OperationType
+{
+    Concurrent = 0,
+    Exclusive = 1,
+}
+
 internal sealed class PerKeyConcurrentExclusiveScheduler<TKey>
     where TKey : notnull
 {

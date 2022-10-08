@@ -6,18 +6,12 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
 
-public enum OperationType
-{
-    Concurrent = 0,
-    Exclusive = 1,
-}
-
 public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
     where TKey : notnull
 {
     private sealed class Synchronizer : IDisposable
     {
-        public readonly record struct Lease : IDisposable
+        public readonly struct Lease : IDisposable
         {
             private readonly IDisposable refCount;
 
