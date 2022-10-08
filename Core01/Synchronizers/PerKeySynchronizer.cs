@@ -32,7 +32,7 @@ public sealed class PerKeySynchronizer<TKey>
             }
         }
 
-        private readonly SemaphoreSlim semaphoreSlim = new(1);
+        private readonly SemaphoreSlim semaphoreSlim = new(1, 1);
         private readonly RefCountDisposable refCountDisposable;
         private readonly ConcurrentDictionary<TKey, Synchronizer> synchronizers;
         private readonly TKey key;
@@ -66,7 +66,7 @@ public sealed class PerKeySynchronizer<TKey>
             {
                 try
                 {
-                    await semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                    await semaphoreSlim.WaitAsync(cancellationToken);
                 }
                 catch
                 {
@@ -93,10 +93,10 @@ public sealed class PerKeySynchronizer<TKey>
         {
             if (synchronizers.TryGetValue(key, out var oldSynchronizer))
             {
-                using var lease = await oldSynchronizer.Acquire(cancellationToken).ConfigureAwait(false);
+                using var lease = await oldSynchronizer.Acquire(cancellationToken);
                 if (lease.IsAquired)
                 {
-                    return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
+                    return await resultFactory(key, argument, cancellationToken);
                 }
             }
             else
@@ -105,12 +105,13 @@ public sealed class PerKeySynchronizer<TKey>
                 if (synchronizers.TryAdd(key, newSynchronizer))
                 {
                     newSynchronizer.AddedToDictionary = true;
-                    using var lease = await newSynchronizer.Acquire(cancellationToken).ConfigureAwait(false);
-                    return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
+                    using var lease = await newSynchronizer.Acquire(cancellationToken);
+                    return await resultFactory(key, argument, cancellationToken);
                 }
             }
         }
-        return await Task.FromCanceled<TResult>(cancellationToken).ConfigureAwait(false);
+
+        return await Task.FromCanceled<TResult>(cancellationToken);
     }
 
     public Task<TResult> SynchronizeAsync<TResult>(

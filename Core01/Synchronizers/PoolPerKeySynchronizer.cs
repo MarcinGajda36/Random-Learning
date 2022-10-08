@@ -20,7 +20,7 @@ public sealed class PoolPerKeySynchronizer<TKey> : IDisposable
         pool = new SemaphoreSlim[poolSize ?? Environment.ProcessorCount];
         for (int index = 0; index < pool.Length; index++)
         {
-            pool[index] = new SemaphoreSlim(1);
+            pool[index] = new SemaphoreSlim(1, 1);
         }
     }
 
@@ -32,10 +32,10 @@ public sealed class PoolPerKeySynchronizer<TKey> : IDisposable
     {
         long index = (uint)key.GetHashCode() % pool.Length;
         var semaphore = pool[index];
-        await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await semaphore.WaitAsync(cancellationToken);
         try
         {
-            return await resultFactory(key, argument, cancellationToken).ConfigureAwait(false);
+            return await resultFactory(key, argument, cancellationToken);
         }
         finally
         {
@@ -68,7 +68,6 @@ public sealed class PoolPerKeySynchronizer<TKey> : IDisposable
 
     public void Dispose()
     {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
