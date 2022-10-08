@@ -14,7 +14,7 @@ internal class ConcurrentExclusiveSynchronizer
         private readonly CancellationToken cancellationToken;
         private readonly CancellationTokenRegistration taskCancellation;
 
-        public Task<object> Result => completionSource.Task;
+        public Task<object> Task => completionSource.Task;
 
         public Operation(Func<CancellationToken, Task<object>> operation, CancellationToken cancellationToken)
         {
@@ -80,10 +80,10 @@ internal class ConcurrentExclusiveSynchronizer
         CancellationToken cancellationToken)
     {
         await using var operation = new Operation(
-            async (cancellationToken) => (await toRun(cancellationToken))!,
+            async cancellationToken => (await toRun(cancellationToken))!,
             cancellationToken);
 
         _ = runner.Post(operation);
-        return (TResult)await operation.Result;
+        return (TResult)await operation.Task;
     }
 }
