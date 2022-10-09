@@ -1,3 +1,5 @@
+using WebApplication2.Background;
+
 namespace WebApplication2;
 
 public class Program
@@ -13,6 +15,9 @@ public class Program
         _ = builder.Services.AddEndpointsApiExplorer();
         _ = builder.Services.AddSwaggerGen();
         _ = builder.Services.AddSingleton<ClientFactory<object>>((url, client) => new { url, client });
+        _ = builder.Services.AddSingleton<UtcNow>(() => DateTimeOffset.UtcNow);
+        //_ = builder.Services.AddSingleton<UtcNow2>(); // Fails
+        _ = builder.Services.AddHostedService<BackgroundSomething>();
 
         var app = builder.Build();
 

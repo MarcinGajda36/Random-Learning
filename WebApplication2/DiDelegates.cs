@@ -1,5 +1,6 @@
 ﻿namespace WebApplication2;
 
+
 public delegate TClient ClientFactory<out TClient>(string url, HttpClient httpClient);
 
 public class Client<TClient>
