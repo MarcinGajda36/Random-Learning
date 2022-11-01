@@ -12,6 +12,6 @@ public class DateValidator<TClock> : IValidator<SomethingWithDate>
     where TClock : struct, IClock
 {
     public bool IsValid(SomethingWithDate value)
-        => default(TClock).UtcNow().Date > value.SomeDate;
+        => default(TClock).UtcNow().Date > value.SomeDate.Date;
 }
 
