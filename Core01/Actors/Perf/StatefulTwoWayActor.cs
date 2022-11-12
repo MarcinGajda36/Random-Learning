@@ -31,17 +31,19 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
 
     public void Complete()
         => @operator.Complete();
-    public TOutput? ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
-        => ((ISourceBlock<TOutput>)@operator).ConsumeMessage(messageHeader, target, out messageConsumed);
-    public void Fault(Exception exception)
-        => ((IDataflowBlock)@operator).Fault(exception);
+
     public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions)
         => @operator.LinkTo(target, linkOptions);
-    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
+
+    TOutput? ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
+        => ((ISourceBlock<TOutput>)@operator).ConsumeMessage(messageHeader, target, out messageConsumed);
+    void IDataflowBlock.Fault(Exception exception)
+        => ((IDataflowBlock)@operator).Fault(exception);
+    DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
         => ((ITargetBlock<TInput>)@operator).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
-    public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+    void ISourceBlock<TOutput>.ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)@operator).ReleaseReservation(messageHeader, target);
-    public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+    bool ISourceBlock<TOutput>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)@operator).ReserveMessage(messageHeader, target);
 
 }
@@ -73,18 +75,20 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput>
 
     public void Complete()
         => @operator.Complete();
-    public TOutput? ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
-        => @operator.ConsumeMessage(messageHeader, target, out messageConsumed);
-    public void Fault(Exception exception)
-        => @operator.Fault(exception);
+
     public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions)
         => @operator.LinkTo(target, linkOptions);
-    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
-        => @operator.OfferMessage(messageHeader, messageValue, source, consumeToAccept);
-    public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
-        => @operator.ReleaseReservation(messageHeader, target);
-    public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
-        => @operator.ReserveMessage(messageHeader, target);
+
+    TOutput? ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
+        => ((ISourceBlock<TOutput>)@operator).ConsumeMessage(messageHeader, target, out messageConsumed);
+    void IDataflowBlock.Fault(Exception exception)
+        => ((IDataflowBlock)@operator).Fault(exception);
+    DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
+        => ((ITargetBlock<TInput>)@operator).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+    void ISourceBlock<TOutput>.ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+        => ((ISourceBlock<TOutput>)@operator).ReleaseReservation(messageHeader, target);
+    bool ISourceBlock<TOutput>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+        => ((ISourceBlock<TOutput>)@operator).ReserveMessage(messageHeader, target);
 }
 
 public static class StatefulTwoWayActor
