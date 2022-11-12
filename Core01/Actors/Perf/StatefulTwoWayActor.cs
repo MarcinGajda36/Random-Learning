@@ -2,42 +2,22 @@
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MarcinGajda.Actors;
+namespace MarcinGajda.Actors.Perf;
 
-public interface IOperation<TState, TInput, TOutput>
+public interface IOperationWithOutput<TState, TInput, TOutput>
 {
     (TState, TOutput) Execute(TState state, TInput input);
 }
 
-internal class StateBag<TState>
-{
-    public TState State { get; set; }
-
-    public StateBag(TState state)
-        => State = state;
-}
-
-internal struct StateInputBag<TState, TInput>
-{
-    public StateBag<TState> StateBag { get; }
-    public TInput Input { get; }
-
-    public StateInputBag(StateBag<TState> stateBag, TInput input)
-    {
-        StateBag = stateBag;
-        Input = input;
-    }
-}
-
-public sealed class PerfStatefulTwoWayActor<TState, TInput, TOutput, TOperation>
+public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
     : ISourceBlock<TOutput>
     //: IPropagatorBlock<TInput, TOutput>
-    where TOperation : struct, IOperation<TState, TInput, TOutput>
+    where TOperation : struct, IOperationWithOutput<TState, TInput, TOutput>
 {
     private readonly TransformBlock<StateInputBag<TState, TInput>, TOutput> @operator;
     private readonly StateBag<TState> stateBag;
 
-    public PerfStatefulTwoWayActor(TState startingState)
+    public StatefulTwoWayActor(TState startingState)
     {
         stateBag = new(startingState);
         @operator = CreateOperator();
