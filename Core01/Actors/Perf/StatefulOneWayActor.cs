@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors.Perf;
@@ -8,24 +9,31 @@ public interface IOperationWithoutOutput<TState, TInput>
 }
 
 public sealed class StatefulOneWayActor<TState, TInput, TOperation>
+    : ITargetBlock<TInput>
     where TOperation : struct, IOperationWithoutOutput<TState, TInput>
 {
-    private readonly ActionBlock<StateInputBag<TState, TInput>> @operator;
-    private readonly StateBag<TState> stateBag;
-
-    public StatefulOneWayActor(TState startingState)
-    {
-        stateBag = new(startingState);
-        @operator = CreateOperator();
-    }
+    private readonly ActionBlock<TInput> @operator;
+    private TState state;
 
     public Task Completion => @operator.Completion;
 
-    private static ActionBlock<StateInputBag<TState, TInput>> CreateOperator()
-        => new(static inputBag
-            => inputBag.StateBag.State = default(TOperation).Execute(inputBag.StateBag.State, inputBag.Input));
+    public StatefulOneWayActor(TState startingState)
+    {
+        state = startingState;
+        @operator = CreateOperator();
+    }
 
-    public bool Enqueue(TInput input)
-        => @operator.Post(new(stateBag, input));
+    private ActionBlock<TInput> CreateOperator()
+        => new(input => state = default(TOperation).Execute(state, input));
+
+    public bool Post(TInput input)
+        => @operator.Post(input);
+
+    public void Complete()
+        => @operator.Complete();
+    public void Fault(Exception exception)
+        => ((IDataflowBlock)@operator).Fault(exception);
+    public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
+        => ((ITargetBlock<TInput>)@operator).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
 }
 
