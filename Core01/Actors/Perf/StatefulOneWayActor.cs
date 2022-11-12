@@ -3,10 +3,6 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors.Perf;
-public interface IOperationWithoutOutput<TState, TInput>
-{
-    TState Execute(TState state, TInput input);
-}
 
 public sealed class StatefulOneWayActor<TState, TInput, TOperation>
     : ITargetBlock<TInput>
@@ -35,5 +31,4 @@ public sealed class StatefulOneWayActor<TState, TInput, TOperation>
         => ((IDataflowBlock)@operator).Fault(exception);
     public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
         => ((ITargetBlock<TInput>)@operator).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
-}
 
