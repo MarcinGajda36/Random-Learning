@@ -1,4 +1,6 @@
-﻿namespace Functional_CS_V2;
+﻿using System;
+
+namespace Functional_CS_V2;
 
 internal static class Chapter02
 {

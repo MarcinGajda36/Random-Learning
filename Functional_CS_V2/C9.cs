@@ -47,7 +47,7 @@ internal class C9
         }
 
         public static PhoneNumber CreateUk(NumberType numberType, string number)
-            => new(numberType, "uk", number);
+            => new(numberType, CountryCode.Create("uk"), number);
 
         public static PhoneNumber CreateUkMobile(string number)
             => CreateUk(NumberType.Mobile, number);

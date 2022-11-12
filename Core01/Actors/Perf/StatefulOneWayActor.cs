@@ -31,4 +31,5 @@ public sealed class StatefulOneWayActor<TState, TInput, TOperation>
         => ((IDataflowBlock)@operator).Fault(exception);
     public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
         => ((ITargetBlock<TInput>)@operator).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+}
 
