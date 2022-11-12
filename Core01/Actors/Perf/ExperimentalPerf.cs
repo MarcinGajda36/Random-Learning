@@ -4,7 +4,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors.Perf;
 
-internal class StateBag<TState>
+internal sealed class StateBag<TState>
 {
     public TState State { get; set; }
 
@@ -22,6 +22,28 @@ internal struct StateInputBag<TState, TInput>
         StateBag = stateBag;
         Input = input;
     }
+}
+
+public sealed class ExperimentalStatefulOneWayActor<TState, TInput, TOperation>
+    where TOperation : struct, IOperationWithoutOutput<TState, TInput>
+{
+    private readonly ActionBlock<StateInputBag<TState, TInput>> @operator;
+    private readonly StateBag<TState> stateBag;
+
+    public ExperimentalStatefulOneWayActor(TState startingState)
+    {
+        stateBag = new(startingState);
+        @operator = CreateOperator();
+    }
+
+    public Task Completion => @operator.Completion;
+
+    private static ActionBlock<StateInputBag<TState, TInput>> CreateOperator()
+        => new(static inputBag
+            => inputBag.StateBag.State = default(TOperation).Execute(inputBag.StateBag.State, inputBag.Input));
+
+    public bool Enqueue(TInput input)
+        => @operator.Post(new(stateBag, input));
 }
 
 public sealed class ExperimentalStatefulTwoWayActor<TState, TInput, TOutput, TOperation>
