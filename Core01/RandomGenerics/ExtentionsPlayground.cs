@@ -6,7 +6,7 @@ internal static class ExtentionsPlayground
     public static int InInt(this in int x)
         => x;
 
-    public static ref int RefInt(this ref int x)
+    public static ref int RefInt(ref this int x)
         => ref x;
 
     public static T VolatileRead<T>(this T t)
