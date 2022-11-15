@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace MarcinGajda.Collections;
 
-
 internal readonly record struct ReadOnlyListEnumerator<TElement>(IReadOnlyList<TElement> Elements)
 {
     public ReadOnlyListEnumerator1<(TArgument, Func<TElement, TArgument, TResult>), TElement, TResult> Select<TArgument, TResult>(
@@ -46,7 +45,7 @@ internal readonly record struct ReadOnlyListEnumerator1<TArgument, TElement, TRe
     {
         for (int index = 0; index < Elements.Count; index++)
         {
-            Func(Elements[index], Argument);
+            _ = Func(Elements[index], Argument);
         }
     }
 
@@ -57,7 +56,7 @@ internal readonly record struct ReadOnlyListEnumerator1<TArgument, TElement, TRe
             var (success1, result1) = Func(Elements[index], Argument);
             if (success1)
             {
-                func(result1, argument2);
+                _ = func(result1, argument2);
             }
         }
     }
@@ -117,7 +116,6 @@ internal readonly record struct ReadOnlyListEnumerator2<TArgument1, TElement1, T
     }
 }
 
-
 internal static class IReadOnlyListExtentions
 {
     public static ReadOnlyListEnumerator<TElement> CreateEnumerator<TElement>(this IReadOnlyList<TElement> elements)
@@ -128,7 +126,7 @@ internal static class Test
 {
     public static void Test1()
     {
-        var arr = new int[] { 1, 2, 3 };
+        int[] arr = new int[] { 1, 2, 3 };
         var results = arr
             .CreateEnumerator()
             .Select(0, static (element, argument) => element + argument)
