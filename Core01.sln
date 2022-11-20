@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LangExtLearning", "LangExtL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functional_CS_V2", "Functional_CS_V2\Functional_CS_V2.csproj", "{6843051B-5FAC-42FF-B2CD-3D289102BCD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication2", "WebApplication2\WebApplication2.csproj", "{0D62DB22-E020-47C7-8B23-2111F4622C8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DITesting", "WebApplication2\DITesting.csproj", "{0D62DB22-E020-47C7-8B23-2111F4622C8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
