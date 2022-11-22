@@ -38,9 +38,10 @@ namespace MarcinGajda
 
         public static async Task Main()
         {
+            TestClosure();
+            await Task.Delay(-1);
             await Observables.LinqQueryTests();
 
-            await Task.Delay(-1);
             await TestEviction();
 
             await BroadcastBlockTest.Test();
@@ -100,6 +101,15 @@ namespace MarcinGajda
             (string _, double _, int _, int pop1, int _, int pop2) = QueryCityDataForYears("New York City", 1960, 2010);
             Console.WriteLine($"Population change, 1960 to 2010: {pop2 - pop1:N0}");
             ParrallelTests();
+        }
+
+        public static int TestClosure()
+        {
+            int i = 1;
+            var capturesI = new Lazy<int>(() => i);
+            i = 2;
+            Console.WriteLine(capturesI.Value);
+            return capturesI.Value;
         }
 
         private static async Task TestEviction()
