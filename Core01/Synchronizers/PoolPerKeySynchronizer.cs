@@ -32,8 +32,7 @@ public sealed class PoolPerKeySynchronizer<TKey>
         Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
     {
-        long index = GetIndex(key);
-        var semaphore = pool[index];
+        var semaphore = pool[GetIndex(key)];
         await semaphore.WaitAsync(cancellationToken);
         try
         {
@@ -110,8 +109,7 @@ public sealed class PoolPerKeySynchronizer<TKey>
         var indexes = new SortedSet<long>();
         foreach (var key in keys)
         {
-            long index = GetIndex(key);
-            _ = indexes.Add(index);
+            _ = indexes.Add(GetIndex(key));
         }
 
         var locked = new Stack<long>(indexes.Count);
