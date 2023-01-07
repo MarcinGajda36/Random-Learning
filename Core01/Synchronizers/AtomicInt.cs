@@ -5,7 +5,7 @@ namespace MarcinGajda.Synchronizers;
 public sealed class OptymisticAtomicInt
 {
     private int value;
-    public int Value => Volatile.Read(ref value);
+    public int Value => value.VolatileRead();
     public OptymisticAtomicInt(int initial = 0)
         => value = initial;
 
@@ -24,6 +24,11 @@ public sealed class OptymisticAtomicInt
 
     public int Swap(Func<int, int> swapper)
         => Swap(swapper, static (initial, func) => func(initial));
+}
+
+public static class AtomicInt
+{
+    public static int VolatileRead(this ref int value) => Volatile.Read(ref value);
 }
 
 public sealed class PesimisticAtomicInt : IDisposable
