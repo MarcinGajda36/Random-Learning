@@ -38,7 +38,7 @@ type TestConstructors2 public (i: int) =
     member val I : int = 0 with get, set
 
 let testConstructors = 
-    let testConstructors = TestConstructors(5,"abc")
+    let testConstructors = TestConstructors(5, "abc")
     let testConstructorss = TestConstructors(5)
     let testConstructors2 = TestConstructors2(1)
     testConstructors.I <- 1
