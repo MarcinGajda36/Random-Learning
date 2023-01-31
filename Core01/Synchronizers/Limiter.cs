@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
-internal sealed class Limiter
+internal sealed class Limiter : IDisposable
 {
     private readonly SemaphoreSlim limiter;
 
@@ -40,4 +40,7 @@ internal sealed class Limiter
             resultFactory,
             static (resultFactory, cancellationToken) => resultFactory(cancellationToken),
             cancellationToken);
+
+    public void Dispose()
+        => limiter.Dispose();
 }
