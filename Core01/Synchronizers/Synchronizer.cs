@@ -38,6 +38,46 @@ public sealed class Synchronizer : IDisposable
         => _semaphoreSlim.Dispose();
 }
 
+public sealed class Synchronizer2 : IDisposable
+{
+    public struct Lease : IDisposable
+    {
+        private SemaphoreSlim? _semaphore;
+
+        public Lease(SemaphoreSlim semaphore)
+            => _semaphore = semaphore;
+
+        public void Dispose()
+            => Interlocked.Exchange(ref _semaphore, null)?.Release();
+    }
+
+    private readonly SemaphoreSlim _semaphoreSlim;
+
+    public Synchronizer2(int max = 1)
+        => _semaphoreSlim = new SemaphoreSlim(max, max);
+
+    public Lease Acquire(CancellationToken cancellationToken = default)
+    {
+        _semaphoreSlim.Wait(cancellationToken);
+        return new Lease(_semaphoreSlim);
+    }
+
+    public async ValueTask<Lease> AcquireAsync(CancellationToken cancellationToken = default)
+    {
+        var wait = _semaphoreSlim.WaitAsync(cancellationToken);
+        if (wait.IsCompletedSuccessfully)
+        {
+            return new Lease(_semaphoreSlim);
+        }
+
+        await wait;
+        return new Lease(_semaphoreSlim);
+    }
+
+    public void Dispose()
+        => _semaphoreSlim.Dispose();
+}
+
 public static class SynchronizerTests
 {
     public static async Task TestAsync()
