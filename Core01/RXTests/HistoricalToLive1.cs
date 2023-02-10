@@ -18,7 +18,7 @@ internal static class HistoricalToLive1
         ImmutableList<TValue> LiveBuffer,
         bool HasHistoricalEnded,
         IObservable<TValue> AvailableMessages,
-        IEqualityComparer<TValue>? Comparer) // Is comparer and de-duping needed?
+        IEqualityComparer<TValue>? Comparer)
     {
         public static ConcatState<TValue> Create(IEqualityComparer<TValue>? comparer)
             => new(ImmutableList<TValue>.Empty, false, Observable.Empty<TValue>(), comparer);
@@ -27,7 +27,7 @@ internal static class HistoricalToLive1
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
         IObservable<TValue> historical,
-        IEqualityComparer<TValue>? comparer = null)
+        IEqualityComparer<TValue>? comparer = null)// Is comparer and de-duping needed?
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(ConcatState<TValue>.Create(comparer), HandleNextMessage)
