@@ -30,7 +30,6 @@ internal static class HistoricalToLive2
             => new(MessageType.HistoricalCompleted, default, null);
     }
 
-    private readonly record struct Concat<TValue>(IEnumerable<TValue> Values, ConcatState<TValue> State);
     private sealed class ConcatState<TValue>
     {
         // Mutable List and LinkedList don't use IEqualityComparer, is there order preserving mutable collection that takes IEqualityComparer?
@@ -85,6 +84,8 @@ internal static class HistoricalToLive2
         }
     }
 
+    private readonly record struct Concat<TValue>(IEnumerable<TValue> Return, ConcatState<TValue> State);
+
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
         IObservable<TValue> historical)
@@ -92,14 +93,11 @@ internal static class HistoricalToLive2
         .Merge(GetHistoricalMessages(historical))
         .Scan(
             new Concat<TValue>(Enumerable.Empty<TValue>(), new ConcatState<TValue>()),
-            (concat, message) => HandleNextMessage(in concat, in message))
-        .SelectMany(state => state.Values);
+            (state, message) => HandleNextMessage(in state, in message))
+        .SelectMany(state => state.Return);
 
-    private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> state, in Message<TValue> message)
-    {
-        var values = state.State.HandleNextMessage(in message);
-        return new(values, state.State); // ctor or return state with { Values = values }; hmm
-    }
+    private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
+        => new(previous.State.HandleNextMessage(in message), previous.State); // or return previous with { Return = previous.State.HandleNextMessage(in message) }
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => Message<TValue>.Live(live));
