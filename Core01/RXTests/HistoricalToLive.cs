@@ -70,8 +70,8 @@ internal static class HistoricalToLive
         .Materialize()
         .Select<Notification<TValue>, IMessage>(notification => notification switch
         {
-            { Kind: NotificationKind.OnNext } => new Historical<TValue>(notification.Value),
-            { Kind: NotificationKind.OnError } => new HistoricalError(notification.Exception!),
+            { Kind: NotificationKind.OnNext, Value: var value } => new Historical<TValue>(value),
+            { Kind: NotificationKind.OnError, Exception: var exception } => new HistoricalError(exception),
             { Kind: NotificationKind.OnCompleted } => new HistoricalCompleted(),
             _ => throw new NotSupportedException()
         });
