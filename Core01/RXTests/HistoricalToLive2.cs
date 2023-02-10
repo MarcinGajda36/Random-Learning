@@ -98,7 +98,7 @@ internal static class HistoricalToLive2
     private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> state, in Message<TValue> message)
     {
         var values = state.State.HandleNextMessage(in message);
-        return state with { Values = values };
+        return new(values, state.State); // ctor or return state with { Values = values }; hmm
     }
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
