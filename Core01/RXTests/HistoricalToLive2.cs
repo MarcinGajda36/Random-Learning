@@ -100,11 +100,23 @@ internal static class HistoricalToLive2
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
         .Materialize()
-        .Select(notification => notification switch
+        .Select(notification =>
         {
-            { Kind: NotificationKind.OnNext, Value: var value } => Message<TValue>.Historical(value),
-            { Kind: NotificationKind.OnError, Exception: var exception } => Message<TValue>.HistoricalError(exception),
-            { Kind: NotificationKind.OnCompleted } => Message<TValue>.HistoricalCompleted(),
-            var unknown => throw new InvalidOperationException($"Unknown notification: '{unknown}'.")
+            if (notification.Kind is NotificationKind.OnNext)
+            {
+                return Message<TValue>.Historical(notification.Value);
+            }
+
+            if (notification.Kind is NotificationKind.OnCompleted)
+            {
+                return Message<TValue>.HistoricalCompleted();
+            }
+
+            if (notification.Kind is NotificationKind.OnError)
+            {
+                return Message<TValue>.HistoricalError(notification.Exception);
+            }
+
+            throw new InvalidOperationException($"Unknown notification: '{notification}'.");
         });
 }
