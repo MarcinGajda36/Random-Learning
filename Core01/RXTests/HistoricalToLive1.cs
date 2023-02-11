@@ -83,7 +83,9 @@ internal static class HistoricalToLive1_Dedup
     // 2) Live returns Obj1_ver2 -> pushed to buffer
     // 3) History returns Obj1_ver2 -> Obj1_ver2 removed from buffer
     // 4) User gets Historical(Obj1_ver2) Then older Live(Obj1_ver1)
-    // This can be corrected with more advanced de-dup logic but is it worth it?
+    // This can be corrected with more advanced de-dup logic
+    //  -> Comparer can detect dup as TValue.Id == Buffer.TValue.Id && TValue.ModifiedAt >= Buffer.TValue.ModifiedAt
+    // but is it worth it?
     {
         public static ConcatState<TValue> Create(IEqualityComparer<TValue>? comparer)
             => new(ImmutableList<TValue>.Empty, false, Observable.Empty<TValue>(), comparer);
