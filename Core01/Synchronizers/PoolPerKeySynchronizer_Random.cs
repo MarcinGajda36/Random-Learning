@@ -20,20 +20,18 @@ public partial class PoolPerKeySynchronizer<TKey>
             }
         }
 
-        int index = 0;
-        do
+        for (int index = 0; index < pool.Length; index++)
         {
             try
             {
                 await pool[index].WaitAsync(cancellationToken);
-                index += 1;
             }
             catch
             {
-                ReleaseAll(pool, index);
+                ReleaseAll(pool, index - 1);
                 throw;
             }
-        } while (index < pool.Length - 1);
+        }
 
         try
         {
@@ -41,7 +39,7 @@ public partial class PoolPerKeySynchronizer<TKey>
         }
         finally
         {
-            ReleaseAll(pool, index);
+            ReleaseAll(pool, pool.Length - 1);
         }
     }
 
