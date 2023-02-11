@@ -32,8 +32,6 @@ internal static class HistoricalToLive2
 
     private sealed class ConcatState<TValue>
     {
-        // Mutable List and LinkedList don't use IEqualityComparer, is there order preserving mutable collection that takes IEqualityComparer?
-        // private readonly IEqualityComparer<TValue>? comparer;  
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
 
@@ -56,10 +54,6 @@ internal static class HistoricalToLive2
 
             if (message.Type is MessageType.Historical)
             {
-                if (liveBuffer is not null)
-                {
-                    _ = liveBuffer.Remove(message.Value!);
-                }
                 return Observable.Return(message.Value!);
             }
 
