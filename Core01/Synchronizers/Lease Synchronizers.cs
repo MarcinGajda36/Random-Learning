@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
 
-public sealed class Synchronizer : IDisposable
+public sealed class Synchronizer1 : IDisposable
 {
     public sealed class Lease : IDisposable
     {
@@ -19,7 +19,7 @@ public sealed class Synchronizer : IDisposable
 
     private readonly SemaphoreSlim _semaphoreSlim;
 
-    public Synchronizer(int max = 1)
+    public Synchronizer1(int max = 1)
         => _semaphoreSlim = new SemaphoreSlim(max, max);
 
     public Lease Acquire(CancellationToken cancellationToken = default)
@@ -82,7 +82,7 @@ public static class SynchronizerTests
 {
     public static async Task TestAsync()
     {
-        using var synchronizer = new Synchronizer();
+        using var synchronizer = new Synchronizer1();
         using var holder1 = synchronizer.Acquire(CancellationToken.None);
         using var cancel = new CancellationTokenSource();
         using var holder1_1 = synchronizer.Acquire(cancel.Token);
