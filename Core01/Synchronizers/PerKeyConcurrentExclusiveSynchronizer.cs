@@ -60,8 +60,8 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
             CancellationToken cancellationToken)
             => operationType switch
             {
-                OperationType.Exclusive => concurrentExclusiveSynchronizer.Exclusive(operation, cancellationToken),
-                OperationType.Concurrent => concurrentExclusiveSynchronizer.Concurrent(operation, cancellationToken),
+                OperationType.Exclusive => concurrentExclusiveSynchronizer.ExclusiveAsync(operation, cancellationToken),
+                OperationType.Concurrent => concurrentExclusiveSynchronizer.ConcurrentAsync(operation, cancellationToken),
                 var unknown => throw new ArgumentOutOfRangeException(nameof(operationType), unknown, "Unknown value."),
             };
 

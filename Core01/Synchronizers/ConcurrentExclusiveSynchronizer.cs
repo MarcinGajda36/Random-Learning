@@ -7,29 +7,34 @@ namespace MarcinGajda.Synchronizers;
 
 internal class ConcurrentExclusiveSynchronizer
 {
-    private sealed class Operation : IAsyncDisposable
+    private interface IOperation
     {
-        private readonly TaskCompletionSource<object> completionSource = new();
-        private readonly Func<CancellationToken, Task<object>> operation;
+        Task ExecuteAsync();
+    }
+
+    private sealed class Operation<TResult> : IOperation, IAsyncDisposable
+    {
+        private readonly TaskCompletionSource<TResult> completionSource = new();
+        private readonly Func<CancellationToken, Task<TResult>> operation;
         private readonly CancellationToken cancellationToken;
         private readonly CancellationTokenRegistration taskCancellation;
 
-        public Task<object> Task => completionSource.Task;
+        public Task<TResult> Task => completionSource.Task;
 
-        public Operation(Func<CancellationToken, Task<object>> operation, CancellationToken cancellationToken)
+        public Operation(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
         {
             this.operation = operation;
             this.cancellationToken = cancellationToken;
             taskCancellation = cancellationToken.Register(
                 static @this =>
                 {
-                    var operation = (Operation)@this!;
+                    var operation = (Operation<TResult>)@this!;
                     _ = operation.completionSource.TrySetCanceled(operation.cancellationToken);
                 },
                 this);
         }
 
-        public async Task Run()
+        public async Task ExecuteAsync()
         {
             try
             {
@@ -46,21 +51,21 @@ internal class ConcurrentExclusiveSynchronizer
         public ValueTask DisposeAsync() => taskCancellation.DisposeAsync();
     }
 
-    private readonly ActionBlock<Operation> exclusive;
-    private readonly ActionBlock<Operation> concurrent;
+    private readonly ActionBlock<IOperation> exclusive;
+    private readonly ActionBlock<IOperation> concurrent;
 
     public ConcurrentExclusiveSynchronizer()
     {
         var concurrentExclusive = new ConcurrentExclusiveSchedulerPair();
-        exclusive = new ActionBlock<Operation>(
-            static operation => operation.Run(),
+        exclusive = new ActionBlock<IOperation>(
+            static operation => operation.ExecuteAsync(),
             new ExecutionDataflowBlockOptions
             {
                 TaskScheduler = concurrentExclusive.ExclusiveScheduler
             });
 
-        concurrent = new ActionBlock<Operation>(
-            static operation => operation.Run(),
+        concurrent = new ActionBlock<IOperation>(
+            static operation => operation.ExecuteAsync(),
             new ExecutionDataflowBlockOptions
             {
                 MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
@@ -68,22 +73,19 @@ internal class ConcurrentExclusiveSynchronizer
             });
     }
 
-    public Task<TResult> Exclusive<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
-        => RunOperation(exclusive, operation, cancellationToken);
+    public Task<TResult> ExclusiveAsync<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
+        => ExecuteOperationAsync(exclusive, operation, cancellationToken);
 
-    public Task<TResult> Concurrent<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
-        => RunOperation(concurrent, operation, cancellationToken);
+    public Task<TResult> ConcurrentAsync<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
+        => ExecuteOperationAsync(concurrent, operation, cancellationToken);
 
-    private static async Task<TResult> RunOperation<TResult>(
-        ActionBlock<Operation> runner,
+    private static async Task<TResult> ExecuteOperationAsync<TResult>(
+        ActionBlock<IOperation> runner,
         Func<CancellationToken, Task<TResult>> toRun,
         CancellationToken cancellationToken)
     {
-        await using var operation = new Operation(
-            async cancellationToken => (await toRun(cancellationToken))!,
-            cancellationToken);
-
+        await using var operation = new Operation<TResult>(toRun, cancellationToken);
         _ = runner.Post(operation);
-        return (TResult)await operation.Task;
+        return await operation.Task;
     }
 }
