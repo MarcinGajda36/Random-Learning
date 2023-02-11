@@ -28,7 +28,9 @@ public sealed class OptymisticAtomicInt
 
 public static class AtomicInt
 {
-    public static int VolatileRead(this ref int value) => Volatile.Read(ref value);
+    // This can hide ref from call site, interesting
+    public static int VolatileRead(this ref int value)
+        => Volatile.Read(ref value);
 }
 
 public sealed class PesimisticAtomicInt : IDisposable
