@@ -4,7 +4,13 @@ PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet build -c Relea
 PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet C:\Users\kirgo\source\repos\Random-Learning\Benchmarks\bin\Release\net6.0\Benchmarks.dll
 
 ElementsCount = 4096
+run 1
 |                              Method |     Mean |     Error |    StdDev | Rank |     Gen0 |  Allocated |
 |------------------------------------ |---------:|----------:|----------:|-----:|---------:|-----------:|
 | HistoricalToLive2_StructAndMutation | 1.809 ms | 0.0095 ms | 0.0089 ms |    1 | 134.7656 |  835.16 KB |
 |  HistoricalToLive_UnionAndImmutable | 1.986 ms | 0.0114 ms | 0.0107 ms |    2 | 218.7500 | 1347.39 KB |
+run 2
+|                              Method |     Mean |     Error |    StdDev | Rank |     Gen0 |  Allocated |
+|------------------------------------ |---------:|----------:|----------:|-----:|---------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 1.830 ms | 0.0084 ms | 0.0074 ms |    1 | 134.7656 |  835.16 KB |
+|  HistoricalToLive_UnionAndImmutable | 1.901 ms | 0.0087 ms | 0.0068 ms |    2 | 218.7500 | 1347.39 KB |
