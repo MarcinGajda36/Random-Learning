@@ -15,7 +15,7 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    private readonly record struct Message<TValue>(MessageType Type, TValue? Value, Exception? Exception)
+    internal readonly record struct Message<TValue>(MessageType Type, TValue? Value, Exception? Exception)
     {
         public static Message<TValue> Live(TValue value)
             => new(MessageType.Live, value, null);
@@ -30,7 +30,7 @@ public static class HistoricalToLive2
             => new(MessageType.HistoricalCompleted, default, null);
     }
 
-    private sealed class ConcatState<TValue>
+    internal sealed class ConcatState<TValue>
     {
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
@@ -78,7 +78,7 @@ public static class HistoricalToLive2
         }
     }
 
-    private readonly record struct Concat<TValue>(IObservable<TValue> Return, ConcatState<TValue> State);
+    internal readonly record struct Concat<TValue>(IObservable<TValue> Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -91,7 +91,7 @@ public static class HistoricalToLive2
         .Select(state => state.Return)
         .Concat();
 
-    private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
+    internal static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
         => new(previous.State.HandleNextMessage(in message), previous.State); // or return previous with { Return = previous.State.HandleNextMessage(in message) }
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
