@@ -3,6 +3,7 @@
 PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet build -c Release
 PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet C:\Users\kirgo\source\repos\Random-Learning\Benchmarks\bin\Release\net6.0\Benchmarks.dll
 
+HistoricalToLiveBenchmark 
 ElementsCount = 4096
 run 1
 |                              Method |     Mean |     Error |    StdDev | Rank |     Gen0 |  Allocated |
@@ -31,3 +32,17 @@ run 3
 |------------------------------------ |---------:|--------:|--------:|-----:|---------:|-------:|-----------:|
 | HistoricalToLive2_StructAndMutation | 877.2 us | 2.37 us | 1.85 us |    1 | 140.6250 |      - |  866.25 KB |
 |  HistoricalToLive_UnionAndImmutable | 928.0 us | 3.93 us | 3.28 us |    2 | 224.6094 | 0.9766 | 1378.33 KB |
+
+
+HistoricalToLiveBenchmark_Halves
+ElementsCount = 4096;
+run 1
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |    Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 449.0 us | 2.36 us | 2.10 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
+|  HistoricalToLive_UnionAndImmutable | 553.7 us | 0.79 us | 0.66 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
+run 2 
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |    Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 452.0 us | 1.38 us | 1.29 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
+|  HistoricalToLive_UnionAndImmutable | 589.0 us | 1.32 us | 1.17 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |

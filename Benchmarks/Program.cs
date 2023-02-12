@@ -5,5 +5,5 @@ namespace Benchmarks;
 internal class Program
 {
     private static void Main(string[] args)
-        => BenchmarkRunner.Run<HistoricalToLiveBenchmark>();
+        => BenchmarkRunner.Run<HistoricalToLiveBenchmark_Halves>();
 }
