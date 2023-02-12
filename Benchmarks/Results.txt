@@ -14,3 +14,8 @@ run 2
 |------------------------------------ |---------:|----------:|----------:|-----:|---------:|-----------:|
 | HistoricalToLive2_StructAndMutation | 1.830 ms | 0.0084 ms | 0.0074 ms |    1 | 134.7656 |  835.16 KB |
 |  HistoricalToLive_UnionAndImmutable | 1.901 ms | 0.0087 ms | 0.0068 ms |    2 | 218.7500 | 1347.39 KB |
+
+After SelectMany(IEnumerable )
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|----------:|
+| HistoricalToLive2_StructAndMutation | 877.6 us | 2.01 us | 1.88 us |    1 | 140.6250 | 866.25 KB |
