@@ -18,10 +18,10 @@ public static class HistoricalToLive
     private sealed record ConcatState<TValue>(
         ImmutableQueue<TValue> LiveBuffer,
         bool HasHistoricalEnded,
-        IObservable<TValue> AvailableMessages)
+        IEnumerable<TValue> AvailableMessages)
     {
         public static readonly ConcatState<TValue> Empty
-            = new(ImmutableQueue<TValue>.Empty, false, Observable.Empty<TValue>());
+            = new(ImmutableQueue<TValue>.Empty, false, Enumerable.Empty<TValue>());
     }
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
@@ -30,20 +30,19 @@ public static class HistoricalToLive
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(ConcatState<TValue>.Empty, HandleNextMessage)
-        .Select(state => state.AvailableMessages)
-        .Concat();
+        .SelectMany(state => state.AvailableMessages);
 
     private static ConcatState<TValue> HandleNextMessage<TValue>(ConcatState<TValue> state, IMessage message)
         => (state, message) switch
         {
             ({ HasHistoricalEnded: true }, Live<TValue>(var live))
-                => state with { AvailableMessages = Observable.Return(live) },
+                => state with { AvailableMessages = new[] { live } },
             ({ HasHistoricalEnded: false }, Live<TValue>(var live))
-                => state with { AvailableMessages = Observable.Empty<TValue>(), LiveBuffer = state.LiveBuffer.Enqueue(live) },
+                => state with { AvailableMessages = Enumerable.Empty<TValue>(), LiveBuffer = state.LiveBuffer.Enqueue(live) },
             (_, Historical<TValue>(var historical))
-                => state with { AvailableMessages = Observable.Return(historical) },
+                => state with { AvailableMessages = new[] { historical } },
             (_, HistoricalCompleted)
-                => state with { AvailableMessages = Observable.ToObservable(state.LiveBuffer), LiveBuffer = ImmutableQueue<TValue>.Empty, HasHistoricalEnded = true },
+                => state with { AvailableMessages = state.LiveBuffer, LiveBuffer = ImmutableQueue<TValue>.Empty, HasHistoricalEnded = true },
             (_, HistoricalError(var exception))
                 => throw exception,
             var unknown => throw new InvalidOperationException($"Unknown message state pair: '{unknown}'.")
