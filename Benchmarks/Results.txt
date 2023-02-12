@@ -46,3 +46,27 @@ run 2
 |------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
 | HistoricalToLive2_StructAndMutation | 452.0 us | 1.38 us | 1.29 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
 |  HistoricalToLive_UnionAndImmutable | 589.0 us | 1.32 us | 1.17 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
+
+removing in for Concat<> (Concat<TValue> previous, in Message<TValue> message)
+run 1
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |    Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 439.3 us | 2.05 us | 1.82 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
+|  HistoricalToLive_UnionAndImmutable | 560.7 us | 0.75 us | 0.62 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
+run 2 
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |    Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 438.9 us | 1.14 us | 1.01 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
+|  HistoricalToLive_UnionAndImmutable | 590.3 us | 2.33 us | 1.82 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
+
+no in's
+run 1
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |    Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 441.2 us | 1.72 us | 1.44 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
+|  HistoricalToLive_UnionAndImmutable | 592.8 us | 0.84 us | 0.70 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
+run 2
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |    Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 441.0 us | 1.78 us | 1.66 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
+|  HistoricalToLive_UnionAndImmutable | 567.9 us | 1.79 us | 1.40 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
