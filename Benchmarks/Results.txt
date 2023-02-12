@@ -16,7 +16,18 @@ run 2
 |  HistoricalToLive_UnionAndImmutable | 1.901 ms | 0.0087 ms | 0.0068 ms |    2 | 218.7500 | 1347.39 KB |
 
 After SelectMany(IEnumerable)
+run 1
 |                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |   Gen1 |  Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|---------:|-------:|-----------:|
 | HistoricalToLive2_StructAndMutation | 872.5 us | 2.11 us | 1.97 us |    1 | 140.6250 |      - |  866.25 KB |
 |  HistoricalToLive_UnionAndImmutable | 930.5 us | 2.63 us | 2.46 us |    2 | 224.6094 | 0.9766 | 1378.33 KB |
+run 2 
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |   Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|-------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 862.1 us | 1.59 us | 1.33 us |    1 | 140.6250 |      - |  866.25 KB |
+|  HistoricalToLive_UnionAndImmutable | 945.0 us | 2.49 us | 2.20 us |    2 | 224.6094 | 0.9766 | 1378.33 KB |
+run 3 
+|                              Method |     Mean |   Error |  StdDev | Rank |     Gen0 |   Gen1 |  Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|---------:|-------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 877.2 us | 2.37 us | 1.85 us |    1 | 140.6250 |      - |  866.25 KB |
+|  HistoricalToLive_UnionAndImmutable | 928.0 us | 3.93 us | 3.28 us |    2 | 224.6094 | 0.9766 | 1378.33 KB |
