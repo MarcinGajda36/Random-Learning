@@ -112,8 +112,11 @@ public static class HistoricalToLive2
                 return Message<TValue>.HistoricalCompleted();
             }
 
-            return notification.Kind is NotificationKind.OnError
-                ? Message<TValue>.HistoricalError(notification.Exception)
-                : throw new InvalidOperationException($"Unknown notification: '{notification}'.");
+            if (notification.Kind is NotificationKind.OnError)
+            {
+                return Message<TValue>.HistoricalError(notification.Exception);
+            }
+
+            throw new InvalidOperationException($"Unknown notification: '{notification}'.");
         });
 }
