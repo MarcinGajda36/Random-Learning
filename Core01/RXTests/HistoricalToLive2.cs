@@ -87,10 +87,10 @@ public static class HistoricalToLive2
         .Merge(GetHistoricalMessages(historical))
         .Scan(
             new Concat<TValue>(Enumerable.Empty<TValue>(), new ConcatState<TValue>()),
-            (state, message) => HandleNextMessage(in state, in message))
+            (state, message) => HandleNextMessage(state, in message))
         .SelectMany(state => state.Return);
 
-    internal static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
+    internal static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, in Message<TValue> message)
         => previous with { Return = previous.State.HandleNextMessage(in message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
