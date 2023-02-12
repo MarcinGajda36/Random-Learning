@@ -70,3 +70,13 @@ run 2
 |------------------------------------ |---------:|--------:|--------:|-----:|---------:|--------:|-----------:|
 | HistoricalToLive2_StructAndMutation | 441.0 us | 1.78 us | 1.66 us |    1 |  81.0547 |  1.9531 |   498.3 KB |
 |  HistoricalToLive_UnionAndImmutable | 567.9 us | 1.79 us | 1.40 us |    2 | 195.3125 | 37.1094 | 1202.09 KB |
+
+AggressiveInlining for Live + Historical 
+run 1
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 449.9 us | 0.17 us | 0.14 us |    1 | 81.0547 | 1.9531 |  498.3 KB |
+run 2
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 453.8 us | 7.69 us | 7.19 us |    1 | 81.0547 | 1.9531 |  498.3 KB |
