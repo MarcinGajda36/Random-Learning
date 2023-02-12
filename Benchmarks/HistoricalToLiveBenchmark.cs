@@ -11,7 +11,7 @@ namespace Benchmarks;
 [RankColumn]
 public class HistoricalToLiveBenchmark
 {
-    private const int ElementsCount = 1000;
+    private const int ElementsCount = 4096;
     private Subject<int> live;
     private int[] historical;
 

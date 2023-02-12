@@ -1,0 +1,7 @@
+﻿
+
+ElementsCount = 4096
+|                              Method |     Mean |     Error |    StdDev | Rank |     Gen0 |  Allocated |
+|------------------------------------ |---------:|----------:|----------:|-----:|---------:|-----------:|
+| HistoricalToLive2_StructAndMutation | 1.809 ms | 0.0095 ms | 0.0089 ms |    1 | 134.7656 |  835.16 KB |
+|  HistoricalToLive_UnionAndImmutable | 1.986 ms | 0.0114 ms | 0.0107 ms |    2 | 218.7500 | 1347.39 KB |
