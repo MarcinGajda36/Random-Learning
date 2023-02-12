@@ -5,7 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 
 namespace MarcinGajda.RXTests;
-internal static class HistoricalToLive2
+public static class HistoricalToLive2
 {
     public enum MessageType : byte
     {
@@ -112,11 +112,8 @@ internal static class HistoricalToLive2
                 return Message<TValue>.HistoricalCompleted();
             }
 
-            if (notification.Kind is NotificationKind.OnError)
-            {
-                return Message<TValue>.HistoricalError(notification.Exception);
-            }
-
-            throw new InvalidOperationException($"Unknown notification: '{notification}'.");
+            return notification.Kind is NotificationKind.OnError
+                ? Message<TValue>.HistoricalError(notification.Exception)
+                : throw new InvalidOperationException($"Unknown notification: '{notification}'.");
         });
 }

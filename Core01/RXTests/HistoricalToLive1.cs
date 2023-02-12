@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 
 namespace MarcinGajda.RXTests;
 
-internal static class HistoricalToLive
+public static class HistoricalToLive
 {
     private interface IMessage { }
     private sealed record Live<TValue>(TValue Value) : IMessage;
@@ -64,7 +64,7 @@ internal static class HistoricalToLive
         });
 }
 
-internal static class HistoricalToLive1_Dedup
+public static class HistoricalToLive1_Dedup
 {
     private interface IMessage { }
     private sealed record Live<TValue>(TValue Value) : IMessage;
