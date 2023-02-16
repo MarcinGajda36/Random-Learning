@@ -8,7 +8,7 @@ namespace MarcinGajda.Kafka;
 
 public record KafkaSettings(string Topic, string BootstrapServers, string GroupId);
 
-public sealed class KafkaFactory
+public sealed partial class KafkaFactory
 {
     public static Task UnboundedParallelismAtLeastOnceClient<TKey, TValue>(
         KafkaSettings kafkaSettings,
@@ -56,28 +56,30 @@ public sealed class KafkaFactory
         int maxDegreeOfParallelism,
         CancellationToken cancellationToken)
     {
-        var processingBlock = CreateProcessingBlock(processor, maxDegreeOfParallelism, cancellationToken);
-        var offsetBlock = CreateOffsetBlock(consumer);
-        using var link = processingBlock.LinkTo(offsetBlock, new DataflowLinkOptions { PropagateCompletion = true });
+
+        var kafkaProcessor = new ProcessAndOffsetProcessor<TKey, TValue>(
+            consumer,
+            processor,
+            maxDegreeOfParallelism,
+            cancellationToken);
 
         await Task.WhenAll(
-            ConsumeAndProcessAsync(consumer, processingBlock, cancellationToken),
-            processingBlock.Completion,
-            offsetBlock.Completion);
+            ConsumeAndProcessAsync(consumer, kafkaProcessor, cancellationToken),
+            kafkaProcessor.Completion);
     }
 
     private static async Task ConsumeAndProcessAsync<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
-        ITargetBlock<ConsumeResult<TKey, TValue>> processorBlock,
+        ProcessAndOffsetProcessor<TKey, TValue> kafkaProcessor,
         CancellationToken cancellationToken)
     {
         await Task.Yield();
-        while (!cancellationToken.IsCancellationRequested)
+        while (cancellationToken.IsCancellationRequested is false)
         {
             try
             {
                 var kafkaMessage = consumer.Consume(cancellationToken);
-                if (!processorBlock.Post(kafkaMessage))
+                if (kafkaProcessor.Enqueue(kafkaMessage) is false)
                 {
                     return;
                 }
@@ -87,44 +89,15 @@ public sealed class KafkaFactory
                 // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
                 if (ex.Error.IsFatal)
                 {
-                    processorBlock.Complete();
+                    kafkaProcessor.Complete();
                     throw;
                 }
             }
             catch
             {
-                processorBlock.Complete();
+                kafkaProcessor.Complete();
                 throw;
             }
         }
     }
-
-    private static TransformBlock<ConsumeResult<TKey, TValue>, ConsumeResult<TKey, TValue>> CreateProcessingBlock<TKey, TValue>(
-        Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
-        int maxDegreeOfParallelism,
-        CancellationToken cancellationToken)
-        => new(
-            async kafkaMessage =>
-            {
-                await processor(kafkaMessage, cancellationToken);
-                return kafkaMessage;
-            },
-            new ExecutionDataflowBlockOptions
-            {
-                MaxDegreeOfParallelism = maxDegreeOfParallelism,
-                CancellationToken = cancellationToken,
-                SingleProducerConstrained = true
-            });
-
-    private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock<TKey, TValue>(IConsumer<TKey, TValue> consumer)
-        => new(
-            kafkaMessage =>
-            {
-                try
-                {
-                    consumer.StoreOffset(kafkaMessage);
-                }
-                catch (KafkaException) { /*maybe log*/ }
-            },
-            new ExecutionDataflowBlockOptions { SingleProducerConstrained = true });
 }
