@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.HighPerformance;
+﻿using CommunityToolkit.HighPerformance;
 
 namespace HighPerf;
 
@@ -16,8 +11,8 @@ internal class RefOfT
         public ref int GetRef()
             => ref someInt;
 
-        //public Ref<int> GetRef1()
-        //    => new Ref<int>
+        public Ref<int> GetRef1()
+            => new(ref someInt);
     }
 
 }
