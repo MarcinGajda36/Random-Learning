@@ -1,5 +1,5 @@
-﻿using Microsoft.Toolkit.HighPerformance.Buffers;
-using Microsoft.Toolkit.HighPerformance.Helpers;
+﻿using CommunityToolkit.HighPerformance.Buffers;
+using CommunityToolkit.HighPerformance.Helpers;
 using System;
 
 //This package has been deprecated as it is legacy and is no longer maintained.
