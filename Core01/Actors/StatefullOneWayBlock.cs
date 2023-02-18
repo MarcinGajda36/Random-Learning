@@ -21,7 +21,9 @@ public abstract class StatefullOneWayBlockBase<TState, TInput>
     protected abstract TState Operation(TState state, TInput input);
 
     private ActionBlock<TInput> CreateBlock(ExecutionDataflowBlockOptions? executionDataflowBlockOptions)
-        => new(input => state = Operation(state, input), executionDataflowBlockOptions ?? new());
+        => new(
+            input => state = Operation(state, input),
+            executionDataflowBlockOptions ?? new());
 
     public Task Completion
         => block.Completion;
@@ -40,8 +42,11 @@ public sealed class StatefullOneWayBlock<TState, TInput>
 {
     private readonly Func<TState, TInput, TState> operation;
 
-    public StatefullOneWayBlock(TState startingState, Func<TState, TInput, TState> operation)
-        : base(startingState)
+    public StatefullOneWayBlock(
+        TState startingState,
+        Func<TState, TInput, TState> operation,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
+        : base(startingState, executionDataflowBlockOptions)
         => this.operation = operation;
 
     protected override TState Operation(TState state, TInput input)
@@ -52,6 +57,7 @@ public static class StatefullOneWayBlock
 {
     public static StatefullOneWayBlock<TState, TInput> Create<TState, TInput>(
         TState startingState,
-        Func<TState, TInput, TState> operation)
-        => new(startingState, operation);
+        Func<TState, TInput, TState> operation,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
+        => new(startingState, operation, executionDataflowBlockOptions);
 }

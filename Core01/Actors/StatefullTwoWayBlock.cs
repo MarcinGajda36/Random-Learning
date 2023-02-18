@@ -10,20 +10,24 @@ public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
     private readonly TransformBlock<TInput, TOutput> block;
     private TState state;
 
-    public StatefulTwoWayBlockBase(TState startingState)
+    public StatefulTwoWayBlockBase(
+        TState startingState,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
     {
         state = startingState;
-        block = CreateBlock();
+        block = CreateBlock(executionDataflowBlockOptions);
     }
 
     protected abstract (TState, TOutput) Operation(TState state, TInput input);
 
-    private TransformBlock<TInput, TOutput> CreateBlock()
-        => new(input =>
-        {
-            (state, var output) = Operation(state, input);
-            return output;
-        });
+    private TransformBlock<TInput, TOutput> CreateBlock(ExecutionDataflowBlockOptions? executionDataflowBlockOptions)
+        => new(
+            input =>
+            {
+                (state, var output) = Operation(state, input);
+                return output;
+            },
+            executionDataflowBlockOptions ?? new());
 
     public Task Completion
         => block.Completion;
@@ -51,8 +55,11 @@ public sealed class StatefullTwoWayBlock<TState, TInput, TOutput>
 {
     private readonly Func<TState, TInput, (TState, TOutput)> operation;
 
-    public StatefullTwoWayBlock(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
-        : base(startingState)
+    public StatefullTwoWayBlock(
+        TState startingState,
+        Func<TState, TInput, (TState, TOutput)> operation,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
+        : base(startingState, executionDataflowBlockOptions)
         => this.operation = operation;
 
     protected override (TState, TOutput) Operation(TState state, TInput input)
@@ -63,8 +70,9 @@ public static class StatefullTwoWayBlock
 {
     public static StatefullTwoWayBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
         TState startingState,
-        Func<TState, TInput, (TState, TOutput)> operation)
-        => new(startingState, operation);
+        Func<TState, TInput, (TState, TOutput)> operation,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
+        => new(startingState, operation, executionDataflowBlockOptions);
 
     public static void Test()
     {
