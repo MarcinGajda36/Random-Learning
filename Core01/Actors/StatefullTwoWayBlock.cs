@@ -4,13 +4,13 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors;
 
-public abstract class StatefulTwoWayActorBase<TState, TInput, TOutput>
+public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
     : IPropagatorBlock<TInput, TOutput>
 {
     private readonly TransformBlock<TInput, TOutput> block;
     private TState state;
 
-    public StatefulTwoWayActorBase(TState startingState)
+    public StatefulTwoWayBlockBase(TState startingState)
     {
         state = startingState;
         block = CreateBlock();
@@ -46,12 +46,12 @@ public abstract class StatefulTwoWayActorBase<TState, TInput, TOutput>
         => ((IDataflowBlock)block).Fault(exception);
 }
 
-public sealed class StatefullTwoWayActor<TState, TInput, TOutput>
-    : StatefulTwoWayActorBase<TState, TInput, TOutput>
+public sealed class StatefullTwoWayBlock<TState, TInput, TOutput>
+    : StatefulTwoWayBlockBase<TState, TInput, TOutput>
 {
     private readonly Func<TState, TInput, (TState, TOutput)> operation;
 
-    public StatefullTwoWayActor(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
+    public StatefullTwoWayBlock(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
         : base(startingState)
         => this.operation = operation;
 
@@ -59,9 +59,9 @@ public sealed class StatefullTwoWayActor<TState, TInput, TOutput>
         => operation(state, input);
 }
 
-public static class StatefullTwoWayActor
+public static class StatefullTwoWayBlock
 {
-    public static StatefullTwoWayActor<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
+    public static StatefullTwoWayBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
         TState startingState,
         Func<TState, TInput, (TState, TOutput)> operation)
         => new(startingState, operation);
