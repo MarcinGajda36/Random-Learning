@@ -18,13 +18,13 @@ public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
         block = CreateBlock(executionDataflowBlockOptions);
     }
 
-    protected abstract (TState, TOutput) Operation(TState state, TInput input);
+    protected abstract Task<(TState, TOutput)> Operation(TState state, TInput input);
 
     private TransformBlock<TInput, TOutput> CreateBlock(ExecutionDataflowBlockOptions? executionDataflowBlockOptions)
         => new(
-            input =>
+            async input =>
             {
-                (state, var output) = Operation(state, input);
+                (state, var output) = await Operation(state, input);
                 return output;
             },
             executionDataflowBlockOptions ?? new());
@@ -53,16 +53,16 @@ public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
 public sealed class StatefullTwoWayBlock<TState, TInput, TOutput>
     : StatefulTwoWayBlockBase<TState, TInput, TOutput>
 {
-    private readonly Func<TState, TInput, (TState, TOutput)> operation;
+    private readonly Func<TState, TInput, Task<(TState, TOutput)>> operation;
 
     public StatefullTwoWayBlock(
         TState startingState,
-        Func<TState, TInput, (TState, TOutput)> operation,
+        Func<TState, TInput, Task<(TState, TOutput)>> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
         : base(startingState, executionDataflowBlockOptions)
         => this.operation = operation;
 
-    protected override (TState, TOutput) Operation(TState state, TInput input)
+    protected override Task<(TState, TOutput)> Operation(TState state, TInput input)
         => operation(state, input);
 }
 
@@ -70,9 +70,18 @@ public static class StatefullTwoWayBlock
 {
     public static StatefullTwoWayBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
         TState startingState,
-        Func<TState, TInput, (TState, TOutput)> operation,
+        Func<TState, TInput, Task<(TState, TOutput)>> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
         => new(startingState, operation, executionDataflowBlockOptions);
+
+    public static StatefullTwoWayBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
+        TState startingState,
+        Func<TState, TInput, (TState, TOutput)> operation,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
+        => new(
+            startingState,
+            (state, input) => Task.FromResult(operation(state, input)),
+            executionDataflowBlockOptions);
 
     public static void Test()
     {

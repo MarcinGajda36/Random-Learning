@@ -18,11 +18,11 @@ public abstract class StatefullOneWayBlockBase<TState, TInput>
         block = CreateBlock(executionDataflowBlockOptions);
     }
 
-    protected abstract TState Operation(TState state, TInput input);
+    protected abstract Task<TState> Operation(TState state, TInput input);
 
     private ActionBlock<TInput> CreateBlock(ExecutionDataflowBlockOptions? executionDataflowBlockOptions)
         => new(
-            input => state = Operation(state, input),
+            async input => state = await Operation(state, input),
             executionDataflowBlockOptions ?? new());
 
     public Task Completion
@@ -40,16 +40,16 @@ public abstract class StatefullOneWayBlockBase<TState, TInput>
 public sealed class StatefullOneWayBlock<TState, TInput>
     : StatefullOneWayBlockBase<TState, TInput>
 {
-    private readonly Func<TState, TInput, TState> operation;
+    private readonly Func<TState, TInput, Task<TState>> operation;
 
     public StatefullOneWayBlock(
         TState startingState,
-        Func<TState, TInput, TState> operation,
+        Func<TState, TInput, Task<TState>> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
         : base(startingState, executionDataflowBlockOptions)
         => this.operation = operation;
 
-    protected override TState Operation(TState state, TInput input)
+    protected override Task<TState> Operation(TState state, TInput input)
         => operation(state, input);
 }
 
@@ -57,7 +57,16 @@ public static class StatefullOneWayBlock
 {
     public static StatefullOneWayBlock<TState, TInput> Create<TState, TInput>(
         TState startingState,
-        Func<TState, TInput, TState> operation,
+        Func<TState, TInput, Task<TState>> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
         => new(startingState, operation, executionDataflowBlockOptions);
+
+    public static StatefullOneWayBlock<TState, TInput> Create<TState, TInput>(
+        TState startingState,
+        Func<TState, TInput, TState> operation,
+        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
+        => new(
+            startingState,
+            (state, input) => Task.FromResult(operation(state, input)),
+            executionDataflowBlockOptions);
 }
