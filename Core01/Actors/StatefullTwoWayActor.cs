@@ -4,7 +4,8 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors;
 
-public abstract class StatefulTwoWayActorBase<TState, TInput, TOutput> : IPropagatorBlock<TInput, TOutput>
+public abstract class StatefulTwoWayActorBase<TState, TInput, TOutput>
+    : IPropagatorBlock<TInput, TOutput>
 {
     private readonly TransformBlock<TInput, TOutput> block;
     private TState state;
@@ -20,8 +21,7 @@ public abstract class StatefulTwoWayActorBase<TState, TInput, TOutput> : IPropag
     private TransformBlock<TInput, TOutput> CreateBlock()
         => new(input =>
         {
-            var (newState, output) = Operation(state, input);
-            state = newState;
+            (state, var output) = Operation(state, input);
             return output;
         });
 
@@ -31,30 +31,23 @@ public abstract class StatefulTwoWayActorBase<TState, TInput, TOutput> : IPropag
     public void Complete()
         => block.Complete();
 
-    public TOutput? ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
-        => ((ISourceBlock<TOutput>)block).ConsumeMessage(messageHeader, target, out messageConsumed);
-
-    public void Fault(Exception exception)
-        => ((IDataflowBlock)block).Fault(exception);
-
     public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions)
         => block.LinkTo(target, linkOptions);
 
-    public DataflowMessageStatus OfferMessage(
-        DataflowMessageHeader messageHeader,
-        TInput messageValue,
-        ISourceBlock<TInput>? source,
-        bool consumeToAccept)
-        => ((ITargetBlock<TInput>)block).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
-
-    public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+    TOutput? ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
+        => ((ISourceBlock<TOutput>)block).ConsumeMessage(messageHeader, target, out messageConsumed);
+    void ISourceBlock<TOutput>.ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)block).ReleaseReservation(messageHeader, target);
-
-    public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+    bool ISourceBlock<TOutput>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)block).ReserveMessage(messageHeader, target);
+    DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput>? source, bool consumeToAccept)
+        => ((ITargetBlock<TInput>)block).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+    void IDataflowBlock.Fault(Exception exception)
+        => ((IDataflowBlock)block).Fault(exception);
 }
 
-public class StatefullTwoWayActor<TState, TInput, TOutput> : StatefulTwoWayActorBase<TState, TInput, TOutput>
+public sealed class StatefullTwoWayActor<TState, TInput, TOutput>
+    : StatefulTwoWayActorBase<TState, TInput, TOutput>
 {
     private readonly Func<TState, TInput, (TState, TOutput)> operation;
 
