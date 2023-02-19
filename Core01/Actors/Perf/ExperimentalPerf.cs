@@ -4,83 +4,83 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors.Perf;
 
-internal sealed class StateBag<TState>
+sealed class StateBox<TState>
 {
     public TState State { get; set; }
 
-    public StateBag(TState state)
+    public StateBox(TState state)
         => State = state;
 }
 
-internal struct StateInputBag<TState, TInput>
-{
-    public StateBag<TState> StateBag { get; }
-    public TInput Input { get; }
+readonly record struct StateInputBox<TState, TInput>(StateBox<TState> StateBag, TInput Input);
 
-    public StateInputBag(StateBag<TState> stateBag, TInput input)
-    {
-        StateBag = stateBag;
-        Input = input;
-    }
-}
-
-public sealed class ExperimentalStatefulOneWayActor<TState, TInput, TOperation>
+public sealed class ExperimentalStatefulOneWayBlock<TState, TInput, TOperation>
+    //: ITargetBlock<TInput>
     where TOperation : struct, IOperationWithoutOutput<TState, TInput>
 {
-    private readonly ActionBlock<StateInputBag<TState, TInput>> @operator;
-    private readonly StateBag<TState> stateBag;
+    private readonly ActionBlock<StateInputBox<TState, TInput>> @operator;
+    private readonly StateBox<TState> state;
 
-    public ExperimentalStatefulOneWayActor(TState startingState)
+    public ExperimentalStatefulOneWayBlock(TState startingState)
     {
-        stateBag = new(startingState);
+        state = new(startingState);
         @operator = CreateOperator();
     }
 
     public Task Completion => @operator.Completion;
 
-    private static ActionBlock<StateInputBag<TState, TInput>> CreateOperator()
+    private static ActionBlock<StateInputBox<TState, TInput>> CreateOperator()
         => new(static inputBag
             => inputBag.StateBag.State = default(TOperation).Execute(inputBag.StateBag.State, inputBag.Input));
 
-    public bool Enqueue(TInput input)
-        => @operator.Post(new(stateBag, input));
+    public bool Post(TInput input)
+        => @operator.Post(new(state, input));
+
+    public void Complete()
+        => @operator.Complete();
+
+    public void Fault(Exception exception)
+        => ((IDataflowBlock)@operator).Fault(exception);
 }
 
-public sealed class ExperimentalStatefulTwoWayActor<TState, TInput, TOutput, TOperation>
+public sealed class ExperimentalStatefulTwoWayBlock<TState, TInput, TOutput, TOperation>
     : ISourceBlock<TOutput>
     //: IPropagatorBlock<TInput, TOutput>
     where TOperation : struct, IOperationWithOutput<TState, TInput, TOutput>
 {
-    private readonly TransformBlock<StateInputBag<TState, TInput>, TOutput> @operator;
-    private readonly StateBag<TState> stateBag;
+    private readonly TransformBlock<StateInputBox<TState, TInput>, TOutput> @operator;
+    private readonly StateBox<TState> state;
 
-    public ExperimentalStatefulTwoWayActor(TState startingState)
+    public ExperimentalStatefulTwoWayBlock(TState startingState)
     {
-        stateBag = new(startingState);
+        state = new(startingState);
         @operator = CreateOperator();
     }
 
     public Task Completion => @operator.Completion;
 
-    private static TransformBlock<StateInputBag<TState, TInput>, TOutput> CreateOperator()
+    private static TransformBlock<StateInputBox<TState, TInput>, TOutput> CreateOperator()
         => new(static inputBag =>
         {
             (inputBag.StateBag.State, var output) = default(TOperation).Execute(inputBag.StateBag.State, inputBag.Input);
             return output;
         });
 
-    public bool Enqueue(TInput input)
-        => @operator.Post(new(stateBag, input));
+    public bool Post(TInput input)
+        => @operator.Post(new(state, input));
 
-    public void Complete() => @operator.Complete();
-    public TOutput? ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
-        => ((ISourceBlock<TOutput>)@operator).ConsumeMessage(messageHeader, target, out messageConsumed);
-    public void Fault(Exception exception)
-        => ((IDataflowBlock)@operator).Fault(exception);
+    public void Complete()
+        => @operator.Complete();
+
     public IDisposable LinkTo(ITargetBlock<TOutput> target, DataflowLinkOptions linkOptions)
         => @operator.LinkTo(target, linkOptions);
-    public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+
+    TOutput? ISourceBlock<TOutput>.ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target, out bool messageConsumed)
+        => ((ISourceBlock<TOutput>)@operator).ConsumeMessage(messageHeader, target, out messageConsumed);
+    void IDataflowBlock.Fault(Exception exception)
+        => ((IDataflowBlock)@operator).Fault(exception);
+    void ISourceBlock<TOutput>.ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)@operator).ReleaseReservation(messageHeader, target);
-    public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
+    bool ISourceBlock<TOutput>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)@operator).ReserveMessage(messageHeader, target);
 }
