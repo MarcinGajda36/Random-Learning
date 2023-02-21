@@ -36,51 +36,44 @@ class Pool<TValue> where TValue : class
     public Pool(int size, Func<TValue> factory)
     {
         this.factory = factory;
-        pool = new TValue[size + 1];
+        pool = new TValue[size];
     }
 
     public Lease Rent()
     {
-        while (true)
+        while (rentIndex != returnIndex)
         {
-            var toRent = rentIndex;
-            if (toRent == returnIndex)
+            int rentIdx = rentIndex;
+            int nextRentIndex = GetNextIndex(rentIdx);
+            if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
-                return new Lease(factory(), this);
+                Interlocked.CompareExchange(ref rentIndex, nextRentIndex, rentIdx);
+                return new(value, this);
             }
-            var nextToRent = toRent + 1;
-            if (nextToRent == pool.Length)
-            {
-                nextToRent = 0;
-            }
-            if (Interlocked.CompareExchange(ref rentIndex, nextToRent, toRent) == toRent)
-            {
-                var value = pool[toRent]!; // hmmm
-                pool[toRent] = null;
-                return new Lease(value, this);
-            }
+            Interlocked.CompareExchange(ref rentIndex, nextRentIndex, rentIdx);
         }
+        return new(factory(), this);
+    }
+
+    private int GetNextIndex(int current)
+    {
+        var next = current + 1;
+        if (next == pool.Length)
+        {
+            next = 0;
+        }
+
+        return next;
     }
 
     void Return(TValue value)
     {
-        while (true)
+        var current = returnIndex;
+        int next = GetNextIndex(current);
+        if (Interlocked.CompareExchange(ref pool[current], value, null) == null)
         {
-            var toReturn = returnIndex;
-            var nextToReturn = toReturn + 1;
-            if (nextToReturn == pool.Length)
-            {
-                nextToReturn = 0;
-            }
-            if (nextToReturn == rentIndex)
-            {
-                return;
-            }
-            if (Interlocked.CompareExchange(ref pool[toReturn], value, null) == null // Is this fine?
-                && Interlocked.CompareExchange(ref returnIndex, nextToReturn, toReturn) == toReturn)
-            {
-                return;
-            }
+            Interlocked.CompareExchange(ref returnIndex, next, current);
+            return;
         }
     }
 }
