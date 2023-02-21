@@ -36,7 +36,7 @@ class OptymisticPool<TValue> where TValue : class
     public OptymisticPool(int size, Func<TValue> factory)
     {
         this.factory = factory;
-        pool = new TValue[size];
+        pool = new TValue?[size];
     }
 
     public Lease Rent()
@@ -46,7 +46,7 @@ class OptymisticPool<TValue> where TValue : class
         {
             if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
-                Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
+                rentIndex = GetNextIndex(rentIdx);
                 return new(value, this);
             }
         }
@@ -71,7 +71,7 @@ class OptymisticPool<TValue> where TValue : class
         {
             if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
             {
-                Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
+                returnIndex = GetNextIndex(returnIdx);
                 return;
             }
         }
