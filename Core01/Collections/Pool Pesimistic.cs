@@ -2,7 +2,7 @@
 using System.Threading;
 
 namespace MarcinGajda.Collections;
-class LockingPool<TValue>
+class PesimisticPool<TValue>
 {
     public struct Lease : IDisposable
     {
@@ -11,11 +11,11 @@ class LockingPool<TValue>
             ? throw new ObjectDisposedException(nameof(Lease))
             : value;
 
-        readonly LockingPool<TValue> parent;
+        readonly PesimisticPool<TValue> parent;
         const int AfterDispose = 1;
         int isDisposed;
 
-        public Lease(TValue value, LockingPool<TValue> parent)
+        public Lease(TValue value, PesimisticPool<TValue> parent)
         {
             this.value = value;
             this.parent = parent;
@@ -35,7 +35,7 @@ class LockingPool<TValue>
     readonly TValue[] pool;
     volatile int available;
 
-    public LockingPool(int size, Func<TValue> factory)
+    public PesimisticPool(int size, Func<TValue> factory)
     {
         this.factory = factory;
         pool = new TValue[size];

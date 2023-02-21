@@ -2,16 +2,16 @@
 using System.Threading;
 
 namespace MarcinGajda.Collections;
-class Pool<TValue> where TValue : class
+class OptymisticPool<TValue> where TValue : class
 {
     public struct Lease : IDisposable
     {
         TValue? value;
         public TValue Value => value ?? throw new ObjectDisposedException(nameof(Lease));
 
-        readonly Pool<TValue> parent;
+        readonly OptymisticPool<TValue> parent;
 
-        public Lease(TValue value, Pool<TValue> parent)
+        public Lease(TValue value, OptymisticPool<TValue> parent)
         {
             this.value = value;
             this.parent = parent;
@@ -33,7 +33,7 @@ class Pool<TValue> where TValue : class
     volatile int returnIndex;
     volatile int rentIndex;
 
-    public Pool(int size, Func<TValue> factory)
+    public OptymisticPool(int size, Func<TValue> factory)
     {
         this.factory = factory;
         pool = new TValue[size];
