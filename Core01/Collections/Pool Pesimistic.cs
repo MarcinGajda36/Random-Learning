@@ -23,8 +23,8 @@ class LockingPool<TValue>
 
         public void Dispose()
         {
-            var temporary = Interlocked.Exchange(ref isDisposed, AfterDispose);
-            if (temporary != AfterDispose)
+            var previousIsDisposed = Interlocked.Exchange(ref isDisposed, AfterDispose);
+            if (previousIsDisposed != AfterDispose)
             {
                 parent.Return(value);
             }
