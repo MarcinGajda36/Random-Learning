@@ -6,10 +6,9 @@ class OptymisticPool<TValue> where TValue : class
 {
     public struct Lease : IDisposable
     {
+        readonly OptymisticPool<TValue> parent;
         TValue? value;
         public TValue Value => value ?? throw new ObjectDisposedException(nameof(Lease));
-
-        readonly OptymisticPool<TValue> parent;
 
         public Lease(TValue value, OptymisticPool<TValue> parent)
         {
