@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace MarcinGajda.Collections;
+namespace MarcinGajda.Synchronizers;
 class PesimisticPool<TValue>
 {
     public struct Lease : IDisposable
