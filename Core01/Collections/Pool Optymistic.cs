@@ -41,16 +41,14 @@ class Pool<TValue> where TValue : class
 
     public Lease Rent()
     {
-        while (rentIndex != returnIndex)
+        int rentIdx;
+        while ((rentIdx = rentIndex) != returnIndex)
         {
-            int rentIdx = rentIndex;
-            int nextRentIndex = GetNextIndex(rentIdx);
             if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
-                Interlocked.CompareExchange(ref rentIndex, nextRentIndex, rentIdx);
+                Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
                 return new(value, this);
             }
-            Interlocked.CompareExchange(ref rentIndex, nextRentIndex, rentIdx);
         }
         return new(factory(), this);
     }
@@ -60,7 +58,7 @@ class Pool<TValue> where TValue : class
         var next = current + 1;
         if (next == pool.Length)
         {
-            next = 0;
+            return 0;
         }
 
         return next;
@@ -68,12 +66,24 @@ class Pool<TValue> where TValue : class
 
     void Return(TValue value)
     {
-        var current = returnIndex;
-        int next = GetNextIndex(current);
-        if (Interlocked.CompareExchange(ref pool[current], value, null) == null)
+        int returnIdx;
+        while ((returnIdx = returnIndex) != LastIndexBefore(rentIndex))
         {
-            Interlocked.CompareExchange(ref returnIndex, next, current);
-            return;
+            if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
+            {
+                Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
+                return;
+            }
         }
+    }
+
+    private int LastIndexBefore(int before)
+    {
+        var previous = before - 1;
+        if (previous < 0)
+        {
+            return pool.Length - 1;
+        }
+        return previous;
     }
 }
