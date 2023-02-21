@@ -2,16 +2,16 @@
 using System.Threading;
 
 namespace MarcinGajda.Collections;
-class Pool<T> where T : class
+class Pool<TValue> where TValue : class
 {
     public struct Lease : IDisposable
     {
-        T? value;
-        public T Value => value ?? throw new ObjectDisposedException(nameof(Lease));
+        TValue? value;
+        public TValue Value => value ?? throw new ObjectDisposedException(nameof(Lease));
 
-        readonly Pool<T> parent;
+        readonly Pool<TValue> parent;
 
-        public Lease(T value, Pool<T> parent)
+        public Lease(TValue value, Pool<TValue> parent)
         {
             this.value = value;
             this.parent = parent;
@@ -27,44 +27,56 @@ class Pool<T> where T : class
         }
     }
 
-    readonly Func<T> factory;
-    readonly T?[] pool;
+    readonly Func<TValue> factory;
+    readonly TValue?[] pool;
 
-    volatile int available;
+    volatile int returnIndex;
+    volatile int rentIndex;
 
-    public Pool(int size, Func<T> factory)
+    public Pool(int size, Func<TValue> factory)
     {
         this.factory = factory;
-        pool = new T[size];
+        pool = new TValue[size];
     }
 
     public Lease Rent()
     {
         while (true)
         {
-            var current = available;
-            if (current < 1)
+            var toRent = rentIndex;
+            if (toRent == returnIndex)
             {
                 return new Lease(factory(), this);
             }
-            var next = current - 1;
-            if (Interlocked.CompareExchange(ref available, next, current) == current
-                && Interlocked.Exchange(ref pool[current], null) is T oryginal) //TODO is it safe?
+            var nextToRent = toRent + 1;
+            if (nextToRent == pool.Length)
             {
-                return new Lease(oryginal, this);
+                nextToRent = 0;
+            }
+            if (Interlocked.CompareExchange(ref returnIndex, nextToRent, toRent) == toRent)
+            {
+                var value = pool[toRent]!;
+                pool[toRent] = null;
+                return new Lease(value, this);
             }
         }
     }
 
-    void Return(T toReturn)
+    void Return(TValue toReturn) // TODO 
     {
-        if (available == pool.Length)
+        while (true)
         {
-            return;
+            var current = returnIndex;
+            if (current == pool.Length - 1)
+            {
+                return;
+            }
+            var next = current + 1;
+            if (Interlocked.CompareExchange(ref pool[current], toReturn, null) == null
+                && Interlocked.CompareExchange(ref returnIndex, next, current) == current)
+            {
+                return;
+            }
         }
-        var current = available;
-        var next = current + 1;
-        pool[current] = toReturn;
-        Interlocked.CompareExchange(ref available, next, current);
     }
 }
