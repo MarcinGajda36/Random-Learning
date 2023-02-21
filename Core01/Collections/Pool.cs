@@ -53,7 +53,7 @@ class Pool<TValue> where TValue : class
             {
                 nextToRent = 0;
             }
-            if (Interlocked.CompareExchange(ref returnIndex, nextToRent, toRent) == toRent)
+            if (Interlocked.CompareExchange(ref rentIndex, nextToRent, toRent) == toRent)
             {
                 var value = pool[toRent]!;
                 pool[toRent] = null;
