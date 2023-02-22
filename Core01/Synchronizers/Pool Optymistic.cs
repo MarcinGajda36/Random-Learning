@@ -40,6 +40,7 @@ class OptymisticPool<TValue> where TValue : class
 
     public Lease Rent()
     {
+        SpinWait spinWait = default;
         int rentIdx;
         while ((rentIdx = rentIndex) != returnIndex)
         {
@@ -48,6 +49,7 @@ class OptymisticPool<TValue> where TValue : class
                 rentIndex = GetNextIndex(rentIdx);
                 return new(value, this);
             }
+            spinWait.SpinOnce();
         }
         return new(factory(), this);
     }
@@ -65,6 +67,7 @@ class OptymisticPool<TValue> where TValue : class
 
     void Return(TValue value)
     {
+        SpinWait spinWait = default;
         int returnIdx;
         while ((returnIdx = returnIndex) != LastIndexBefore(rentIndex))
         {
@@ -73,6 +76,7 @@ class OptymisticPool<TValue> where TValue : class
                 returnIndex = GetNextIndex(returnIdx);
                 return;
             }
+            spinWait.SpinOnce();
         }
     }
 
