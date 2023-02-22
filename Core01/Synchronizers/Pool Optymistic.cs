@@ -2,15 +2,15 @@
 using System.Threading;
 
 namespace MarcinGajda.Synchronizers;
-class OptymisticPool<TValue> where TValue : class
+class SpiningPool<TValue> where TValue : class
 {
     public struct Lease : IDisposable
     {
-        readonly OptymisticPool<TValue> parent;
+        readonly SpiningPool<TValue> parent;
         TValue? value;
         public TValue Value => value ?? throw new ObjectDisposedException(nameof(Lease));
 
-        public Lease(TValue value, OptymisticPool<TValue> parent)
+        public Lease(TValue value, SpiningPool<TValue> parent)
         {
             this.value = value;
             this.parent = parent;
@@ -32,7 +32,7 @@ class OptymisticPool<TValue> where TValue : class
     volatile int returnIndex;
     volatile int rentIndex;
 
-    public OptymisticPool(int size, Func<TValue> factory)
+    public SpiningPool(int size, Func<TValue> factory)
     {
         this.factory = factory;
         pool = new TValue?[size];
