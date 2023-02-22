@@ -82,11 +82,10 @@ class OptymisticPool<TValue> where TValue : class
 
     private int LastIndexBefore(int before)
     {
-        var previous = before - 1;
-        if (previous < 0)
+        if (before == 0)
         {
             return pool.Length - 1;
         }
-        return previous;
+        return before - 1;
     }
 }
