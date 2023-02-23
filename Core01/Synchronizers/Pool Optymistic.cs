@@ -46,7 +46,7 @@ class SpiningPool<TValue> where TValue : class
         {
             if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
-                rentIndex = GetNextIndex(rentIdx);
+                Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
                 return new(value, this);
             }
             spinWait.SpinOnce();
@@ -73,7 +73,7 @@ class SpiningPool<TValue> where TValue : class
         {
             if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
             {
-                returnIndex = GetNextIndex(returnIdx);
+                Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
                 return;
             }
             spinWait.SpinOnce();
