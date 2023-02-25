@@ -1,16 +1,4 @@
-﻿using MarcinGajda.AsyncDispose_;
-using MarcinGajda.Collections;
-using MarcinGajda.ContractsT;
-using MarcinGajda.Copy;
-using MarcinGajda.DataflowTests;
-using MarcinGajda.Fs;
-using MarcinGajda.PeriodicCheckers;
-using MarcinGajda.RXTests;
-using MarcinGajda.Structs;
-using MarcinGajda.WORK_observable;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -19,6 +7,19 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using MarcinGajda.AsyncDispose_;
+using MarcinGajda.Collections;
+using MarcinGajda.ContractsT;
+using MarcinGajda.Copy;
+using MarcinGajda.DataflowTests;
+using MarcinGajda.Fs;
+using MarcinGajda.PeriodicCheckers;
+using MarcinGajda.RXTests;
+using MarcinGajda.Structs;
+using MarcinGajda.Synchronizers.Pooling;
+using MarcinGajda.WORK_observable;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace MarcinGajda;
 
@@ -37,8 +38,9 @@ internal class Program
 
     public static async Task Main()
     {
-        _ = TestClosure();
+        PoolTest();
         await Task.Delay(-1);
+        _ = TestClosure();
         await Observables.LinqQueryTests();
 
         await TestEviction();
@@ -99,6 +101,17 @@ internal class Program
         (_, _, _, int pop1, _, int pop2) = QueryCityDataForYears("New York City", 1960, 2010);
         Console.WriteLine($"Population change, 1960 to 2010: {pop2 - pop1:N0}");
         ParrallelTests();
+    }
+
+    private static void PoolTest()
+    {
+        var pool = new ThreadStaticPool<object>(() => new object());
+        var lease1 = pool.Rent();
+        var lease2 = pool.Rent();
+        lease1.Dispose();
+        var lease3 = pool.Rent();
+        lease2.Dispose();
+        lease3.Dispose();
     }
 
     public static int TestClosure()
