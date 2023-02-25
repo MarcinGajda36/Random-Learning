@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronizers.PerKey;
 
 public enum OperationType
 {

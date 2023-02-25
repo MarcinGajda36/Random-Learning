@@ -4,7 +4,7 @@ using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronizers.PerKey;
 
 public sealed class PerKeySynchronizer<TKey>
     where TKey : notnull
