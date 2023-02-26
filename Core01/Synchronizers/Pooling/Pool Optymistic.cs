@@ -18,10 +18,9 @@ public class SpiningPool<TValue> where TValue : class
 
         public void Dispose()
         {
-            var temporary = Interlocked.Exchange(ref value, null);
-            if (temporary is not null)
+            if (Interlocked.Exchange(ref value, null) is TValue noNull)
             {
-                parent.Return(temporary);
+                parent.Return(noNull);
             }
         }
     }
@@ -40,15 +39,16 @@ public class SpiningPool<TValue> where TValue : class
 
     public Lease Rent()
     {
+        SpinWait spinWait = default;
         int rentIdx;
         while ((rentIdx = rentIndex) != returnIndex)
         {
+            Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
             if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
-                Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
                 return new(value, this);
             }
-            Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
+            spinWait.SpinOnce();
         }
         return new(factory(), this);
     }
@@ -66,15 +66,16 @@ public class SpiningPool<TValue> where TValue : class
 
     void Return(TValue value)
     {
+        SpinWait spinWait = default;
         int returnIdx;
         while ((returnIdx = returnIndex) != LastIndexBefore(rentIndex))
         {
-            if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
+            Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
+            if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) is null)
             {
-                Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
                 return;
             }
-            Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
+            spinWait.SpinOnce();
         }
     }
 

@@ -1,0 +1,26 @@
+
+size 64, no try-finally, no spinWait
+
+|   Method |   Rents | NumberOfThreads |         Mean |      Error |      StdDev |       Median | Rank | Allocated |
+|--------- |-------- |---------------- |-------------:|-----------:|------------:|-------------:|-----:|----------:|
+| Spinning |  250000 |               1 |     9.605 ms |  0.0844 ms |   0.0748 ms |     9.575 ms |    1 |   1.25 KB |
+| Spinning | 1000000 |               1 |    36.859 ms |  0.4702 ms |   0.4398 ms |    36.915 ms |    2 |   1.25 KB |
+| Spinning |  250000 |               2 |    76.724 ms |  2.3602 ms |   6.9591 ms |    76.778 ms |    3 |   1.32 KB |
+| Spinning | 1000000 |               2 |   304.577 ms | 10.1733 ms |  29.9961 ms |   308.643 ms |    4 |   1.34 KB |
+| Spinning |  250000 |               8 |   557.136 ms | 10.8025 ms |  20.8128 ms |   554.981 ms |    5 |   1.72 KB |
+| Spinning |  250000 |              16 | 1,136.805 ms | 22.6641 ms |  57.2752 ms | 1,126.689 ms |    6 |   1.79 KB |
+| Spinning | 1000000 |               8 | 2,228.262 ms | 43.6075 ms |  80.8293 ms | 2,202.531 ms |    7 |   3.88 KB |
+| Spinning | 1000000 |              16 | 4,655.302 ms | 99.3592 ms | 292.9629 ms | 4,565.073 ms |    8 |    2.4 KB |
+
+size 64, no idx++ first, spinWait
+
+|   Method |   Rents | NumberOfThreads |        Mean |     Error |     StdDev | Rank | Allocated |
+|--------- |-------- |---------------- |------------:|----------:|-----------:|-----:|----------:|
+| Spinning |  250000 |               1 |    10.44 ms |  0.202 ms |   0.240 ms |    1 |   1.25 KB |
+| Spinning | 1000000 |               1 |    38.80 ms |  0.486 ms |   0.455 ms |    2 |   1.25 KB |
+| Spinning |  250000 |               2 |    54.45 ms |  1.876 ms |   5.531 ms |    3 |   1.32 KB |
+| Spinning | 1000000 |               2 |   220.27 ms |  7.755 ms |  22.866 ms |    4 |   1.32 KB |
+| Spinning |  250000 |               8 |   323.48 ms |  6.321 ms |  15.266 ms |    5 |   2.52 KB |
+| Spinning |  250000 |              16 |   669.40 ms | 13.294 ms |  27.455 ms |    6 |   4.53 KB |
+| Spinning | 1000000 |               8 | 1,345.46 ms | 30.492 ms |  89.905 ms |    7 |   5.77 KB |
+| Spinning | 1000000 |              16 | 2,687.00 ms | 61.581 ms | 181.573 ms |    8 |   7.37 KB |

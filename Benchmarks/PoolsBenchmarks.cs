@@ -17,7 +17,7 @@ public class PoolsBenchmarks
     record ThreadParam<TPool, TLease>(TPool Pool, Func<TPool, TLease> Rent, int N)
         where TLease : struct, IDisposable;
 
-    [Params(100_000, 1_000_000)]
+    [Params(250_000, 1_000_000)]
     public int Rents { get; set; }
 
     [Params(1, 2, 8, 16)]
@@ -25,17 +25,17 @@ public class PoolsBenchmarks
 
     Thread[]? threads;
 
-    [IterationSetup(Target = nameof(ThreadStatic))]
-    public void SetupThreadStatic()
-    {
-        Setup<ThreadStaticPool<RandomType>, ThreadStaticPool<RandomType>.Lease>();
-    }
+    //[IterationSetup(Target = nameof(ThreadStatic))]
+    //public void SetupThreadStatic()
+    //{
+    //    Setup<ThreadStaticPool<RandomType>, ThreadStaticPool<RandomType>.Lease>();
+    //}
 
-    [IterationSetup(Target = nameof(Locking))]
-    public void SetupLocking()
-    {
-        Setup<LockingPool<RandomType>, LockingPool<RandomType>.Lease>();
-    }
+    //[IterationSetup(Target = nameof(Locking))]
+    //public void SetupLocking()
+    //{
+    //    Setup<LockingPool<RandomType>, LockingPool<RandomType>.Lease>();
+    //}
 
     [IterationSetup(Target = nameof(Spinning))]
     public void SetupSpinning()
@@ -73,12 +73,12 @@ public class PoolsBenchmarks
         Array.ForEach(threads, thread => thread.Join());
     }
 
-    [Benchmark]
-    public void ThreadStatic()
-    {
-        var pool = new ThreadStaticPool<RandomType>(createRandomType);
-        Test(pool, static pool => pool.Rent());
-    }
+    //[Benchmark]
+    //public void ThreadStatic()
+    //{
+    //    var pool = new ThreadStaticPool<RandomType>(createRandomType);
+    //    Test(pool, static pool => pool.Rent());
+    //}
 
     [Benchmark]
     public void Spinning()
@@ -88,10 +88,10 @@ public class PoolsBenchmarks
     }
 
 
-    [Benchmark]
-    public void Locking()
-    {
-        var pool = new LockingPool<RandomType>(64, createRandomType);
-        Test(pool, static pool => pool.Rent());
-    }
+    //[Benchmark]
+    //public void Locking()
+    //{
+    //    var pool = new LockingPool<RandomType>(64, createRandomType);
+    //    Test(pool, static pool => pool.Rent());
+    //}
 }
