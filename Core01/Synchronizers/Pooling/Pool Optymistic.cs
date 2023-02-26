@@ -40,22 +40,15 @@ public class SpiningPool<TValue> where TValue : class
 
     public Lease Rent()
     {
-        SpinWait spin = default;
         int rentIdx;
         while ((rentIdx = rentIndex) != returnIndex)
         {
-            try
-            {
-                if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
-                {
-                    return new(value, this);
-                }
-            }
-            finally
+            if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
                 Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
+                return new(value, this);
             }
-            spin.SpinOnce();
+            Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
         }
         return new(factory(), this);
     }
@@ -73,22 +66,15 @@ public class SpiningPool<TValue> where TValue : class
 
     void Return(TValue value)
     {
-        SpinWait spin = default;
         int returnIdx;
         while ((returnIdx = returnIndex) != LastIndexBefore(rentIndex))
         {
-            try
-            {
-                if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
-                {
-                    return;
-                }
-            }
-            finally
+            if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
             {
                 Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
+                return;
             }
-            spin.SpinOnce();
+            Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
         }
     }
 
