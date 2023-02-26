@@ -72,3 +72,19 @@ Static 8
 |      Locking | 250000 |              16 | 232.971 ms |  4.6269 ms |  4.5443 ms |   10 |    1656 B |
 |     Spinning | 250000 |               8 | 317.769 ms | 14.3166 ms | 41.9882 ms |   11 |    1760 B |
 |     Spinning | 250000 |              16 | 837.265 ms | 22.1539 ms | 65.3214 ms |   12 |    4448 B |
+
+Spinning 64 - try+finally+spin
+Locking 64
+Static 8
+
+|       Method |   Rents | Threads |         Mean |      Error |       StdDev | Rank | Allocated |
+|------------- |-------- |-------- |-------------:|-----------:|-------------:|-----:|----------:|
+| ThreadStatic | 2500000 |       1 |     88.96 ms |   1.214 ms |     0.948 ms |    1 |     896 B |
+|      Locking | 2500000 |       1 |     98.41 ms |   0.438 ms |     0.342 ms |    2 |    1288 B |
+| ThreadStatic | 2500000 |       8 |     99.01 ms |   1.957 ms |     4.764 ms |    2 |    2184 B |
+|     Spinning | 2500000 |       1 |    105.80 ms |   0.992 ms |     0.879 ms |    3 |    1288 B |
+| ThreadStatic | 2500000 |      32 |    392.67 ms |   7.394 ms |     7.911 ms |    4 |    6600 B |
+|      Locking | 2500000 |       8 |  1,944.91 ms |  38.760 ms |    75.598 ms |    5 |    1456 B |
+|     Spinning | 2500000 |       8 |  3,942.89 ms | 141.961 ms |   418.576 ms |    6 |   11416 B |
+|      Locking | 2500000 |      32 |  5,778.27 ms |  81.615 ms |    76.342 ms |    7 |    2080 B |
+|     Spinning | 2500000 |      32 | 19,179.32 ms | 378.036 ms | 1,028.474 ms |    8 |   54040 B |

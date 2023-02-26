@@ -14,14 +14,14 @@ public class PoolsBenchmarks
     class RandomType { public int X { get; set; } }
     readonly Func<RandomType> createRandomType = () => new RandomType { X = 5 };
 
-    record ThreadParam<TPool, TLease>(TPool Pool, Func<TPool, TLease> Rent, int N)
+    record ThreadParam<TPool, TLease>(TPool Pool, Func<TPool, TLease> Rent, Action<TLease> DoSomething, int N)
         where TLease : struct, IDisposable;
 
-    [Params(250_000)]
+    [Params(2_500_000)]
     public int Rents { get; set; }
 
-    [Params(1, 2, 8, 16)]
-    public int NumberOfThreads { get; set; }
+    [Params(1, 8, 32)]
+    public int Threads { get; set; }
 
     Thread[]? threads;
 
@@ -46,8 +46,8 @@ public class PoolsBenchmarks
     public void Setup<TPool, TLease>()
         where TLease : struct, IDisposable
     {
-        threads = new Thread[NumberOfThreads];
-        for (int index = 0; index < NumberOfThreads; index++)
+        threads = new Thread[Threads];
+        for (int index = 0; index < Threads; index++)
         {
             var thread = new Thread(pool =>
             {
@@ -55,16 +55,17 @@ public class PoolsBenchmarks
                 for (int i = 0; i < typedPool.N; i++)
                 {
                     using var lease = typedPool.Rent(typedPool.Pool);
+                    typedPool.DoSomething(lease);
                 }
             });
             threads[index] = thread;
         }
     }
 
-    public void Test<TPool, TLease>(TPool pool, Func<TPool, TLease> rent)
+    public void Test<TPool, TLease>(TPool pool, Func<TPool, TLease> rent, Action<TLease> doSomething)
         where TLease : struct, IDisposable
     {
-        var threadParam = new ThreadParam<TPool, TLease>(pool, rent, Rents);
+        var threadParam = new ThreadParam<TPool, TLease>(pool, rent, doSomething, Rents);
         for (int index = 0; index < threads!.Length; index++)
         {
             threads[index].Start(threadParam);
@@ -77,20 +78,20 @@ public class PoolsBenchmarks
     public void ThreadStatic()
     {
         var pool = new ThreadStaticPool<RandomType>(createRandomType);
-        Test(pool, static pool => pool.Rent());
+        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 
     [Benchmark]
     public void Spinning()
     {
         var pool = new SpiningPool<RandomType>(64, createRandomType);
-        Test(pool, static pool => pool.Rent());
+        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 
     [Benchmark]
     public void Locking()
     {
         var pool = new LockingPool<RandomType>(64, createRandomType);
-        Test(pool, static pool => pool.Rent());
+        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 }
