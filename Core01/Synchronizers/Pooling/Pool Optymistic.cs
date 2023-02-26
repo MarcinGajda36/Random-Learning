@@ -2,7 +2,7 @@
 using System.Threading;
 
 namespace MarcinGajda.Synchronizers.Pooling;
-class SpiningPool<TValue> where TValue : class
+public class SpiningPool<TValue> where TValue : class
 {
     public struct Lease : IDisposable
     {

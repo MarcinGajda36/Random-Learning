@@ -2,7 +2,7 @@
 using System.Threading;
 
 namespace MarcinGajda.Synchronizers.Pooling;
-class LockingPool<TValue>
+public class LockingPool<TValue>
 {
     public struct Lease : IDisposable
     {

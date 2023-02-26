@@ -1,8 +1,8 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using MarcinGajda.RXTests;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 
 namespace Benchmarks;
 
