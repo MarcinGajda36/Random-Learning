@@ -23,8 +23,7 @@ public class LockingPool<TValue>
 
         public void Dispose()
         {
-            var previousIsDisposed = Interlocked.Exchange(ref isDisposed, AfterDispose);
-            if (previousIsDisposed != AfterDispose)
+            if (Interlocked.Exchange(ref isDisposed, AfterDispose) != AfterDispose)
             {
                 parent.Return(value);
             }
@@ -56,7 +55,7 @@ public class LockingPool<TValue>
             {
                 return new(factory(), this);
             }
-            available -= 1;
+            --available;
             var toRent = pool[available];
             return new(toRent, this);
         }
@@ -78,7 +77,7 @@ public class LockingPool<TValue>
                 return;
             }
             pool[available] = toReturn;
-            available += 1;
+            ++available;
         }
     }
 }

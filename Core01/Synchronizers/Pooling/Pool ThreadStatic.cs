@@ -23,8 +23,7 @@ public class ThreadStaticPool<TValue>
 
         public void Dispose()
         {
-            var previousIsDisposed = Interlocked.Exchange(ref isDisposed, AfterDispose);
-            if (previousIsDisposed != AfterDispose)
+            if (Interlocked.Exchange(ref isDisposed, AfterDispose) != AfterDispose)
             {
                 parent.Return(value);
             }

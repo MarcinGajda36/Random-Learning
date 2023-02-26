@@ -12,7 +12,7 @@ size 64, no try-finally, no spinWait
 | Spinning | 1000000 |               8 | 2,228.262 ms | 43.6075 ms |  80.8293 ms | 2,202.531 ms |    7 |   3.88 KB |
 | Spinning | 1000000 |              16 | 4,655.302 ms | 99.3592 ms | 292.9629 ms | 4,565.073 ms |    8 |    2.4 KB |
 
-size 64, no idx++ first, spinWait
+size 64, increase index first, spinWait
 
 |   Method |   Rents | NumberOfThreads |        Mean |     Error |     StdDev | Rank | Allocated |
 |--------- |-------- |---------------- |------------:|----------:|-----------:|-----:|----------:|
@@ -24,3 +24,13 @@ size 64, no idx++ first, spinWait
 | Spinning |  250000 |              16 |   669.40 ms | 13.294 ms |  27.455 ms |    6 |   4.53 KB |
 | Spinning | 1000000 |               8 | 1,345.46 ms | 30.492 ms |  89.905 ms |    7 |   5.77 KB |
 | Spinning | 1000000 |              16 | 2,687.00 ms | 61.581 ms | 181.573 ms |    8 |   7.37 KB |
+
+
+size 64, increase index in finally, spinWait
+
+|   Method |  Rents | NumberOfThreads |      Mean |     Error |    StdDev | Rank | Allocated |
+|--------- |------- |---------------- |----------:|----------:|----------:|-----:|----------:|
+| Spinning | 250000 |               1 |  10.55 ms |  0.149 ms |  0.124 ms |    1 |   1.25 KB |
+| Spinning | 250000 |               2 |  43.64 ms |  2.293 ms |  6.725 ms |    2 |   1.34 KB |
+| Spinning | 250000 |               8 | 335.08 ms | 13.451 ms | 39.660 ms |    3 |   2.09 KB |
+| Spinning | 250000 |              16 | 819.35 ms | 16.342 ms | 45.554 ms |    4 |   3.73 KB |
