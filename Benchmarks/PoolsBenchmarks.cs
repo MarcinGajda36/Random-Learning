@@ -20,7 +20,7 @@ public class PoolsBenchmarks
     [Params(100_000, 1_000_000)]
     public int Rents { get; set; }
 
-    [Params(1, 2, 8, 128)]
+    [Params(1, 2, 8, 16)]
     public int NumberOfThreads { get; set; }
 
     Thread[]? threads;
@@ -35,6 +35,12 @@ public class PoolsBenchmarks
     public void SetupLocking()
     {
         Setup<LockingPool<RandomType>, LockingPool<RandomType>.Lease>();
+    }
+
+    [IterationSetup(Target = nameof(Spinning))]
+    public void SetupSpinning()
+    {
+        Setup<SpiningPool<RandomType>, SpiningPool<RandomType>.Lease>();
     }
 
     public void Setup<TPool, TLease>()
@@ -74,8 +80,12 @@ public class PoolsBenchmarks
         Test(pool, static pool => pool.Rent());
     }
 
-    //[Benchmark]
-    //public void Spinning()
+    [Benchmark]
+    public void Spinning()
+    {
+        var pool = new SpiningPool<RandomType>(64, createRandomType);
+        Test(pool, static pool => pool.Rent());
+    }
 
 
     [Benchmark]
