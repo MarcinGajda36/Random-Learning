@@ -4,6 +4,25 @@ using System.Reactive.Disposables;
 
 namespace MarcinGajda.Structs
 {
+    public readonly record struct Min<T>(T Current)
+    {
+        public IComparer<T>? Comparer { get; init; }
+
+        public Min<T> Compare(T next)
+        {
+            var comparer = Comparer ?? Comparer<T>.Default;
+            return comparer.Compare(Current, next) > 0
+                ? this with { Current = next }
+                : this;
+        }
+    }
+
+    public static class Min
+    {
+        public static Min<T> Create<T>(T initial, IComparer<T>? comparer = null)
+            => new(initial) { Comparer = comparer };
+    }
+
     public struct MutationsTests
     {
         public int X { get; set; }
