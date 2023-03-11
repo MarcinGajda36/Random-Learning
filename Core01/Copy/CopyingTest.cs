@@ -21,7 +21,7 @@ namespace MarcinGajda.Copy
             await source.CopyToAsync(destination);
         }
 
-        public static void CopyFileSync(string sourcePath, string destinationPath) 
+        public static void CopyFileSync(string sourcePath, string destinationPath)
             => File.Copy(sourcePath, destinationPath);
     }
 }

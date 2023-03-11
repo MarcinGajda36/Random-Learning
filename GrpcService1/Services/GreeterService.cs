@@ -1,6 +1,6 @@
+using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace GrpcService1.Services
 {

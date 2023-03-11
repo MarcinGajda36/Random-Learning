@@ -1,8 +1,8 @@
-﻿using Confluent.Kafka;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Confluent.Kafka;
 
 namespace MarcinGajda.Kafka;
 public partial class KafkaFactory

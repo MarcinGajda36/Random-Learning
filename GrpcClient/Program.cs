@@ -1,8 +1,8 @@
-﻿using Grpc.Core;
+﻿using System;
+using System.Threading.Tasks;
+using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcService1;
-using System;
-using System.Threading.Tasks;
 
 namespace GrpcClient
 {

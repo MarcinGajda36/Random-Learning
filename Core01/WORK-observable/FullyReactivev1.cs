@@ -1,11 +1,11 @@
-﻿using LanguageExt;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
+using LanguageExt;
 
 
 namespace MarcinGajda.WORK_observable
@@ -18,7 +18,7 @@ namespace MarcinGajda.WORK_observable
 
         private readonly string contextId = "";
 
-        public NotifierHub1(NotifierHubContext1 notifierHubContext1) 
+        public NotifierHub1(NotifierHubContext1 notifierHubContext1)
             => _notifierHubContext1 = notifierHubContext1;
 
         public void OnExit()

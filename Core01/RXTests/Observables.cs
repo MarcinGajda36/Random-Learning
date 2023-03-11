@@ -1,5 +1,4 @@
-﻿using LanguageExt;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -13,6 +12,7 @@ using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using LanguageExt;
 
 namespace MarcinGajda.RXTests
 {

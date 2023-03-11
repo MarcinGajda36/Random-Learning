@@ -60,10 +60,10 @@ namespace MarcinGajda.Collections
     public static class WeakTableCache<T>
         where T : class, new()
     {
-        private static readonly ConditionalWeakTable<string, T> LangDictionaryCache 
+        private static readonly ConditionalWeakTable<string, T> LangDictionaryCache
             = new ConditionalWeakTable<string, T>();
 
-        public static T GetOrAdd(string key, Func<string, T> valueFactory) 
+        public static T GetOrAdd(string key, Func<string, T> valueFactory)
             => LangDictionaryCache.GetValue(key, k => valueFactory(k));
     }
 }

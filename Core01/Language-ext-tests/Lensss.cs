@@ -1,6 +1,6 @@
-﻿using LanguageExt;
+﻿using System;
+using LanguageExt;
 using LanguageExt.ClassInstances;
-using System;
 using static LanguageExt.Prelude;
 
 namespace MarcinGajda.Language_ext_tests

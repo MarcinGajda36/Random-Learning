@@ -1,15 +1,15 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace MarcinGajda.DataflowTests
 {
     public class DataflowTests
     {
-        public Task<int> TestTaskFactory() 
+        public Task<int> TestTaskFactory()
             => Task.Factory.StartNew((x) => 5, 4, TaskCreationOptions.LongRunning | TaskCreationOptions.PreferFairness);
         public static async Task Test()
         {

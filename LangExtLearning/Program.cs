@@ -1,7 +1,7 @@
-﻿using LanguageExt;
+﻿using System;
+using LanguageExt;
 using LanguageExt.ClassInstances;
 using LanguageExt.Common;
-using System;
 using static LanguageExt.Prelude;
 
 namespace LangExtLearning;

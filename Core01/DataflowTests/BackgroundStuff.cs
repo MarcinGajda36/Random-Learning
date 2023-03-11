@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Extensions.Hosting;
 
 namespace MarcinGajda.DataflowTests
 {
@@ -10,7 +10,7 @@ namespace MarcinGajda.DataflowTests
     {
         private readonly MyQueue myQueue;
 
-        public BackgroundStuff(MyQueue myQueue) 
+        public BackgroundStuff(MyQueue myQueue)
             => this.myQueue = myQueue;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

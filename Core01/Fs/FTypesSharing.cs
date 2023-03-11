@@ -1,8 +1,8 @@
-﻿using FTypesSharingTest;
+﻿using System;
+using System.Threading.Tasks;
+using FTypesSharingTest;
 using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
-using System;
-using System.Threading.Tasks;
 using static Types;
 
 
@@ -36,7 +36,7 @@ namespace MarcinGajda.Fs
 
             //var a = TypeProvidersTests.Todos
         }
-        public static void FsLib() 
+        public static void FsLib()
             => ListModule.MinBy(FSharpFunc<int, int>.FromConverter(x => x * 2), ListModule.OfArray(Array.Empty<int>()));
     }
 }

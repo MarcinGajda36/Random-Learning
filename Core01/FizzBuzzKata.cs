@@ -54,7 +54,7 @@ namespace MarcinGajda
         /*
          * Presentation way
          */
-        public static void Print() 
+        public static void Print()
             => Console.WriteLine(FizzBuzzStr(0, 100));
 
         public static string FizzBuzzStr(int start = 0, int end = 100)

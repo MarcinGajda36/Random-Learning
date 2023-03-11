@@ -1,8 +1,8 @@
-﻿using Microsoft.FSharp.Collections;
-using Microsoft.FSharp.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Microsoft.FSharp.Collections;
+using Microsoft.FSharp.Core;
 
 namespace MarcinGajda.Fs
 {

@@ -1,5 +1,5 @@
-﻿using Grpc.Core;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Grpc.Core;
 
 namespace GrpcService1.Services
 {

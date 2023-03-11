@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace MarcinGajda.channels
 {

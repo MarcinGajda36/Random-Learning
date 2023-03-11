@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.HighPerformance.Buffers;
-using System;
+﻿using System;
+using CommunityToolkit.HighPerformance.Buffers;
 
 namespace HighPerf;
 

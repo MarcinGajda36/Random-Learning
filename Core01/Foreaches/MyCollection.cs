@@ -2,7 +2,7 @@
 {
     public class MyCollection
     {
-        public Enumerator GetEnumerator() 
+        public Enumerator GetEnumerator()
             => new Enumerator();
         public class Enumerator
         {

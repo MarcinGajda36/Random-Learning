@@ -1,7 +1,7 @@
-﻿using Microsoft.Data.SqlClient;
-using System;
+﻿using System;
 using System.Data;
 using System.Runtime.ExceptionServices;
+using Microsoft.Data.SqlClient;
 
 namespace MarcinGajda.SQL
 {
