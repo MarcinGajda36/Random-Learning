@@ -49,7 +49,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         {
             pool[index] = new SemaphoreSlim(1, 1);
         }
-        poolIndexBitShift = 32 - BitOperations.TrailingZeroCount(pool.Length);
+        poolIndexBitShift = sizeof(int) * 8 - BitOperations.TrailingZeroCount(pool.Length);
     }
 
     public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
