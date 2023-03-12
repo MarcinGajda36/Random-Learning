@@ -58,7 +58,7 @@ public sealed partial class PoolPerKeySynchronizer<TKey>
     private long GetIndex(TKey key)
         => (uint)key.GetHashCode() % pool.Length;
 
-    private long GetIndex2(TKey key)
+    private uint GetIndex2(TKey key)
     {
         // This gives better index distribution but needs pool size to be power of 2 to work.
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
