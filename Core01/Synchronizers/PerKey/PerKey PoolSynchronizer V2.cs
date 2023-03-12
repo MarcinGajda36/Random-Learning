@@ -14,7 +14,7 @@ public readonly record struct PowerOfTwo
     {
         if (IsPowerOf2(value) is false)
         {
-            throw new ArgumentOutOfRangeException(nameof(value), value, $"Not a power of 2.");
+            throw new ArgumentOutOfRangeException(nameof(value), value, "Not a power of 2.");
         }
         Value = value;
     }
