@@ -53,7 +53,7 @@ public sealed class PerKeyDisposablePool<TKey, TInsance>
     }
 
     private uint GetIndex(TKey key)
-        => Hashing.Fibonacci(key) >> poolIndexBitShift;
+        => Hashing.UintFibonacci(key) >> poolIndexBitShift;
 
     private void Dispose(bool disposing)
     {
