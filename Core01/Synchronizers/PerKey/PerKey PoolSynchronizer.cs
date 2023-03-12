@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
+
 
 public sealed partial class PoolPerKeySynchronizer<TKey>
     : IDisposable
@@ -57,16 +56,6 @@ public sealed partial class PoolPerKeySynchronizer<TKey>
 
     private long GetIndex(TKey key)
         => (uint)key.GetHashCode() % pool.Length;
-
-    private uint GetIndex2(TKey key)
-    {
-        // This gives better index distribution but needs pool size to be power of 2 to work.
-        // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
-        var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
-        var fibonachi = (uint)hash * 2654435769u;
-        var indexBitShift = 32 - BitOperations.TrailingZeroCount(pool.Length);
-        return fibonachi >> indexBitShift;
-    }
 
     private void Dispose(bool disposing)
     {
