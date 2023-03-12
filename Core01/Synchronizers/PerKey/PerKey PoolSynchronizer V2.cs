@@ -9,7 +9,7 @@ namespace MarcinGajda.Synchronizers;
 
 public static class Hashing
 {
-    public static uint HashFibonacci<TKey>(TKey key)
+    public static uint Fibonacci<TKey>(TKey key)
     {
         ArgumentNullException.ThrowIfNull(key, nameof(key));
         var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
@@ -84,7 +84,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         // HashFibonacci gives better index distribution
         // and using poolIndexBitShift needs pool size to be power of 2 to work.
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
-        => Hashing.HashFibonacci(key) >> poolIndexBitShift;
+        => Hashing.Fibonacci(key) >> poolIndexBitShift;
 
     private void Dispose(bool disposing)
     {
