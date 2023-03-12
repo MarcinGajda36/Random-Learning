@@ -98,3 +98,16 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         GC.SuppressFinalize(this);
     }
 }
+
+public static class PerKey<TKey>
+    where TKey : notnull
+{
+    private static readonly PoolPerKeySynchronizerV2<TKey> synchronizer = new();
+
+    public static Task<TResult> SynchronizeAsync<TArgument, TResult>(
+        TKey key,
+        TArgument argument,
+        Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+        => synchronizer.SynchronizeAsync(key, argument, resultFactory, cancellationToken);
+}
