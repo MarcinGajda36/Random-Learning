@@ -36,6 +36,10 @@ public readonly record struct PowerOfTwo
         }
         Value = value;
     }
+
+    public static PowerOfTwo Create(int power)
+        => new((int)Pow(2, power));
+
     public static bool IsPowerOf2(int value)
         => (value & (value - 1)) == 0;
 
