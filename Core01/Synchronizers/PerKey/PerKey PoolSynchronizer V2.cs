@@ -7,6 +7,16 @@ using static System.Math;
 
 namespace MarcinGajda.Synchronizers;
 
+public static class Hashing
+{
+    public static uint HashFibonacci<TKey>(TKey key)
+    {
+        ArgumentNullException.ThrowIfNull(key, nameof(key));
+        var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
+        return (uint)hash * 2654435769u;
+    }
+}
+
 public readonly record struct PowerOfTwo
 {
     public int Value { get; }
@@ -71,13 +81,10 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
     }
 
     private uint GetIndex(TKey key)
-    {
-        // This gives better index distribution but needs pool size to be power of 2 to work.
+        // HashFibonacci gives better index distribution
+        // and using poolIndexBitShift needs pool size to be power of 2 to work.
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
-        var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
-        var fibonachi = (uint)hash * 2654435769u;
-        return fibonachi >> poolIndexBitShift;
-    }
+        => Hashing.HashFibonacci(key) >> poolIndexBitShift;
 
     private void Dispose(bool disposing)
     {
