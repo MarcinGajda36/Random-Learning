@@ -31,6 +31,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
     private readonly SemaphoreSlim[] pool;
+    private readonly int poolIndexBitShift;
     private bool disposedValue;
 
     public PoolPerKeySynchronizerV2()
@@ -48,6 +49,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         {
             pool[index] = new SemaphoreSlim(1, 1);
         }
+        poolIndexBitShift = 32 - BitOperations.TrailingZeroCount(pool.Length);
     }
 
     public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
@@ -74,8 +76,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
         var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
         var fibonachi = (uint)hash * 2654435769u;
-        var indexBitShift = 32 - BitOperations.TrailingZeroCount(pool.Length);
-        return fibonachi >> indexBitShift;
+        return fibonachi >> poolIndexBitShift;
     }
 
     private void Dispose(bool disposing)
