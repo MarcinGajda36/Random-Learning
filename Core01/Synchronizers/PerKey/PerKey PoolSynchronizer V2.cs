@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Math;
 
 namespace MarcinGajda.Synchronizers;
 
@@ -19,6 +20,9 @@ public readonly record struct PowerOfTwo
     }
     public static bool IsPowerOf2(int value)
         => (value & (value - 1)) == 0;
+
+    public static bool IsPowerOf2V2(int value)
+        => Ceiling(Log2(value)) - Floor(Log2(value)) < double.Epsilon;
 }
 
 public sealed partial class PoolPerKeySynchronizerV2<TKey>
