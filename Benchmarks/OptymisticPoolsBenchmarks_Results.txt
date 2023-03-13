@@ -8,3 +8,20 @@
 |   Spinning | 500000 |       8 |   745.42 ms | 27.900 ms |  82.264 ms |    4 |   3.25 KB |
 | SpinningV2 | 500000 |      32 | 2,539.64 ms | 10.087 ms |   8.942 ms |    5 |   2.48 KB |
 |   Spinning | 500000 |      32 | 3,722.90 ms | 73.887 ms | 214.360 ms |    6 |  11.83 KB |
+
+manual Volatile.Read(...)
+
+|     Method |  Rents | Threads |        Mean |     Error |    StdDev | Rank | Allocated |
+|----------- |------- |-------- |------------:|----------:|----------:|-----:|----------:|
+| SpinningV2 | 500000 |       1 |    16.25 ms |  0.178 ms |  0.256 ms |    1 |   1.26 KB |
+| SpinningV2 | 500000 |       8 |   626.30 ms | 12.450 ms | 11.646 ms |    2 |    1.3 KB |
+| SpinningV2 | 500000 |      32 | 2,427.47 ms |  9.213 ms |  8.618 ms |    3 |   1.98 KB |
+
+
+no spin in Return
+
+|     Method |  Rents | Threads |        Mean |     Error |    StdDev | Rank | Allocated |
+|----------- |------- |-------- |------------:|----------:|----------:|-----:|----------:|
+| SpinningV2 | 500000 |       1 |    15.70 ms |  0.151 ms |  0.252 ms |    1 |   1.26 KB |
+| SpinningV2 | 500000 |       8 |   481.22 ms |  3.273 ms |  2.902 ms |    2 |   1.33 KB |
+| SpinningV2 | 500000 |      32 | 1,913.18 ms | 13.867 ms | 12.971 ms |    3 |   2.31 KB |

@@ -28,8 +28,8 @@ public class SpiningPoolV2<TValue> where TValue : class
     readonly Func<TValue> factory;
     readonly TValue?[] pool;
 
-    volatile int returnIndex;
-    volatile int rentIndex;
+    int returnIndex;
+    int rentIndex;
 
     public SpiningPoolV2(int size, Func<TValue> factory)
     {
@@ -42,12 +42,12 @@ public class SpiningPoolV2<TValue> where TValue : class
         SpinWait spinWait = default;
         while (true)
         {
-            int rentIdx = rentIndex;
+            int rentIdx = Volatile.Read(ref rentIndex);
             if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
                 return new(value, this);
             }
-            if (rentIdx != returnIndex)
+            if (rentIdx != Volatile.Read(ref returnIndex))
             {
                 Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
                 spinWait.SpinOnce();
@@ -71,18 +71,16 @@ public class SpiningPoolV2<TValue> where TValue : class
 
     void Return(TValue value)
     {
-        SpinWait spinWait = default;
         while (true)
         {
-            int returnIdx = returnIndex;
+            int returnIdx = Volatile.Read(ref returnIndex);
             if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
             {
                 return;
             }
-            if (returnIdx != GetLastIndexBefore(rentIndex))
+            if (returnIdx != GetLastIndexBefore(Volatile.Read(ref rentIndex)))
             {
                 Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
-                spinWait.SpinOnce();
                 continue;
             }
             return;

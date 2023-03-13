@@ -25,12 +25,6 @@ public class OptymisticPoolsBenchmarks
 
     Thread[]? threads;
 
-    [IterationSetup(Target = nameof(Spinning))]
-    public void SetupSpinning()
-    {
-        Setup<SpiningPool<RandomType>, SpiningPool<RandomType>.Lease>();
-    }
-
     [IterationSetup(Target = nameof(SpinningV2))]
     public void SetupSpinningV2()
     {
@@ -66,13 +60,6 @@ public class OptymisticPoolsBenchmarks
         }
 
         Array.ForEach(threads, thread => thread.Join());
-    }
-
-    [Benchmark]
-    public void Spinning()
-    {
-        var pool = new SpiningPool<RandomType>(64, createRandomType);
-        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 
     [Benchmark]
