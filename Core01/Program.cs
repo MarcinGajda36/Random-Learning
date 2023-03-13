@@ -105,7 +105,7 @@ internal class Program
 
     private static void PoolTest()
     {
-        var pool = new ThreadStaticPool<object>(() => new object());
+        var pool = new ThreadStaticPool<object>(10, () => new object());
         var lease1 = pool.Rent();
         var lease2 = pool.Rent();
         lease1.Dispose();

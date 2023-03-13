@@ -28,8 +28,8 @@ public class SpiningPool<TValue> where TValue : class
     readonly Func<TValue> factory;
     readonly TValue?[] pool;
 
-    volatile int returnIndex;
-    volatile int rentIndex;
+    int returnIndex;
+    int rentIndex;
 
     public SpiningPool(int size, Func<TValue> factory)
     {
@@ -40,28 +40,27 @@ public class SpiningPool<TValue> where TValue : class
     public Lease Rent()
     {
         SpinWait spinWait = default;
-        int rentIdx;
-        while ((rentIdx = rentIndex) != returnIndex)
+        while (true)
         {
-            try
+            int rentIdx = Volatile.Read(ref rentIndex);
+            if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
             {
-                if (Interlocked.Exchange(ref pool[rentIdx], null) is TValue value)
-                {
-                    return new(value, this);
-                }
+                return new(value, this);
             }
-            finally
+            if (rentIdx != Volatile.Read(ref returnIndex))
             {
                 Interlocked.CompareExchange(ref rentIndex, GetNextIndex(rentIdx), rentIdx);
+                spinWait.SpinOnce();
+                continue;
             }
-            spinWait.SpinOnce();
+            break;
         }
         return new(factory(), this);
     }
 
-    private int GetNextIndex(int current)
+    private int GetNextIndex(int currentIndex)
     {
-        var next = current + 1;
+        var next = currentIndex + 1;
         if (next == pool.Length)
         {
             return 0;
@@ -72,26 +71,23 @@ public class SpiningPool<TValue> where TValue : class
 
     void Return(TValue value)
     {
-        SpinWait spinWait = default;
-        int returnIdx;
-        while ((returnIdx = returnIndex) != LastIndexBefore(rentIndex))
+        while (true)
         {
-            try
+            int returnIdx = Volatile.Read(ref returnIndex);
+            if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
             {
-                if (Interlocked.CompareExchange(ref pool[returnIdx], value, null) == null)
-                {
-                    return;
-                }
+                return;
             }
-            finally
+            if (returnIdx != GetLastIndexBefore(Volatile.Read(ref rentIndex)))
             {
                 Interlocked.CompareExchange(ref returnIndex, GetNextIndex(returnIdx), returnIdx);
+                continue;
             }
-            spinWait.SpinOnce();
+            return;
         }
     }
 
-    private int LastIndexBefore(int before)
+    private int GetLastIndexBefore(int before)
     {
         if (before == 0)
         {

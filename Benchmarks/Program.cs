@@ -5,5 +5,5 @@ namespace Benchmarks;
 internal class Program
 {
     private static void Main(string[] args)
-        => BenchmarkRunner.Run<OptymisticPoolsBenchmarks>();
+        => BenchmarkRunner.Run<PoolsBenchmarks>();
 }

@@ -32,13 +32,15 @@ public class ThreadStaticPool<TValue>
 
     class Pool
     {
-        const int Size = 8;
-        readonly TValue[] values = new TValue[Size];
+        readonly TValue[] values;
         readonly Func<TValue> factory;
         int available;
 
-        public Pool(Func<TValue> factory)
-            => this.factory = factory;
+        public Pool(ThreadStaticPool<TValue> parent)
+        {
+            values = new TValue[parent.sizePerPool];
+            factory = parent.factory;
+        }
 
         public TValue GetOrCreate()
         {
@@ -62,10 +64,12 @@ public class ThreadStaticPool<TValue>
     }
 
     [ThreadStatic] static Pool? pool;
+    readonly int sizePerPool;
     readonly Func<TValue> factory;
 
-    public ThreadStaticPool(Func<TValue> factory)
+    public ThreadStaticPool(int size, Func<TValue> factory)
     {
+        sizePerPool = Math.Max(size / Environment.ProcessorCount, 2);
         this.factory = factory;
     }
 
@@ -80,7 +84,7 @@ public class ThreadStaticPool<TValue>
 
     void Return(TValue value)
     {
-        pool ??= new Pool(factory);
+        pool ??= new Pool(this);
         pool.Return(value);
     }
 }
