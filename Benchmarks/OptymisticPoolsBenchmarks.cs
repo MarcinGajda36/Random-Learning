@@ -23,6 +23,9 @@ public class OptymisticPoolsBenchmarks
     [Params(1, 8, 32)]
     public int Threads { get; set; }
 
+    [Params(8, 32, 64)]
+    public int PoolSize { get; set; }
+
     Thread[]? threads;
 
     [IterationSetup(Target = nameof(SpinningV2))]
@@ -65,7 +68,7 @@ public class OptymisticPoolsBenchmarks
     [Benchmark]
     public void SpinningV2()
     {
-        var pool = new SpiningPoolV2<RandomType>(64, createRandomType);
+        var pool = new SpiningPoolV2<RandomType>(PoolSize, createRandomType);
         Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 }

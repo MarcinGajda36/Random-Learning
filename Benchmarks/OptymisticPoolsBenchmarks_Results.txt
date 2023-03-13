@@ -25,3 +25,25 @@ no spin in Return
 | SpinningV2 | 500000 |       1 |    15.70 ms |  0.151 ms |  0.252 ms |    1 |   1.26 KB |
 | SpinningV2 | 500000 |       8 |   481.22 ms |  3.273 ms |  2.902 ms |    2 |   1.33 KB |
 | SpinningV2 | 500000 |      32 | 1,913.18 ms | 13.867 ms | 12.971 ms |    3 |   2.31 KB |
+
+no spin in Rent 
+
+|     Method |  Rents | Threads |        Mean |      Error |     StdDev | Rank | Allocated |
+|----------- |------- |-------- |------------:|-----------:|-----------:|-----:|----------:|
+| SpinningV2 | 500000 |       1 |    15.83 ms |   0.197 ms |   0.339 ms |    1 |   1.26 KB |
+| SpinningV2 | 500000 |       8 | 1,388.47 ms |  41.769 ms | 123.156 ms |    2 |   4.94 KB |
+| SpinningV2 | 500000 |      32 | 5,677.27 ms | 136.667 ms | 402.967 ms |    3 |  28.05 KB |
+
+added spin to just Rent again
+
+|     Method |  Rents | Threads | PoolSize |        Mean |     Error |    StdDev |      Median | Rank | Allocated |
+|----------- |------- |-------- |--------- |------------:|----------:|----------:|------------:|-----:|----------:|
+| SpinningV2 | 500000 |       1 |        8 |    15.86 ms |  0.160 ms |  0.258 ms |    15.72 ms |    1 |     840 B |
+| SpinningV2 | 500000 |       1 |       64 |    15.90 ms |  0.185 ms |  0.304 ms |    15.84 ms |    1 |    1288 B |
+| SpinningV2 | 500000 |       1 |       32 |    16.23 ms |  0.310 ms |  0.717 ms |    15.91 ms |    1 |    1032 B |
+| SpinningV2 | 500000 |       8 |        8 |   481.74 ms |  3.835 ms |  3.400 ms |   482.04 ms |    2 |     936 B |
+| SpinningV2 | 500000 |       8 |       64 |   482.24 ms |  2.737 ms |  2.137 ms |   481.87 ms |    2 |    1384 B |
+| SpinningV2 | 500000 |       8 |       32 |   484.50 ms |  7.466 ms |  6.618 ms |   483.27 ms |    2 |    1104 B |
+| SpinningV2 | 500000 |      32 |       32 | 1,904.97 ms | 27.242 ms | 24.150 ms | 1,908.17 ms |    3 |    2688 B |
+| SpinningV2 | 500000 |      32 |        8 | 1,913.65 ms |  9.216 ms |  8.170 ms | 1,913.95 ms |    3 |    2616 B |
+| SpinningV2 | 500000 |      32 |       64 | 1,919.68 ms |  8.235 ms |  6.877 ms | 1,920.24 ms |    3 |    2632 B |
