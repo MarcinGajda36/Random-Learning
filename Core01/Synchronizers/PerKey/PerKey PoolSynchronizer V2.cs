@@ -93,7 +93,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
     }
 
     private uint GetIndex(TKey key)
-        // HashFibonacci gives better hash distribution + spreads bites all throughout int
+        // HashFibonacci gives better hash distribution 
         // bit shift needs pool size to be power of 2 to work (alternative is modulo)
         // Fibonacci and bit shift complement each other well for index distribution
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
