@@ -30,7 +30,7 @@ public class ThreadStaticPool<TValue>
         }
     }
 
-    struct Pool
+    class Pool
     {
         readonly TValue?[] values;
         readonly Func<TValue> factory;
@@ -75,19 +75,16 @@ public class ThreadStaticPool<TValue>
 
     public Lease Rent()
     {
-        if (pool.HasValue)
+        if (pool is null)
         {
-            return new Lease(((Pool)pool).GetOrCreate(), this);
+            return new Lease(factory(), this);
         }
-        return new Lease(factory(), this);
+        return new Lease(pool.GetOrCreate(), this);
     }
 
     void Return(TValue value)
     {
-        if (pool.HasValue is false)
-        {
-            pool = new Pool(this);
-        }
-        ((Pool)pool).Return(value);
+        pool ??= new Pool(this);
+        pool.Return(value);
     }
 }

@@ -229,3 +229,12 @@ inline -- or ++; if with common case; by ref swap
 | ThreadStatic | 500000 |       1 |     1024 | 22.59 ms | 0.446 ms | 0.458 ms |    1 |  1000.0000 |  11.45 MB |
 | ThreadStatic | 500000 |      16 |     1024 | 53.05 ms | 1.037 ms | 1.948 ms |    2 | 30000.0000 | 183.12 MB |
 | ThreadStatic | 500000 |      16 |       32 | 57.47 ms | 1.360 ms | 3.990 ms |    3 | 30000.0000 | 183.11 MB |
+
+class pool
+
+|       Method |  Rents | Threads | PoolSize |     Mean |    Error |   StdDev |   Median | Rank | Allocated |
+|------------- |------- |-------- |--------- |---------:|---------:|---------:|---------:|-----:|----------:|
+| ThreadStatic | 500000 |       1 |     1024 | 20.08 ms | 0.399 ms | 0.597 ms | 20.00 ms |    1 |    1864 B |
+| ThreadStatic | 500000 |       1 |       32 | 20.18 ms | 0.380 ms | 0.373 ms | 20.11 ms |    1 |     872 B |
+| ThreadStatic | 500000 |      16 |       32 | 50.26 ms | 2.157 ms | 6.359 ms | 47.87 ms |    2 |    3152 B |
+| ThreadStatic | 500000 |      16 |     1024 | 51.69 ms | 2.385 ms | 7.031 ms | 49.18 ms |    2 |   19024 B |
