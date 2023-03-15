@@ -30,7 +30,7 @@ public readonly record struct PowerOfTwo
     public int Value { get; }
     public PowerOfTwo(int value)
     {
-        if (IsPowerOf2(value) is false)
+        if (BitOperations.IsPow2(value) is false)
         {
             throw new ArgumentOutOfRangeException(nameof(value), value, "Not a power of 2.");
         }
@@ -39,12 +39,6 @@ public readonly record struct PowerOfTwo
 
     public static PowerOfTwo Create(int power)
         => new((int)Pow(2, power));
-
-    public static bool IsPowerOf2(int value)
-        => (value & (value - 1)) == 0;
-
-    public static bool IsPowerOf2V2(int value)
-        => Ceiling(Log2(value)) - Floor(Log2(value)) < double.Epsilon;
 }
 
 public sealed partial class PoolPerKeySynchronizerV2<TKey>
@@ -71,6 +65,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         {
             pool[index] = new SemaphoreSlim(1, 1);
         }
+
         poolIndexBitShift = sizeof(int) * 8 - BitOperations.TrailingZeroCount(pool.Length);
     }
 
