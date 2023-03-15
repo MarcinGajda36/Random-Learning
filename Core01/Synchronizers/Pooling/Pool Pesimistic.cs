@@ -31,13 +31,13 @@ public class LockingPool<TValue>
     }
 
     readonly Func<TValue> factory;
-    readonly TValue[] pool;
+    readonly TValue?[] pool;
     volatile int available;
 
     public LockingPool(int size, Func<TValue> factory)
     {
         this.factory = factory;
-        pool = new TValue[size];
+        pool = new TValue?[size];
     }
 
     bool IsPoolEmpty()
@@ -55,9 +55,10 @@ public class LockingPool<TValue>
             {
                 return new(factory(), this);
             }
-            --available;
+            available--;
             var toRent = pool[available];
-            return new(toRent, this);
+            pool[available] = default;
+            return new(toRent!, this);
         }
     }
 
@@ -77,7 +78,7 @@ public class LockingPool<TValue>
                 return;
             }
             pool[available] = toReturn;
-            ++available;
+            available++;
         }
     }
 }

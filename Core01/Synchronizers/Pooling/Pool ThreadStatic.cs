@@ -30,15 +30,15 @@ public class ThreadStaticPool<TValue>
         }
     }
 
-    class Pool
+    struct Pool
     {
-        readonly TValue[] values;
+        readonly TValue?[] values;
         readonly Func<TValue> factory;
         int available;
 
         public Pool(ThreadStaticPool<TValue> parent)
         {
-            values = new TValue[parent.sizePerPool];
+            values = new TValue?[parent.sizePerPool];
             factory = parent.factory;
         }
 
@@ -47,7 +47,9 @@ public class ThreadStaticPool<TValue>
             if (available > 0)
             {
                 available--;
-                return values[available];
+                var toRent = values[available];
+                values[available] = default;
+                return toRent!;
             }
             return factory();
         }
@@ -74,17 +76,13 @@ public class ThreadStaticPool<TValue>
     }
 
     public Lease Rent()
-    {
-        if (pool == null)
-        {
-            return new Lease(factory(), this);
-        }
-        return new Lease(pool.GetOrCreate(), this);
-    }
+        => pool.HasValue
+        ? new Lease(((Pool)pool).GetOrCreate(), this)
+        : new Lease(factory(), this);
 
     void Return(TValue value)
     {
         pool ??= new Pool(this);
-        pool.Return(value);
+        ((Pool)pool).Return(value);
     }
 }

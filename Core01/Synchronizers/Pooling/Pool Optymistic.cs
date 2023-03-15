@@ -27,14 +27,23 @@ public class SpiningPool<TValue> where TValue : class
 
     readonly Func<TValue> factory;
     readonly TValue?[] pool;
+    readonly int wrapAroundMask;
 
     int returnIndex;
     int rentIndex;
 
     public SpiningPool(int size, Func<TValue> factory)
+        : this(new PowerOfTwo(size), factory) { }
+
+    public SpiningPool(PowerOfTwo size, Func<TValue> factory)
     {
+        if (size.Value < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(size), size, "Size has to be bigger then 0.");
+        }
         this.factory = factory;
-        pool = new TValue?[size];
+        pool = new TValue?[size.Value];
+        wrapAroundMask = pool.Length - 1;
     }
 
     public Lease Rent()
@@ -58,16 +67,8 @@ public class SpiningPool<TValue> where TValue : class
         return new(factory(), this);
     }
 
-    private int GetNextIndex(int currentIndex)
-    {
-        var next = currentIndex + 1;
-        if (next == pool.Length)
-        {
-            return 0;
-        }
-
-        return next;
-    }
+    private int GetNextIndex(int index)
+        => (index + 1) & wrapAroundMask;
 
     void Return(TValue value)
     {
@@ -87,12 +88,7 @@ public class SpiningPool<TValue> where TValue : class
         }
     }
 
-    private int GetLastIndexBefore(int before)
-    {
-        if (before == 0)
-        {
-            return pool.Length - 1;
-        }
-        return before - 1;
-    }
+    private int GetLastIndexBefore(int index)
+        => (index - 1) & wrapAroundMask;
+
 }

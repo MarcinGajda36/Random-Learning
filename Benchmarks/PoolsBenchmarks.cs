@@ -17,13 +17,13 @@ public class PoolsBenchmarks
     record ThreadParam<TPool, TLease>(TPool Pool, Func<TPool, TLease> Rent, Action<TLease> DoSomething, int N)
         where TLease : struct, IDisposable;
 
-    [Params(500_000, 2_500_000)]
+    [Params(500_000)]
     public int Rents { get; set; }
 
-    [Params(1, 16, 64)]
+    [Params(1, 16)]
     public int Threads { get; set; }
 
-    [Params(32, 512, 1024)]
+    [Params(32, 1024)]
     public int PoolSize { get; set; }
 
     Thread[]? threads;
@@ -78,16 +78,16 @@ public class PoolsBenchmarks
     }
 
     [Benchmark]
-    public void ThreadStatic()
+    public void Spinning()
     {
-        var pool = new ThreadStaticPool<RandomType>(PoolSize, createRandomType);
+        var pool = new SpiningPool<RandomType>(PoolSize, createRandomType);
         Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 
     [Benchmark]
-    public void Spinning()
+    public void ThreadStatic()
     {
-        var pool = new SpiningPool<RandomType>(PoolSize, createRandomType);
+        var pool = new ThreadStaticPool<RandomType>(PoolSize, createRandomType);
         Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 
