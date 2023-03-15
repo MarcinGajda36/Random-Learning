@@ -85,16 +85,18 @@ public class PoolsBenchmarks
     }
 
     [Benchmark]
+    public void Locking()
+    {
+        var pool = new LockingPool<RandomType>(PoolSize, createRandomType);
+        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
+    }
+
+    [Benchmark]
     public void ThreadStatic()
     {
         var pool = new ThreadStaticPool<RandomType>(PoolSize, createRandomType);
         Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 
-    [Benchmark]
-    public void Locking()
-    {
-        var pool = new LockingPool<RandomType>(PoolSize, createRandomType);
-        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
-    }
+
 }

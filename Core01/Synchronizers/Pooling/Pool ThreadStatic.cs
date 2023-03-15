@@ -46,22 +46,20 @@ public class ThreadStaticPool<TValue>
         {
             if (available > 0)
             {
-                available--;
-                var toRent = values[available];
-                values[available] = default;
-                return toRent!;
+                ref var toRent = ref values[--available];
+                var value = toRent;
+                toRent = default;
+                return value!;
             }
             return factory();
         }
 
         public void Return(TValue value)
         {
-            if (available == values.Length)
+            if (available != values.Length)
             {
-                return;
+                values[available++] = value;
             }
-            values[available] = value;
-            available++;
         }
     }
 
@@ -76,13 +74,20 @@ public class ThreadStaticPool<TValue>
     }
 
     public Lease Rent()
-        => pool.HasValue
-        ? new Lease(((Pool)pool).GetOrCreate(), this)
-        : new Lease(factory(), this);
+    {
+        if (pool.HasValue)
+        {
+            return new Lease(((Pool)pool).GetOrCreate(), this);
+        }
+        return new Lease(factory(), this);
+    }
 
     void Return(TValue value)
     {
-        pool ??= new Pool(this);
+        if (pool.HasValue is false)
+        {
+            pool = new Pool(this);
+        }
         ((Pool)pool).Return(value);
     }
 }
