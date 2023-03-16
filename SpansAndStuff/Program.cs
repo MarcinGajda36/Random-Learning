@@ -2,12 +2,20 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace SpansAndStuff
 {
     internal class Program
     {
-        private static void Main()
+        private static async Task Main()
+        {
+            Vectors.EqualsAny();
+
+            await Task.Delay(-1);
+        }
+
+        private static void Tests()
         {
             ArraySegments.Test4();
             Test();
