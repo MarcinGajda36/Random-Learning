@@ -33,7 +33,7 @@ public class SpiningPool<TValue> where TValue : class
     int rentIndex;
 
     public SpiningPool(int size, Func<TValue> factory)
-        : this(new PowerOfTwo(size), factory) { }
+        : this(new PowerOfTwo((uint)size), factory) { }
 
     public SpiningPool(PowerOfTwo size, Func<TValue> factory)
     {

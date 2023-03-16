@@ -3,32 +3,24 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using static System.Math;
 
 namespace MarcinGajda.Synchronizers;
 
 public static class Hashing
 {
-    public static int Fibonacci<TKey>(TKey key)
-    {
-        ArgumentNullException.ThrowIfNull(key, nameof(key));
-        var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
-        return hash * 1327217884;
-    }
-
-    private const uint fibonacci = 2654435769u; // 2^32 / PHI
-    public static uint UintFibonacci<TKey>(TKey key)
+    private const uint FIBONACCI = 2654435769u; // 2^32 / PHI
+    public static uint Fibonacci<TKey>(TKey key)
         where TKey : notnull
     {
         var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
-        return (uint)hash * fibonacci;
+        return unchecked((uint)hash * FIBONACCI);
     }
 }
 
 public readonly record struct PowerOfTwo
 {
-    public int Value { get; }
-    public PowerOfTwo(int value)
+    public uint Value { get; }
+    public PowerOfTwo(uint value)
     {
         if (BitOperations.IsPow2(value) is false)
         {
@@ -37,8 +29,11 @@ public readonly record struct PowerOfTwo
         Value = value;
     }
 
-    public static PowerOfTwo Create(int power)
-        => new((int)Pow(2, power));
+    public static PowerOfTwo Create(int powerOfTwo)
+        => new(1u << powerOfTwo);
+
+    public static PowerOfTwo RoundUpToPowerOf2(uint toRoundUp)
+        => new(BitOperations.RoundUpToPowerOf2(toRoundUp));
 }
 
 public sealed partial class PoolPerKeySynchronizerV2<TKey>
@@ -53,20 +48,18 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
     public PoolPerKeySynchronizerV2()
         : this(DefaultSize) { }
 
-    public PoolPerKeySynchronizerV2(PowerOfTwo powerOfTwo)
+    public PoolPerKeySynchronizerV2(PowerOfTwo poolSize)
     {
-        if (powerOfTwo.Value < 1)
+        if (poolSize.Value < 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(powerOfTwo), powerOfTwo, "Pool size has to be bigger then 0.");
+            throw new ArgumentOutOfRangeException(nameof(poolSize), poolSize, "Pool size has to be power of 2 and bigger then 0.");
         }
-
-        pool = new SemaphoreSlim[powerOfTwo.Value];
+        poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(poolSize.Value);
+        pool = new SemaphoreSlim[poolSize.Value];
         for (int index = 0; index < pool.Length; index++)
         {
             pool[index] = new SemaphoreSlim(1, 1);
         }
-
-        poolIndexBitShift = sizeof(int) * 8 - BitOperations.TrailingZeroCount(pool.Length);
     }
 
     public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
@@ -92,7 +85,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         // bit shift needs pool size to be power of 2 to work (alternative is modulo)
         // Fibonacci and bit shift complement each other well for index distribution
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
-        => Hashing.UintFibonacci(key) >> poolIndexBitShift;
+        => Hashing.Fibonacci(key) >> poolIndexBitShift;
 
     private void Dispose(bool disposing)
     {
