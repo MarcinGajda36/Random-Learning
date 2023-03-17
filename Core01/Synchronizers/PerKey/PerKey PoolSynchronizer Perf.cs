@@ -95,28 +95,20 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             }
         }
 
-        var keysIndexes = ArrayPool<uint>.Shared.Rent(keys.Count);
-        int keyCount = 0;
-        foreach (var key in keys)
-        {
-            var keyIndex = GetIndex(key);
-            if (keysIndexes.AsSpan(0, keyCount).Contains(keyIndex) is false)
-            {
-                keysIndexes[keyCount++] = keyIndex;
-            }
-        }
-        keysIndexes.AsSpan(0, keyCount).Sort();
+        var keyIndexes = ArrayPool<uint>.Shared.Rent(keys.Count);
+        int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes);
+        keyIndexes.AsSpan(0, keyIndexesCount).Sort();
 
-        for (int index = 0; index < keyCount; index++)
+        for (int index = 0; index < keyIndexesCount; index++)
         {
             try
             {
-                await pool[keysIndexes[index]].WaitAsync(cancellationToken);
+                await pool[keyIndexes[index]].WaitAsync(cancellationToken);
             }
             catch
             {
-                ReleaseLocked(pool, keysIndexes.AsSpan(0, index));
-                ArrayPool<uint>.Shared.Return(keysIndexes);
+                ReleaseLocked(pool, keyIndexes.AsSpan(0, index + 1));
+                ArrayPool<uint>.Shared.Return(keyIndexes);
                 throw;
             }
         }
@@ -127,9 +119,23 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         }
         finally
         {
-            ReleaseLocked(pool, keysIndexes.AsSpan(0, keyCount));
-            ArrayPool<uint>.Shared.Return(keysIndexes);
+            ReleaseLocked(pool, keyIndexes.AsSpan(0, keyIndexesCount));
+            ArrayPool<uint>.Shared.Return(keyIndexes);
         }
+    }
+
+    private int FillWithKeyIndexes(IReadOnlyCollection<TKey> keys, uint[] keysIndexes)
+    {
+        int keyCount = 0;
+        foreach (var key in keys)
+        {
+            var keyIndex = GetIndex(key);
+            if (keysIndexes.AsSpan(0, keyCount).Contains(keyIndex) is false)
+            {
+                keysIndexes[keyCount++] = keyIndex;
+            }
+        }
+        return keyCount;
     }
 
     private uint GetIndex(TKey key)
