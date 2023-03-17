@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,7 +83,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     }
 
     public async Task<TResult> SynchronizeManyAsync<TArgument, TResult>(
-        IReadOnlyCollection<TKey> keys,
+        IEnumerable<TKey> keys,
         TArgument argument,
         Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
@@ -95,7 +96,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             }
         }
 
-        var keyIndexes = ArrayPool<uint>.Shared.Rent(keys.Count);
+        var keyIndexes = ArrayPool<uint>.Shared.Rent(pool.Length);
         int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes);
         keyIndexes.AsSpan(0, keyIndexesCount).Sort();
 
@@ -124,7 +125,17 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         }
     }
 
-    private int FillWithKeyIndexes(IReadOnlyCollection<TKey> keys, uint[] keysIndexes)
+    // if pool.Length is big then this can be useful
+    //private int GetKeysLimit(IEnumerable<TKey> keys)
+    //{
+    //    if (keys.TryGetNonEnumeratedCount(out var count))
+    //    {
+    //        return Math.Min(count, pool.Length);
+    //    }
+    //    return pool.Length;
+    //}
+
+    private int FillWithKeyIndexes(IEnumerable<TKey> keys, uint[] keysIndexes)
     {
         int keyCount = 0;
         foreach (var key in keys)
