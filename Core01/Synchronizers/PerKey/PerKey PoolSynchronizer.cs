@@ -55,7 +55,7 @@ public sealed partial class PoolPerKeySynchronizer<TKey>
             cancellationToken);
 
     private long GetIndex(TKey key)
-        => (uint)key.GetHashCode() % pool.Length;
+        => (uint)key.GetHashCode() % pool.Length; // Modulo can significantly increase collisions unless pool.Length is prime 
 
     private void Dispose(bool disposing)
     {
