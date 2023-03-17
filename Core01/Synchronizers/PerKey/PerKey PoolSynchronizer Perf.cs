@@ -145,6 +145,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             {
                 keysIndexes[keyCount++] = keyIndex;
             }
+            // For crazy amount of keys we can stop if keyCount == pool.Length
         }
         return keyCount;
     }
