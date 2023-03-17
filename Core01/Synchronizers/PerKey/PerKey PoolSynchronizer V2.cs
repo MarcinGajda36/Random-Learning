@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading;
@@ -77,6 +78,57 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
         finally
         {
             _ = semaphore.Release();
+        }
+    }
+
+    public async Task<TResult> SynchronizeManyAsync<TArgument, TResult>(
+        IReadOnlyCollection<TKey> keys,
+        TArgument argument,
+        Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+    {
+        static void ReleaseLocked(SemaphoreSlim[] pool, Span<uint> locked)
+        {
+            for (int index = locked.Length - 1; index >= 0; index--)
+            {
+                _ = pool[locked[index]].Release();
+            }
+        }
+
+        var keysIndexes = ArrayPool<uint>.Shared.Rent(keys.Count);
+        int keyCount = 0;
+        foreach (var key in keys)
+        {
+            var keyIndex = GetIndex(key);
+            if (keysIndexes.AsSpan(0, keyCount).Contains(keyIndex) is false)
+            {
+                keysIndexes[keyCount++] = keyIndex;
+            }
+        }
+        keysIndexes.AsSpan(0, keyCount).Sort();
+
+        for (int index = 0; index < keyCount; index++)
+        {
+            try
+            {
+                await pool[keysIndexes[index]].WaitAsync(cancellationToken);
+            }
+            catch
+            {
+                ReleaseLocked(pool, keysIndexes.AsSpan(0, index));
+                ArrayPool<uint>.Shared.Return(keysIndexes);
+                throw;
+            }
+        }
+
+        try
+        {
+            return await resultFactory(argument, cancellationToken);
+        }
+        finally
+        {
+            ReleaseLocked(pool, keysIndexes.AsSpan(0, keyCount));
+            ArrayPool<uint>.Shared.Return(keysIndexes);
         }
     }
 
