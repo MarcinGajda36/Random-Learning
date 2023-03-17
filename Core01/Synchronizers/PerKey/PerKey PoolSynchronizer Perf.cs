@@ -108,7 +108,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             }
             catch
             {
-                ReleaseLocked(pool, keyIndexes.AsSpan(0, index + 1));
+                ReleaseLocked(pool, keyIndexes.AsSpan(0, index));
                 ArrayPool<uint>.Shared.Return(keyIndexes);
                 throw;
             }
