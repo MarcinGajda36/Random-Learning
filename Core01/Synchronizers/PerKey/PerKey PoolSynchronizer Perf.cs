@@ -37,7 +37,7 @@ public readonly record struct PowerOfTwo
         => new(BitOperations.RoundUpToPowerOf2(toRoundUp));
 }
 
-public sealed partial class PoolPerKeySynchronizerV2<TKey>
+public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     : IDisposable
     where TKey : notnull
 {
@@ -46,10 +46,10 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
     private readonly int poolIndexBitShift;
     private bool disposedValue;
 
-    public PoolPerKeySynchronizerV2()
+    public PoolPerKeySynchronizerPerf()
         : this(DefaultSize) { }
 
-    public PoolPerKeySynchronizerV2(PowerOfTwo poolSize)
+    public PoolPerKeySynchronizerPerf(PowerOfTwo poolSize)
     {
         if (poolSize.Value < 1)
         {
@@ -162,7 +162,7 @@ public sealed partial class PoolPerKeySynchronizerV2<TKey>
 public static class PerKey<TKey>
     where TKey : notnull
 {
-    private static readonly PoolPerKeySynchronizerV2<TKey> synchronizer = new();
+    private static readonly PoolPerKeySynchronizerPerf<TKey> synchronizer = new();
 
     public static Task<TResult> SynchronizeAsync<TArgument, TResult>(
         TKey key,
