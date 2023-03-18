@@ -97,7 +97,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         }
 
         var keyIndexes = ArrayPool<uint>.Shared.Rent(pool.Length);
-        int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes);
+        int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes.AsSpan(0, pool.Length));
         // We need order to avoid deadlock when:
         // 1) Thread 1 hold keys A and B
         // 2) Thread 2 waits for A and B
@@ -142,13 +142,13 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     //    return pool.Length;
     //}
 
-    private int FillWithKeyIndexes(IEnumerable<TKey> keys, uint[] keysIndexes)
+    private int FillWithKeyIndexes(IEnumerable<TKey> keys, Span<uint> keysIndexes)
     {
         int keyCount = 0;
         foreach (var key in keys)
         {
             var keyIndex = GetIndex(key);
-            if (keysIndexes.AsSpan(0, keyCount).Contains(keyIndex) is false)
+            if (keysIndexes[..keyCount].Contains(keyIndex) is false)
             {
                 keysIndexes[keyCount++] = keyIndex;
             }
