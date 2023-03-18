@@ -55,7 +55,7 @@ public sealed partial class PoolPerKeySynchronizer<TKey>
             cancellationToken);
 
     private long GetIndex(TKey key)
-        => (uint)key.GetHashCode() % pool.Length; // Modulo can significantly increase collisions unless pool.Length is prime 
+        => (uint)key.GetHashCode() % pool.Length; // i heard modulo by prime has some nice properties but idk needs confirmation
 
     private void Dispose(bool disposing)
     {
