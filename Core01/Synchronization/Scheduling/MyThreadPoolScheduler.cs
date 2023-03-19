@@ -17,8 +17,6 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
     readonly Thread[] threads = new Thread[MaxThreads];
 
     uint queueInfo;
-    uint Count => queueInfo & CountMask;
-    uint EnqueueIndex => (queueInfo & EnqueueIndexMask) >> enqueueIndexBitShift;
 
     public MyThreadPoolScheduler()
     {
@@ -35,18 +33,28 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
         SpinWait spinWait = new SpinWait();
         while (true)
         {
-            var info = queueInfo;
-            if (Interlocked.CompareExchange(ref queue[EnqueueIndex], task, null) == null)
+            var info = Volatile.Read(ref queueInfo);
+            var enqueueIndex = GetEnqueueIndex(info);
+            if (Interlocked.CompareExchange(ref queue[enqueueIndex], task, null) == null)
             {
+                Interlocked.CompareExchange(ref queueInfo, NextEnqueueIndex(info), info);
                 return;
             }
-            Interlocked.CompareExchange(ref queueInfo, NextEnqueueIndex(info), info);
             spinWait.SpinOnce();
         }
     }
 
-    private static uint NextEnqueueIndex(uint current)
-        => 0; // TODO
+    static uint GetQueueCount(uint queueInfo)
+        => queueInfo & CountMask;
+    uint GetEnqueueIndex(uint queueInfo)
+        => (queueInfo & EnqueueIndexMask) >> enqueueIndexBitShift;
+
+    uint NextEnqueueIndex(uint queueInfo)
+    {
+        var count = GetQueueCount(queueInfo);
+
+        return 0; // TODO
+    }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
@@ -85,7 +93,9 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
 
             var index = start;
             var queue = parent.queue;
-            while (parent.Count > 0 && index <= queue.Length)
+            uint queueInfo;
+            while ((queueInfo = Volatile.Read(ref parent.queueInfo)) > 0
+                && index <= queue.Length)
             {
                 for (int i = start; i < queue.Length; i += step)
                 {
