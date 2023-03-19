@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,11 +8,16 @@ namespace MarcinGajda.Synchronization.Scheduling;
 internal sealed class MyThreadPoolScheduler : TaskScheduler
 {
     const int QueueSize = 32_768;
-    const int WrapAroundMask = QueueSize - 1;
+    const uint WrapAroundMask = QueueSize - 1;
     readonly Task?[] queue = new Task?[QueueSize];
-    readonly ImmutableArray<Thread> threads;
-    int enqueueIndex = 0;
-    int enqueuedCount = 0;
+    readonly Thread[] threads;
+
+
+    readonly int enqueueIndexBitShift;
+    uint queueInfo;
+    uint QueueInfo => Volatile.Read(ref queueInfo);
+    uint Count => QueueInfo & WrapAroundMask;
+    uint EnqueueIndex => (QueueInfo & ~WrapAroundMask) >> enqueueIndexBitShift;
 
     public MyThreadPoolScheduler(int threadCount = 4)
     {
@@ -21,12 +26,18 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
             throw new ArgumentOutOfRangeException(nameof(threadCount), threadCount, "Thread count has to be bigger then 0.");
         }
 
-        var threadsBuilder = ImmutableArray.CreateBuilder<Thread>(threadCount);
-        for (int i = 0; i < threadCount; i++)
+        enqueueIndexBitShift = BitOperations.TrailingZeroCount(QueueSize);
+        var perThread = QueueSize / threadCount;
+        threads = new Thread[threadCount];
+        for (int index = 0; index < threadCount; index++)
         {
-            /*threadsBuilder.Add(new Thread()) */ // Take something with preferred index range 
+            var thread = new Thread(worker => ((Worker)worker!).Work());
+            threads[index] = thread;
+            thread.Start(new Worker(
+                this,
+                index * perThread,
+                (index + 1) * perThread));
         }
-        threads = threadsBuilder.MoveToImmutable();
     }
 
     protected override void QueueTask(Task task)
@@ -34,18 +45,18 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
         SpinWait spinWait = new SpinWait();
         while (true)
         {
-            int enqueIdx = Volatile.Read(ref enqueueIndex);
-            if (Interlocked.CompareExchange(ref queue[enqueIdx], task, null) == null)
+            var info = queueInfo;
+            if (Interlocked.CompareExchange(ref queue[EnqueueIndex], task, null) == null)
             {
                 return;
             }
-            Interlocked.CompareExchange(ref enqueueIndex, NextEnqueueIndex(enqueIdx), enqueIdx);
+            Interlocked.CompareExchange(ref queueInfo, NextEnqueueIndex(info), info);
             spinWait.SpinOnce();
         }
     }
 
-    private static int NextEnqueueIndex(int current)
-        => ++current & WrapAroundMask;
+    private static uint NextEnqueueIndex(uint current)
+        => 0; // TODO
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
@@ -59,4 +70,30 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
     protected override IEnumerable<Task>? GetScheduledTasks()
         => null;
 
+    class Worker
+    {
+        private readonly MyThreadPoolScheduler parent;
+        private readonly int start;
+        private readonly int length;
+
+        public Worker(MyThreadPoolScheduler parent, int start, int length)
+        {
+            this.parent = parent;
+            this.start = start;
+            this.length = length;
+        }
+
+        internal void Work()
+        {
+            var queueWindow = parent.queue.AsSpan(start, length);
+            while (parent.Count > 0)
+            {
+                for (int i = 0; i < queueWindow.Length; i++)
+                {
+                    // First worker can be optimized to just try take right? maybe not
+                    //if (Interlocked.Exchange(ref ) // TODO
+                }
+            }
+        }
+    }
 }
