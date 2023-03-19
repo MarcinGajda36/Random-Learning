@@ -78,6 +78,11 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
 
         internal void Work()
         {
+            // Notes: 
+            // i can check ThreadPool.QueueUserWorkItem for ideas
+            // should enqueue wake workers?
+            // should worker wake next worker if he gets busy?
+
             var index = start;
             var queue = parent.queue;
             while (parent.Count > 0 && index <= queue.Length)
