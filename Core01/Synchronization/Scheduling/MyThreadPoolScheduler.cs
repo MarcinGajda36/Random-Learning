@@ -35,7 +35,7 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
             threads[index] = thread;
             thread.Start(new Worker(
                 this,
-                index * perThread,
+                index * perThread, // TODO Can i have them start at 0..4 and have 4 index step?
                 (index + 1) * perThread));
         }
     }
