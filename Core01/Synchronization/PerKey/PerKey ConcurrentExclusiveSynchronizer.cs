@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
+using MarcinGajda.Synchronization.Synchronizers;
 
 namespace MarcinGajda.Synchronizers.PerKey;
 

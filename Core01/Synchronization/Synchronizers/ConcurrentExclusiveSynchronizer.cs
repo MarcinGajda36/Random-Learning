@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronization.Synchronizers;
 
 internal class ConcurrentExclusiveSynchronizer
 {

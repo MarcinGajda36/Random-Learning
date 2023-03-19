@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronization.Synchronizers;
 public sealed class OptymisticAtomicInt
 {
     private int value;

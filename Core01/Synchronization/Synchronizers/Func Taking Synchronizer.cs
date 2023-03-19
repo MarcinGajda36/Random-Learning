@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronization.Synchronizers;
 internal sealed class Limiter : IDisposable
 {
     private readonly SemaphoreSlim limiter;

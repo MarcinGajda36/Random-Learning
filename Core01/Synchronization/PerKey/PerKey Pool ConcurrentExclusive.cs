@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using MarcinGajda.Synchronization.Synchronizers;
 using MarcinGajda.Synchronizers.Pooling;
 
 namespace MarcinGajda.Synchronizers;

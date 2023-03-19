@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronization.Synchronizers;
 
 public sealed class Synchronizer1 : IDisposable
 {
