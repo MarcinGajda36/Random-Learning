@@ -12,6 +12,7 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
     readonly Task?[] queue = new Task?[QueueSize];
     readonly ImmutableArray<Thread> threads;
     int enqueueIndex = 0;
+    int enqueuedCount = 0;
 
     public MyThreadPoolScheduler(int threadCount = 4)
     {
@@ -52,14 +53,10 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
         {
             return TryExecuteTask(task);
         }
-        var taskIndex = Array.IndexOf(queue, task);
-        if (taskIndex != -1 && Interlocked.CompareExchange(ref queue[taskIndex], null, task) == task)
-        {
-            return TryExecuteTask(task);
-        }
         return false;
     }
 
     protected override IEnumerable<Task>? GetScheduledTasks()
         => null;
+
 }
