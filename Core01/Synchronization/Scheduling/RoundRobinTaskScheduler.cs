@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MarcinGajda.Synchronization.Scheduling;
 internal sealed class RoundRobinTaskScheduler : TaskScheduler
 {
-    const int MaxWorkers = 4; // 2,4,8?
+    const int MaxWorkers = 4; // 4,8?
     readonly Worker[] workers = new Worker[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
@@ -17,8 +17,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
     {
         for (int index = 0; index < workers.Length; index++)
         {
-            var worker = new Worker(index, this);
-            workers[index] = worker;
+            workers[index] = new Worker(index, this);
             queues[index] = new ConcurrentQueue<Task>();
         }
         Array.ForEach(workers, worker => worker.Start());
@@ -70,7 +69,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             while (true)
             {
                 ++count;
-                DoQueue(queue);
+                DoQueue();
                 if ((count & 15) == 15) // Every 16
                 {
                     StealWork(1);
@@ -86,7 +85,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             }
         }
 
-        void DoQueue(ConcurrentQueue<Task> queue)
+        void DoQueue()
         {
             while (queue.TryDequeue(out var task))
             {
@@ -94,9 +93,9 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             }
         }
 
-        void StealWork(int stealOffset)
+        void StealWork(int offset)
         {
-            var queueIndex = (index + stealOffset) & (AllQueues.Length - 1);
+            var queueIndex = (index + offset) & (AllQueues.Length - 1);
             var queueToRob = AllQueues[queueIndex];
             int limit = 32;
             while (limit > 0 && queueToRob.TryDequeue(out var task))
