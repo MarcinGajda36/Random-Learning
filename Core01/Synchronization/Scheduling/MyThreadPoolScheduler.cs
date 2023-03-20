@@ -35,6 +35,10 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
         {
             var info = Volatile.Read(ref queueInfo);
             var enqueueIndex = GetEnqueueIndex(info);
+            // How to handle case?
+            // 2 Threads try to add, one lags behind and try idx = 0 and other is up-to date and tries idx = 1
+            // idx 1 succeeds because its correct but idx 0 replaces null because thread pool manage to take task already
+            // CompareExchange will make idx 0 compare invalid but we still replaced null so next if will fail
             if (Interlocked.CompareExchange(ref queue[enqueueIndex], task, null) == null)
             {
                 Interlocked.CompareExchange(ref queueInfo, NextEnqueueIndex(info), info);
