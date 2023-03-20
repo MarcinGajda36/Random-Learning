@@ -78,7 +78,8 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
                 {
                     StealWork(2);
                 }
-                else if ((count & 63) == 63)
+
+                if ((count & 63) == 63) // Every 64
                 {
                     Thread.Sleep(3);
                 }
