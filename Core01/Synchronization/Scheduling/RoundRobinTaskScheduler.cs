@@ -73,11 +73,11 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
                 DoQueue(queue);
                 if ((count & 15) == 15) // Every 16
                 {
-                    // Steal
+                    StealWork(1);
                 }
                 else if ((count & 31) == 0) // Every 32
                 {
-
+                    StealWork(2);
                 }
                 else if ((count & 3) == 3) // Every 4 except after (count & 15)
                 {
@@ -96,7 +96,14 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void StealWork(int stealOffset)
         {
+            var queueIndex = (index + stealOffset) & (AllQueues.Length - 1);
+            var queueToRob = AllQueues[queueIndex];
             int limit = 32;
+            while (limit > 0 && queueToRob.TryDequeue(out var task))
+            {
+                parent.TryExecuteTask(task);
+                --limit;
+            }
         }
     }
 }
