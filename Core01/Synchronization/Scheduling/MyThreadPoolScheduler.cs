@@ -35,7 +35,7 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
         {
             var info = Volatile.Read(ref queueInfo);
             var enqueueIndex = GetEnqueueIndex(info);
-            // How to handle case?
+            // TODO How to handle case?
             // 2 Threads try to add, one lags behind and try idx = 0 and other is up-to date and tries idx = 1
             // idx 1 succeeds because its correct but idx 0 replaces null because thread pool manage to take task already
             // CompareExchange will make idx 0 compare invalid but we still replaced null so next if will fail
@@ -59,7 +59,7 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
         var enqueueIndex = GetEnqueueIndex(queueInfo);
         enqueueIndex = (enqueueIndex + 1) & WrapAroundMask;
         enqueueIndex <<= enqueueIndexBitShift;
-        return enqueueIndex + count;
+        return enqueueIndex | count;
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
