@@ -70,7 +70,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             {
                 ++count;
                 DoQueue();
-                if ((count & 15) == 15) // Every 16
+                if ((count & 15) == 15) // Every 16 
                 {
                     StealWork(1);
                 }
@@ -79,7 +79,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
                     StealWork(2);
                 }
 
-                if ((count & 63) == 63) // Every 64
+                if ((count & 63) == 0) // Every 64
                 {
                     Thread.Sleep(3);
                 }
