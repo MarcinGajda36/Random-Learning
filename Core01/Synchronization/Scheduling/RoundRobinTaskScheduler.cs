@@ -10,7 +10,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
     const int MaxWorkers = 4; // 2,4,8?
     readonly Worker[] workers = new Worker[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
-    const int WrapAroundMask = MaxWorkers - 1;
+    const int QueueIndexMask = MaxWorkers - 1;
     int index;
 
     public RoundRobinTaskScheduler()
@@ -26,7 +26,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
     protected override void QueueTask(Task task)
     {
-        var index = Interlocked.Increment(ref this.index) & WrapAroundMask;
+        var index = Interlocked.Increment(ref this.index) & QueueIndexMask;
         queues[index].Enqueue(task);
     }
 
@@ -79,7 +79,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
                 {
 
                 }
-                else
+                else if ((count & 3) == 3) // Every 4 except after (count & 15)
                 {
                     Thread.Sleep(3);
                 }
