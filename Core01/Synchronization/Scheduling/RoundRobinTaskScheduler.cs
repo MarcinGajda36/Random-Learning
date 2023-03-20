@@ -47,7 +47,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
     class Worker
     {
         readonly RoundRobinTaskScheduler parent;
-        readonly ConcurrentQueue<Task> queue;
+        readonly ConcurrentQueue<Task> queue; // I can try something like in SpiningPool
         readonly Thread thread;
         readonly int index;
 
@@ -70,18 +70,20 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             {
                 ++count;
                 DoQueue();
-                if ((count & 15) == 15) // Every 16 
-                {
-                    StealWork(1);
-                }
-                else if ((count & 31) == 0) // Every 32
-                {
-                    StealWork(2);
-                }
-
                 if ((count & 63) == 0) // Every 64
                 {
                     Thread.Sleep(3);
+                    continue;
+                }
+
+                switch (count & 15) // Every 16
+                {
+                    case 1:
+                        StealWork(1);
+                        break;
+                    case 0:
+                        StealWork(2);
+                        break;
                 }
             }
         }
