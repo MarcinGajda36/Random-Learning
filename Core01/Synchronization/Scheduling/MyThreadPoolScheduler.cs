@@ -51,9 +51,11 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
 
     uint NextEnqueueIndex(uint queueInfo)
     {
-        var count = GetQueueCount(queueInfo);
-
-        return 0; // TODO
+        var count = GetQueueCount(queueInfo) + 1;
+        var enqueueIndex = GetEnqueueIndex(queueInfo);
+        enqueueIndex = (enqueueIndex + 1) & WrapAroundMask;
+        enqueueIndex <<= enqueueIndexBitShift;
+        return enqueueIndex + count;
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
