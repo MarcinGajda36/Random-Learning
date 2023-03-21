@@ -69,25 +69,18 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             while (true)
             {
                 ++count;
-                DoQueue();
+                CurrentQueue();
+                OtherQueue(1);
+
                 if ((count & 63) == 0) // Every 64
                 {
-                    Thread.Sleep(3);
+                    Thread.Sleep(1);
                     continue;
-                }
-
-                if ((count & 1) == 1)
-                {
-                    StealWork(2);
-                }
-                else
-                {
-                    StealWork(1);
                 }
             }
         }
 
-        void DoQueue()
+        void CurrentQueue()
         {
             while (queue.TryDequeue(out var task))
             {
@@ -95,7 +88,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             }
         }
 
-        void StealWork(int offset)
+        void OtherQueue(int offset)
         {
             var queueIndex = (index + offset) & QueueIndexMask;
             var queueToRob = AllQueues[queueIndex];
