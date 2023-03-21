@@ -97,7 +97,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void StealWork(int offset)
         {
-            var queueIndex = (index + offset) & (AllQueues.Length - 1);
+            var queueIndex = (index + offset) & QueueIndexMask;
             var queueToRob = AllQueues[queueIndex];
             int limit = 32;
             while (limit > 0 && queueToRob.TryDequeue(out var task))
