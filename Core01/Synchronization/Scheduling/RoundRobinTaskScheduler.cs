@@ -76,14 +76,13 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
                     continue;
                 }
 
-                switch (count & 15) // Every 16
+                if ((count & 1) == 1)
                 {
-                    case 0:
-                        StealWork(2);
-                        break;
-                    case 15:
-                        StealWork(1);
-                        break;
+                    StealWork(2);
+                }
+                else
+                {
+                    StealWork(1);
                 }
             }
         }
