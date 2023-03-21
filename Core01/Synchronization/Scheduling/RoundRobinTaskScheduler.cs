@@ -65,14 +65,17 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void Work()
         {
-            SpinWait spinWait = new SpinWait();
             int count = -1;
             while (true)
             {
                 ++count;
                 CurrentQueue();
                 OtherQueue(1);
-                spinWait.SpinOnce();
+
+                if (queue.IsEmpty)
+                {
+                    Thread.Yield();
+                }
             }
         }
 
