@@ -65,10 +65,8 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void Work()
         {
-            int count = -1;
             while (true)
             {
-                ++count;
                 CurrentQueue();
                 OtherQueue(1);
 
