@@ -15,19 +15,19 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    internal readonly record struct Message<TValue>(MessageType Type, TValue? Value, Exception? Exception)
+    internal readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception)
     {
         public static Message<TValue> Live(TValue value)
-            => new(MessageType.Live, value, null);
+            => new(MessageType.Live, new[] { value }, null);
 
-        public static Message<TValue> Historical(TValue value)
+        public static Message<TValue> Historical(IList<TValue> value)
             => new(MessageType.Historical, value, null);
 
         public static Message<TValue> HistoricalError(Exception exception)
-            => new(MessageType.HistoricalError, default, exception);
+            => new(MessageType.HistoricalError, Array.Empty<TValue>(), exception);
 
         public static Message<TValue> HistoricalCompleted()
-            => new(MessageType.HistoricalCompleted, default, null);
+            => new(MessageType.HistoricalCompleted, Array.Empty<TValue>(), null);
     }
 
     internal sealed class ConcatState<TValue>
@@ -41,20 +41,17 @@ public static class HistoricalToLive2
             {
                 if (hasHistoricalEnded)
                 {
-                    return new[] { message.Value! };
+                    return message.Value;
                 }
 
-                if (liveBuffer is null)
-                {
-                    liveBuffer = new List<TValue>();
-                }
-                liveBuffer.Add(message.Value!);
+                liveBuffer ??= new List<TValue>();
+                liveBuffer.Add(message.Value[0]);
                 return Enumerable.Empty<TValue>();
             }
 
             if (message.Type is MessageType.Historical)
             {
-                return new[] { message.Value! };
+                return message.Value;
             }
 
             if (message.Type is MessageType.HistoricalCompleted)
@@ -98,24 +95,13 @@ public static class HistoricalToLive2
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
+        .ToList()
         .Materialize()
-        .Select(notification =>
+        .Select(notification => notification.Kind switch
         {
-            if (notification.Kind is NotificationKind.OnNext)
-            {
-                return Message<TValue>.Historical(notification.Value);
-            }
-
-            if (notification.Kind is NotificationKind.OnCompleted)
-            {
-                return Message<TValue>.HistoricalCompleted();
-            }
-
-            if (notification.Kind is NotificationKind.OnError)
-            {
-                return Message<TValue>.HistoricalError(notification.Exception);
-            }
-
-            throw new InvalidOperationException($"Unknown notification: '{notification}'.");
+            NotificationKind.OnNext => Message<TValue>.Historical(notification.Value),
+            NotificationKind.OnError => Message<TValue>.HistoricalError(notification.Exception),
+            NotificationKind.OnCompleted => Message<TValue>.HistoricalCompleted(),
+            _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
 }
