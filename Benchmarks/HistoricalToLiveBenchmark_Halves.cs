@@ -1,5 +1,5 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using MarcinGajda.RXTests;
@@ -40,14 +40,14 @@ public class HistoricalToLiveBenchmark_Halves
     //}
 
     [Benchmark]
-    public void HistoricalToLive2_StructAndMutation()
+    public async Task HistoricalToLive2_StructAndMutation()
     {
         using var live = new Subject<int>();
         using var historical = new Subject<int>();
 
-        using var merge = HistoricalToLive2
+        var subscrible = HistoricalToLive2
             .ConcatLiveAfterHistory(live, historical)
-            .Subscribe();
+            .ToTask();
 
         int half = ElementsCount / 2;
         for (int i = 0; i < half; i++)
@@ -63,5 +63,7 @@ public class HistoricalToLiveBenchmark_Halves
         {
             live.OnNext(i);
         }
+        live.OnCompleted();
+        await subscrible;
     }
 }
