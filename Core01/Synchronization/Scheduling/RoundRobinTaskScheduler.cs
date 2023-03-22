@@ -47,17 +47,18 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
     class Worker
     {
         readonly RoundRobinTaskScheduler parent;
-        readonly ConcurrentQueue<Task> queue; // I can try something like in SpiningPool
+        readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
+        readonly ConcurrentQueue<Task> neighborQueue;
         readonly Thread thread;
-        readonly int index;
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
         public Worker(int index, RoundRobinTaskScheduler parent)
         {
             this.parent = parent;
-            this.index = index;
-            queue = parent.queues[index];
+            currentQueue = parent.queues[index];
+            var queueIndex = (index + 1) & QueueIndexMask;
+            neighborQueue = AllQueues[queueIndex];
             thread = new Thread(state => ((Worker)state!).Work());
         }
 
@@ -68,9 +69,9 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             while (true)
             {
                 CurrentQueue();
-                OtherQueue(1);
+                HelpNeighbor();
 
-                if (queue.IsEmpty)
+                if (currentQueue.IsEmpty)
                 {
                     Thread.Yield();
                 }
@@ -79,18 +80,16 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void CurrentQueue()
         {
-            while (queue.TryDequeue(out var task))
+            while (currentQueue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
             }
         }
 
-        void OtherQueue(int offset)
+        void HelpNeighbor()
         {
-            var queueIndex = (index + offset) & QueueIndexMask;
-            var queueToRob = AllQueues[queueIndex];
-            int limit = 32;
-            while (limit > 0 && queueToRob.TryDequeue(out var task))
+            var limit = 32;
+            while (limit > 0 && neighborQueue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
                 --limit;
