@@ -85,7 +85,7 @@ public static class HistoricalToLive2
             HandleNextMessage)
         .SelectMany(state => state.Return);
 
-    internal static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
+    private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
         => previous with { Return = previous.State.HandleNextMessage(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
