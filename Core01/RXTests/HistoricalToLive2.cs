@@ -16,18 +16,20 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    internal readonly record struct Message<TValue>(MessageType Type, TValue[] Value, Exception? Exception)
+    internal readonly record struct Message<TValue>(MessageType Type, TValue[] Value, Exception? Exception);
+
+    static class Message
     {
-        public static Message<TValue> Live(TValue value)
+        public static Message<TValue> Live<TValue>(TValue value)
             => new(MessageType.Live, new[] { value }, null);
 
-        public static Message<TValue> Historical(TValue[] value)
+        public static Message<TValue> Historical<TValue>(TValue[] value)
             => new(MessageType.Historical, value, null);
 
-        public static Message<TValue> HistoricalError(Exception exception)
+        public static Message<TValue> HistoricalError<TValue>(Exception exception)
             => new(MessageType.HistoricalError, Array.Empty<TValue>(), exception);
 
-        public static Message<TValue> HistoricalCompleted()
+        public static Message<TValue> HistoricalCompleted<TValue>()
             => new(MessageType.HistoricalCompleted, Array.Empty<TValue>(), null);
     }
 
@@ -89,7 +91,7 @@ public static class HistoricalToLive2
         => previous with { Return = previous.State.HandleNextMessage(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live.Select(Message<TValue>.Live);
+        => live.Select(Message.Live);
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
@@ -97,9 +99,9 @@ public static class HistoricalToLive2
         .Materialize()
         .Select(notification => notification.Kind switch
         {
-            NotificationKind.OnNext => Message<TValue>.Historical(notification.Value),
-            NotificationKind.OnError => Message<TValue>.HistoricalError(notification.Exception),
-            NotificationKind.OnCompleted => Message<TValue>.HistoricalCompleted(),
+            NotificationKind.OnNext => Message.Historical(notification.Value),
+            NotificationKind.OnError => Message.HistoricalError<TValue>(notification.Exception),
+            NotificationKind.OnCompleted => Message.HistoricalCompleted<TValue>(),
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
 }
