@@ -160,3 +160,9 @@ only arrays
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 121.8 us | 0.46 us | 0.39 us |    1 | 13.5498 | 1.4648 |  83.15 KB |
+
+
+back to IList + 16ms buffer 
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 120.9 us | 0.10 us | 0.09 us |    1 | 13.5498 | 1.4648 |  83.15 KB |
