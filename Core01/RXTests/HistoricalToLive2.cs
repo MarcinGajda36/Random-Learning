@@ -65,7 +65,7 @@ public static class HistoricalToLive2
                     }
                     var buffered = liveBuffer;
                     liveBuffer = null;
-                    return buffered.ToArray();
+                    return buffered;
 
                 default:
                     throw new InvalidOperationException($"Unknown message: '{message}'.");
@@ -93,7 +93,7 @@ public static class HistoricalToLive2
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
-        .ToList()
+        .ToArray()
         .Materialize()
         .Select(notification => notification.Kind switch
         {

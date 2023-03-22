@@ -145,3 +145,8 @@ live buffer 8
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 133.6 us | 0.94 us | 0.83 us |    1 | 10.7422 | 1.2207 |  67.17 KB |
+
+historical back to toArray + remove toArray buffer
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 122.0 us | 0.26 us | 0.22 us |    1 | 13.4277 | 1.4648 |  83.15 KB |
