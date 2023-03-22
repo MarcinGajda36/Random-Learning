@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 namespace MarcinGajda.RXTests;
 public static class HistoricalToLive2
 {
-    public enum MessageType : byte
+    internal enum MessageType : byte
     {
         Live = 0,
         Historical,
@@ -17,7 +17,7 @@ public static class HistoricalToLive2
 
     internal readonly record struct Message<TValue>(MessageType Type, TValue[] Value, Exception? Exception);
 
-    static class Message
+    private static class Message
     {
         public static Message<TValue> Live<TValue>(TValue value)
             => new(MessageType.Live, new[] { value }, null);
