@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MarcinGajda.Synchronization.Scheduling;
 internal sealed class RoundRobinTaskScheduler : TaskScheduler
 {
-    const int MaxWorkers = 4; // 4,8?
+    const int MaxWorkers = 4; // 2,4,8 .. any power of 2 
     readonly Worker[] workers = new Worker[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
