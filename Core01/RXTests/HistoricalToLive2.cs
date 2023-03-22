@@ -35,7 +35,7 @@ public static class HistoricalToLive2
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
 
-        public TValue[] HandleNextMessage(in Message<TValue> message)
+        public TValue[] HandleNextMessage(Message<TValue> message)
         {
             switch (message.Type)
             {
@@ -80,11 +80,11 @@ public static class HistoricalToLive2
         .Merge(GetHistoricalMessages(historical))
         .Scan(
             new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
-            (state, message) => HandleNextMessage(state, in message))
+            HandleNextMessage)
         .SelectMany(state => state.Return);
 
-    internal static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, in Message<TValue> message)
-        => previous with { Return = previous.State.HandleNextMessage(in message) };
+    internal static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
+        => previous with { Return = previous.State.HandleNextMessage(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(Message<TValue>.Live);
