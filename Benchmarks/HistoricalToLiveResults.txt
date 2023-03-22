@@ -97,3 +97,8 @@ unnecessary lambda
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 283.3 us | 0.26 us | 0.23 us |    1 | 39.5508 | 0.9766 |  242.7 KB |
+
+switch statement 
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 284.0 us | 0.29 us | 0.25 us |    1 | 39.5508 | 0.9766 |  242.7 KB |

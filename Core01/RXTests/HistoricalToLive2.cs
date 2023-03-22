@@ -37,41 +37,37 @@ public static class HistoricalToLive2
 
         public IEnumerable<TValue> HandleNextMessage(in Message<TValue> message)
         {
-            if (message.Type is MessageType.Live)
+            switch (message.Type)
             {
-                if (hasHistoricalEnded)
-                {
-                    return message.Value;
-                }
+                case MessageType.Live:
+                    if (hasHistoricalEnded)
+                    {
+                        return message.Value;
+                    }
 
-                liveBuffer ??= new List<TValue>();
-                liveBuffer.Add(message.Value[0]);
-                return Enumerable.Empty<TValue>();
-            }
-
-            if (message.Type is MessageType.Historical)
-            {
-                return message.Value;
-            }
-
-            if (message.Type is MessageType.HistoricalCompleted)
-            {
-                hasHistoricalEnded = true;
-                if (liveBuffer is null)
-                {
+                    liveBuffer ??= new List<TValue>();
+                    liveBuffer.Add(message.Value[0]);
                     return Enumerable.Empty<TValue>();
-                }
-                var buffered = liveBuffer;
-                liveBuffer = null;
-                return buffered;
-            }
 
-            if (message.Type is MessageType.HistoricalError)
-            {
-                throw message.Exception!;
-            }
+                case MessageType.Historical:
+                    return message.Value;
 
-            throw new InvalidOperationException($"Unknown message: '{message}'.");
+                case MessageType.HistoricalError:
+                    throw message.Exception!;
+
+                case MessageType.HistoricalCompleted:
+                    hasHistoricalEnded = true;
+                    if (liveBuffer is null)
+                    {
+                        return Enumerable.Empty<TValue>();
+                    }
+                    var buffered = liveBuffer;
+                    liveBuffer = null;
+                    return buffered;
+
+                default:
+                    throw new InvalidOperationException($"Unknown message: '{message}'.");
+            }
         }
     }
 
