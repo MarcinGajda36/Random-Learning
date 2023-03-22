@@ -15,12 +15,12 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    internal readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception)
+    internal readonly record struct Message<TValue>(MessageType Type, TValue[] Value, Exception? Exception)
     {
         public static Message<TValue> Live(TValue value)
             => new(MessageType.Live, new[] { value }, null);
 
-        public static Message<TValue> Historical(IList<TValue> value)
+        public static Message<TValue> Historical(TValue[] value)
             => new(MessageType.Historical, value, null);
 
         public static Message<TValue> HistoricalError(Exception exception)
@@ -35,7 +35,7 @@ public static class HistoricalToLive2
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
 
-        public IEnumerable<TValue> HandleNextMessage(in Message<TValue> message)
+        public TValue[] HandleNextMessage(in Message<TValue> message)
         {
             switch (message.Type)
             {
@@ -47,7 +47,7 @@ public static class HistoricalToLive2
 
                     liveBuffer ??= new List<TValue>();
                     liveBuffer.Add(message.Value[0]);
-                    return Enumerable.Empty<TValue>();
+                    return Array.Empty<TValue>();
 
                 case MessageType.Historical:
                     return message.Value;
@@ -59,11 +59,11 @@ public static class HistoricalToLive2
                     hasHistoricalEnded = true;
                     if (liveBuffer is null)
                     {
-                        return Enumerable.Empty<TValue>();
+                        return Array.Empty<TValue>();
                     }
                     var buffered = liveBuffer;
                     liveBuffer = null;
-                    return buffered;
+                    return buffered.ToArray();
 
                 default:
                     throw new InvalidOperationException($"Unknown message: '{message}'.");
@@ -71,7 +71,7 @@ public static class HistoricalToLive2
         }
     }
 
-    internal readonly record struct Concat<TValue>(IEnumerable<TValue> Return, ConcatState<TValue> State);
+    internal readonly record struct Concat<TValue>(TValue[] Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -79,7 +79,7 @@ public static class HistoricalToLive2
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(
-            new Concat<TValue>(Enumerable.Empty<TValue>(), new ConcatState<TValue>()),
+            new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
             (state, message) => HandleNextMessage(state, in message))
         .SelectMany(state => state.Return);
 
@@ -91,7 +91,7 @@ public static class HistoricalToLive2
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
-        .ToList()
+        .ToArray()
         .Materialize()
         .Select(notification => notification.Kind switch
         {
