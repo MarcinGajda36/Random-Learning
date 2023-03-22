@@ -15,14 +15,14 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    internal readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception);
+    internal readonly record struct Message<TValue>(MessageType Type, TValue[] Value, Exception? Exception);
 
     private static class Message
     {
         public static Message<TValue> Live<TValue>(IList<TValue> value)
-            => new(MessageType.Live, value, null);
+            => new(MessageType.Live, value.ToArray(), null);
 
-        public static Message<TValue> Historical<TValue>(IList<TValue> value)
+        public static Message<TValue> Historical<TValue>(TValue[] value)
             => new(MessageType.Historical, value, null);
 
         public static Message<TValue> HistoricalError<TValue>(Exception exception)
@@ -37,7 +37,7 @@ public static class HistoricalToLive2
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
 
-        public IList<TValue> HandleNextMessage(Message<TValue> message)
+        public TValue[] HandleNextMessage(Message<TValue> message)
         {
             switch (message.Type)
             {
@@ -73,7 +73,7 @@ public static class HistoricalToLive2
         }
     }
 
-    internal readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    internal readonly record struct Concat<TValue>(TValue[] Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
