@@ -135,3 +135,8 @@ static message class
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 253.6 us | 0.14 us | 0.12 us |    1 | 43.4570 | 2.9297 | 266.74 KB |
+
+no AggressiveInlining HandleNextMessage
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 253.4 us | 0.45 us | 0.40 us |    1 | 43.4570 | 2.9297 | 266.74 KB |
