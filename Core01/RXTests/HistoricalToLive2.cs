@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 namespace MarcinGajda.RXTests;
 public static class HistoricalToLive2
 {
-    internal enum MessageType : byte
+    private enum MessageType : byte
     {
         Live = 0,
         Historical,
@@ -15,7 +15,7 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    internal readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception);
+    private readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception);
 
     private static class Message
     {
@@ -32,7 +32,7 @@ public static class HistoricalToLive2
             => new(MessageType.HistoricalCompleted, Array.Empty<TValue>(), null);
     }
 
-    internal sealed class ConcatState<TValue>
+    private sealed class ConcatState<TValue>
     {
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
@@ -73,7 +73,7 @@ public static class HistoricalToLive2
         }
     }
 
-    internal readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
