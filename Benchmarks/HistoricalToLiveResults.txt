@@ -140,3 +140,8 @@ no AggressiveInlining HandleNextMessage
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 253.4 us | 0.45 us | 0.40 us |    1 | 43.4570 | 2.9297 | 266.74 KB |
+
+live buffer 8
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 133.6 us | 0.94 us | 0.83 us |    1 | 10.7422 | 1.2207 |  67.17 KB |
