@@ -65,7 +65,7 @@ public static class HistoricalToLive2
                     }
                     var buffered = liveBuffer;
                     liveBuffer = null;
-                    return buffered;
+                    return buffered.ToArray();
 
                 default:
                     throw new InvalidOperationException($"Unknown message: '{message}'.");

@@ -150,3 +150,8 @@ historical back to toArray + remove toArray buffer
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 122.0 us | 0.26 us | 0.22 us |    1 | 13.4277 | 1.4648 |  83.15 KB |
+
+toArray buffer
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 119.5 us | 0.08 us | 0.07 us |    1 | 13.5498 | 1.4648 |  83.15 KB |
