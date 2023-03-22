@@ -119,3 +119,9 @@ no is's
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 253.7 us | 0.48 us | 0.45 us |    1 | 43.4570 | 2.9297 | 266.74 KB |
+
+
+static lambda instead of HandleNextMessage
+|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
+|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
+| HistoricalToLive2_StructAndMutation | 256.0 us | 0.30 us | 0.26 us |    1 | 43.4570 | 2.9297 | 266.74 KB |
