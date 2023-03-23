@@ -193,3 +193,12 @@ more sizes
 |   HistoricalToLive2_Mutable |        250000 | 14.852 ms | 0.2855 ms | 0.3287 ms |    2 |  1000.0000 | 1000.0000 | 1000.0000 |   5077.8 KB |
 |   HistoricalToLive2_Mutable |         10000 | 14.875 ms | 0.2952 ms | 0.5012 ms |    2 |          - |         - |         - |    299.5 KB |
 | HistoricalToLive2_Immutable |        250000 | 46.712 ms | 0.6345 ms | 0.5935 ms |    3 | 11000.0000 | 1000.0000 |         - | 73245.23 KB |
+
+
+unbuffered live
+|                      Method | ElementsCount |      Mean |     Error |    StdDev | Rank |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|---------------------------- |-------------- |----------:|----------:|----------:|-----:|-----------:|----------:|----------:|------------:|
+|   HistoricalToLive2_Mutable |         10000 |  1.234 ms | 0.0087 ms | 0.0077 ms |    1 |          - |         - |         - |   703.41 KB |
+| HistoricalToLive2_Immutable |         10000 |  2.489 ms | 0.0240 ms | 0.0225 ms |    2 |          - |         - |         - |  2932.73 KB |
+|   HistoricalToLive2_Mutable |        250000 | 20.087 ms | 0.1379 ms | 0.1533 ms |    3 |  1000.0000 | 1000.0000 | 1000.0000 | 15771.43 KB |
+| HistoricalToLive2_Immutable |        250000 | 47.581 ms | 0.5692 ms | 0.5324 ms |    4 | 11000.0000 | 1000.0000 |         - | 73245.23 KB |
