@@ -53,6 +53,10 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
+        // How to replace ConcurrentQueue<Task>?
+        // 1) Writing to some buffer (maybe array from pool)
+        // the free worker could take entire buffer and queues would start a new one
+        // but how to deal with buffer re-size?
         public Worker(int index, RoundRobinTaskScheduler parent)
         {
             this.parent = parent;
