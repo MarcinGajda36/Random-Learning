@@ -202,3 +202,11 @@ unbuffered live
 | HistoricalToLive2_Immutable |         10000 |  2.489 ms | 0.0240 ms | 0.0225 ms |    2 |          - |         - |         - |  2932.73 KB |
 |   HistoricalToLive2_Mutable |        250000 | 20.087 ms | 0.1379 ms | 0.1533 ms |    3 |  1000.0000 | 1000.0000 | 1000.0000 | 15771.43 KB |
 | HistoricalToLive2_Immutable |        250000 | 47.581 ms | 0.5692 ms | 0.5324 ms |    4 | 11000.0000 | 1000.0000 |         - | 73245.23 KB |
+
+toList historical
+|                      Method | ElementsCount |      Mean |     Error |    StdDev | Rank |       Gen0 |      Gen1 |   Allocated |
+|---------------------------- |-------------- |----------:|----------:|----------:|-----:|-----------:|----------:|------------:|
+|   HistoricalToLive2_Mutable |         10000 |  1.232 ms | 0.0094 ms | 0.0079 ms |    1 |          - |         - |   664.33 KB |
+| HistoricalToLive2_Immutable |         10000 |  2.502 ms | 0.0225 ms | 0.0211 ms |    2 |          - |         - |  2932.73 KB |
+|   HistoricalToLive2_Mutable |        250000 | 19.246 ms | 0.3844 ms | 0.4113 ms |    3 |  1000.0000 |         - | 14794.52 KB |
+| HistoricalToLive2_Immutable |        250000 | 46.718 ms | 0.6250 ms | 0.5846 ms |    4 | 11000.0000 | 1000.0000 | 73245.23 KB |

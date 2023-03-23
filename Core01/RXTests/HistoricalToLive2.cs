@@ -93,7 +93,7 @@ public static class HistoricalToLive2
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
-        .ToArray()
+        .ToList()
         .Materialize()
         .Select(notification => notification.Kind switch
         {
