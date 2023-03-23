@@ -1,4 +1,5 @@
-﻿using System.Reactive.Subjects;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
@@ -42,11 +43,13 @@ public class HistoricalToLiveBenchmark_Halves
     [Benchmark]
     public async Task HistoricalToLive2_StructAndMutation()
     {
+        const int LastValue = int.MaxValue;
         using var live = new Subject<int>();
         using var historical = new Subject<int>();
 
         var subscrible = HistoricalToLive2
             .ConcatLiveAfterHistory(live, historical)
+            .FirstAsync(x => x == LastValue)
             .ToTask();
 
         int half = ElementsCount / 2;
@@ -63,7 +66,11 @@ public class HistoricalToLiveBenchmark_Halves
         {
             live.OnNext(i);
         }
-        live.OnCompleted();
-        await subscrible;
+
+        live.OnNext(LastValue);
+        if (await subscrible != LastValue)
+        {
+            throw new Exception("Max not seen");
+        }
     }
 }

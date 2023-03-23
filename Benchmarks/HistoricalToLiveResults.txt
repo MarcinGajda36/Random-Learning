@@ -177,3 +177,4 @@ better benchmark
 |                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
 |------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
 | HistoricalToLive2_StructAndMutation | 168.9 us | 0.26 us | 0.23 us |    1 | 13.4277 | 1.7090 |  83.27 KB |
+
