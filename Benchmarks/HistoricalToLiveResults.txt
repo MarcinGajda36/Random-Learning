@@ -178,3 +178,9 @@ waiting for last value
 |------------------------------------ |---------:|---------:|---------:|-----:|--------:|----------:|
 | HistoricalToLive2_StructAndMutation | 15.70 ms | 0.282 ms | 0.264 ms |    1 | 15.6250 | 115.66 KB |
 
+
+rewriting benchmarks 
+|                      Method | ElementsCount |      Mean |     Error |    StdDev | Rank |  Allocated |
+|---------------------------- |-------------- |----------:|----------:|----------:|-----:|-----------:|
+| HistoricalToLive2_Immutable |         10000 |  2.481 ms | 0.0192 ms | 0.0180 ms |    1 | 2932.73 KB |
+|   HistoricalToLive2_Mutable |         10000 | 14.880 ms | 0.2910 ms | 0.4530 ms |    2 |   299.5 KB |

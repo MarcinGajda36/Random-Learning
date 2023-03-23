@@ -4,6 +4,12 @@ namespace Benchmarks;
 
 internal class Program
 {
-    private static void Main(string[] args)
-        => BenchmarkRunner.Run<HistoricalToLiveBenchmark_Halves>();
+    public static Task Main(string[] args)
+    {
+        //var s = new HistoricalToLiveBenchmark_Halves();
+        //s.ElementsCount = 1000;
+        //await s.HistoricalToLive2_Mutable();
+        BenchmarkRunner.Run<HistoricalToLiveBenchmark_Halves>();
+        return Task.CompletedTask;
+    }
 }

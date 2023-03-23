@@ -3,6 +3,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using LanguageExt;
 using MarcinGajda.RXTests;
 
 namespace Benchmarks;
@@ -12,65 +13,67 @@ namespace Benchmarks;
 [RankColumn]
 public class HistoricalToLiveBenchmark_Halves
 {
-    private const int ElementsCount = 4096;
 
-    //[Benchmark]
-    //public void HistoricalToLive_UnionAndImmutable()
-    //{
-    //    using var live = new Subject<int>();
-    //    using var historical = new Subject<int>();
+    [Params(10_000)]
+    public int ElementsCount { get; set; }
 
-    //    using var merge = HistoricalToLive
-    //        .ConcatLiveAfterHistory(live, historical)
-    //        .Subscribe();
+    const int LastValue = int.MaxValue;
+    private Subject<int> Live { get; set; } = new();
+    private Subject<int> Historical { get; set; } = new();
 
-    //    int half = ElementsCount / 2;
-    //    for (int i = 0; i < half; i++)
-    //    {
-    //        live.OnNext(i);
-    //    }
-    //    for (int i = 0; i < ElementsCount; i++)
-    //    {
-    //        historical.OnNext(i);
-    //    }
-    //    historical.OnCompleted();
-    //    for (int i = half; i < ElementsCount; i++)
-    //    {
-    //        live.OnNext(i);
-    //    }
-    //}
-
-    [Benchmark]
-    public async Task HistoricalToLive2_StructAndMutation()
+    [IterationSetup]
+    public void SetUp()
     {
-        const int LastValue = int.MaxValue;
-        using var live = new Subject<int>();
-        using var historical = new Subject<int>();
+        Live?.Dispose();
+        Live = new Subject<int>();
 
-        var subscrible = HistoricalToLive2
-            .ConcatLiveAfterHistory(live, historical)
-            .FirstAsync(x => x == LastValue)
+        Historical?.Dispose();
+        Historical = new Subject<int>();
+    }
+
+    readonly record struct HistoricalLivePair(IObservable<int> Historical, IObservable<int> Live);
+    Task WaitFor2LastValues(Func<HistoricalLivePair, IObservable<int>> subscribtion)
+    {
+        var task = subscribtion(new(Historical, Live))
+            .Where(x => x == LastValue)
+            .Take(2)
             .ToTask();
 
         int half = ElementsCount / 2;
         for (int i = 0; i < half; i++)
         {
-            live.OnNext(i);
+            Historical.OnNext(i);
         }
-        for (int i = 0; i < ElementsCount; i++)
+        for (int i = 0; i < half; i++)
         {
-            historical.OnNext(i);
+            Live.OnNext(i);
         }
-        historical.OnCompleted();
         for (int i = half; i < ElementsCount; i++)
         {
-            live.OnNext(i);
+            Historical.OnNext(i);
+        }
+        Historical.OnNext(LastValue);
+        Historical.OnCompleted();
+
+        for (int i = half; i < ElementsCount; i++)
+        {
+            Live.OnNext(i);
         }
 
-        live.OnNext(LastValue);
-        if (await subscrible != LastValue)
-        {
-            throw new Exception("Max not seen");
-        }
+        Live.OnNext(LastValue);
+
+        return task;
+    }
+
+    [Benchmark]
+    public Task HistoricalToLive2_Immutable()
+    {
+        return WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
+    }
+
+    [Benchmark]
+    public Task HistoricalToLive2_Mutable()
+    {
+        return WaitFor2LastValues(pair => HistoricalToLive2.ConcatLiveAfterHistory(pair.Live, pair.Historical));
     }
 }
