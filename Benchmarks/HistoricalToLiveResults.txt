@@ -232,3 +232,11 @@ buffer 5ms for live in mutable
 |   HistoricalToLive2_Mutable |       1000000 |  46.261 ms | 0.3782 ms | 0.3537 ms |    3 |  4000.0000 | 4000.0000 | 4000.0000 |  17852.48 KB |
 | HistoricalToLive2_Immutable |        250000 |  47.864 ms | 0.5124 ms | 0.4793 ms |    4 | 11000.0000 | 1000.0000 |         - |  73245.23 KB |
 | HistoricalToLive2_Immutable |       1000000 | 195.533 ms | 2.0479 ms | 1.8154 ms |    5 | 47000.0000 | 3000.0000 | 1000.0000 | 292972.12 KB |
+
+
+no buffers IList
+|                    Method | ElementsCount |      Mean |     Error |    StdDev | Rank |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|-----:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.234 ms | 0.0083 ms | 0.0073 ms |    1 |         - |         - |         - |   664.33 KB |
+| HistoricalToLive2_Mutable |        250000 | 19.404 ms | 0.1018 ms | 0.0850 ms |    2 | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive2_Mutable |       1000000 | 78.479 ms | 0.7104 ms | 0.5932 ms |    3 | 9000.0000 | 2000.0000 | 2000.0000 | 59170.09 KB |
