@@ -80,6 +80,8 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void CurrentQueue()
         {
+            // maybe buffer some tasks locally before executing? 
+            // 1 re-used array should be enough 
             while (currentQueue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
