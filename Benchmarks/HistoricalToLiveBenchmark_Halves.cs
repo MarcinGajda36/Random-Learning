@@ -14,7 +14,7 @@ namespace Benchmarks;
 public class HistoricalToLiveBenchmark_Halves
 {
 
-    [Params(10_000, 250_000)]
+    [Params(10_000, 250_000, 1_000_000)]
     public int ElementsCount { get; set; }
 
     const int LastValue = int.MaxValue;
@@ -32,7 +32,7 @@ public class HistoricalToLiveBenchmark_Halves
     }
 
     readonly record struct HistoricalLivePair(IObservable<int> Historical, IObservable<int> Live);
-    Task WaitFor2LastValues(Func<HistoricalLivePair, IObservable<int>> subscribtion)
+    async Task WaitFor2LastValues(Func<HistoricalLivePair, IObservable<int>> subscribtion)
     {
         var task = subscribtion(new(Historical, Live))
             .Where(x => x == LastValue)
@@ -62,18 +62,18 @@ public class HistoricalToLiveBenchmark_Halves
 
         Live.OnNext(LastValue);
 
-        return task;
+        await task;
     }
 
     [Benchmark]
-    public Task HistoricalToLive2_Immutable()
+    public async Task HistoricalToLive2_Immutable()
     {
-        return WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
+        await WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
     }
 
     [Benchmark]
-    public Task HistoricalToLive2_Mutable()
+    public async Task HistoricalToLive2_Mutable()
     {
-        return WaitFor2LastValues(pair => HistoricalToLive2.ConcatLiveAfterHistory(pair.Live, pair.Historical));
+        await WaitFor2LastValues(pair => HistoricalToLive2.ConcatLiveAfterHistory(pair.Live, pair.Historical));
     }
 }

@@ -210,3 +210,14 @@ toList historical
 | HistoricalToLive2_Immutable |         10000 |  2.502 ms | 0.0225 ms | 0.0211 ms |    2 |          - |         - |  2932.73 KB |
 |   HistoricalToLive2_Mutable |        250000 | 19.246 ms | 0.3844 ms | 0.4113 ms |    3 |  1000.0000 |         - | 14794.52 KB |
 | HistoricalToLive2_Immutable |        250000 | 46.718 ms | 0.6250 ms | 0.5846 ms |    4 | 11000.0000 | 1000.0000 | 73245.23 KB |
+
+
+1milion case
+|                      Method | ElementsCount |       Mean |     Error |    StdDev | Rank |       Gen0 |      Gen1 |      Gen2 |    Allocated |
+|---------------------------- |-------------- |-----------:|----------:|----------:|-----:|-----------:|----------:|----------:|-------------:|
+|   HistoricalToLive2_Mutable |         10000 |   1.216 ms | 0.0048 ms | 0.0040 ms |    1 |          - |         - |         - |    664.33 KB |
+| HistoricalToLive2_Immutable |         10000 |   2.494 ms | 0.0277 ms | 0.0259 ms |    2 |          - |         - |         - |   2932.73 KB |
+|   HistoricalToLive2_Mutable |        250000 |  19.671 ms | 0.1269 ms | 0.1060 ms |    3 |  1000.0000 |         - |         - |  14794.52 KB |
+| HistoricalToLive2_Immutable |        250000 |  47.084 ms | 0.9380 ms | 0.8774 ms |    4 | 11000.0000 | 1000.0000 |         - |  73245.23 KB |
+|   HistoricalToLive2_Mutable |       1000000 |  76.632 ms | 0.5504 ms | 0.4596 ms |    5 |  9000.0000 | 2000.0000 | 2000.0000 |  59172.18 KB |
+| HistoricalToLive2_Immutable |       1000000 | 189.063 ms | 2.3991 ms | 2.2441 ms |    6 | 47000.0000 | 3000.0000 | 1000.0000 | 292972.12 KB |
