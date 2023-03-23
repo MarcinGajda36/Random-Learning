@@ -15,14 +15,14 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    private readonly record struct Message<TValue>(MessageType Type, TValue[] Value, Exception? Exception);
+    private readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception);
 
     private static class Message
     {
-        public static Message<TValue> Live<TValue>(TValue[] value)
+        public static Message<TValue> Live<TValue>(IList<TValue> value)
             => new(MessageType.Live, value, null);
 
-        public static Message<TValue> Historical<TValue>(TValue[] value)
+        public static Message<TValue> Historical<TValue>(IList<TValue> value)
             => new(MessageType.Historical, value, null);
 
         public static Message<TValue> HistoricalError<TValue>(Exception exception)
@@ -37,7 +37,7 @@ public static class HistoricalToLive2
         private List<TValue>? liveBuffer;
         private bool hasHistoricalEnded;
 
-        public TValue[] HandleNextMessage(Message<TValue> message)
+        public IList<TValue> HandleNextMessage(Message<TValue> message)
         {
             switch (message.Type)
             {
@@ -65,7 +65,7 @@ public static class HistoricalToLive2
                     }
                     var buffered = liveBuffer;
                     liveBuffer = null;
-                    return buffered.ToArray();
+                    return buffered;
 
                 default:
                     throw new InvalidOperationException($"Unknown message: '{message}'.");
@@ -73,7 +73,7 @@ public static class HistoricalToLive2
         }
     }
 
-    private readonly record struct Concat<TValue>(TValue[] Return, ConcatState<TValue> State);
+    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -93,7 +93,7 @@ public static class HistoricalToLive2
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
-        .ToArray()
+        .ToList()
         .Materialize()
         .Select(notification => notification.Kind switch
         {
