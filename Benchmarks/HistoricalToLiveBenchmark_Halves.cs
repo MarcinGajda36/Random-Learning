@@ -14,7 +14,7 @@ namespace Benchmarks;
 public class HistoricalToLiveBenchmark_Halves
 {
 
-    [Params(10_000)]
+    [Params(10_000, 250_000)]
     public int ElementsCount { get; set; }
 
     const int LastValue = int.MaxValue;

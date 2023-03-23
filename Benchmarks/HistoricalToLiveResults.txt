@@ -184,3 +184,12 @@ rewriting benchmarks
 |---------------------------- |-------------- |----------:|----------:|----------:|-----:|-----------:|
 | HistoricalToLive2_Immutable |         10000 |  2.481 ms | 0.0192 ms | 0.0180 ms |    1 | 2932.73 KB |
 |   HistoricalToLive2_Mutable |         10000 | 14.880 ms | 0.2910 ms | 0.4530 ms |    2 |   299.5 KB |
+
+
+more sizes 
+|                      Method | ElementsCount |      Mean |     Error |    StdDev | Rank |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|---------------------------- |-------------- |----------:|----------:|----------:|-----:|-----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Immutable |         10000 |  2.505 ms | 0.0199 ms | 0.0176 ms |    1 |          - |         - |         - |  2932.73 KB |
+|   HistoricalToLive2_Mutable |        250000 | 14.852 ms | 0.2855 ms | 0.3287 ms |    2 |  1000.0000 | 1000.0000 | 1000.0000 |   5077.8 KB |
+|   HistoricalToLive2_Mutable |         10000 | 14.875 ms | 0.2952 ms | 0.5012 ms |    2 |          - |         - |         - |    299.5 KB |
+| HistoricalToLive2_Immutable |        250000 | 46.712 ms | 0.6345 ms | 0.5935 ms |    3 | 11000.0000 | 1000.0000 |         - | 73245.23 KB |
