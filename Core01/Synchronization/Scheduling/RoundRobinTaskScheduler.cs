@@ -71,7 +71,11 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
                 CurrentQueue();
                 HelpNeighbor();
 
-                if (currentQueue.IsEmpty)
+                if (currentQueue.TryDequeue(out var task))
+                {
+                    parent.TryExecuteTask(task);
+                }
+                else
                 {
                     Thread.Yield();
                 }
