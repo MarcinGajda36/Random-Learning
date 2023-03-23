@@ -173,8 +173,8 @@ replacing history toArray with 16ms buffer
 | HistoricalToLive2_StructAndMutation | 175.2 us | 0.35 us | 0.33 us |    1 | 10.9863 | 1.2207 |  67.57 KB |
 
 
-better benchmark 
-|                              Method |     Mean |   Error |  StdDev | Rank |    Gen0 |   Gen1 | Allocated |
-|------------------------------------ |---------:|--------:|--------:|-----:|--------:|-------:|----------:|
-| HistoricalToLive2_StructAndMutation | 168.9 us | 0.26 us | 0.23 us |    1 | 13.4277 | 1.7090 |  83.27 KB |
+waiting for last value 
+|                              Method |     Mean |    Error |   StdDev | Rank |    Gen0 | Allocated |
+|------------------------------------ |---------:|---------:|---------:|-----:|--------:|----------:|
+| HistoricalToLive2_StructAndMutation | 15.70 ms | 0.282 ms | 0.264 ms |    1 | 15.6250 | 115.66 KB |
 
