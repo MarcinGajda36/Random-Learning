@@ -105,7 +105,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         // 4) Thread 1 releases A and B
         // 5) Thread 2 grabs A; Thread 3 grabs B
         // 6) Thread 2 waits for B; Thread 3 waits for A infinitely
-        keyIndexes.AsSpan(..keyIndexesCount).Sort(); // Or Array.Sort(keyIndexes, 0, keyIndexesCount);
+        Array.Sort(keyIndexes, 0, keyIndexesCount);
 
         for (int index = 0; index < keyIndexesCount; index++)
         {
