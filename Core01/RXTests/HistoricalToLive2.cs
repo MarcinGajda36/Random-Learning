@@ -15,7 +15,7 @@ public static class HistoricalToLive2
         HistoricalCompleted,
     }
 
-    private readonly record struct Message<TValue>(MessageType Type, IList<TValue> Value, Exception? Exception);
+    private readonly record struct Message<TValue>(MessageType Type, IList<TValue> Values, Exception? Exception);
 
     private static class Message
     {
@@ -41,7 +41,7 @@ public static class HistoricalToLive2
             => message.Type switch
             {
                 MessageType.Live => HandleLiveMessage(message),
-                MessageType.Historical => message.Value,
+                MessageType.Historical => message.Values,
                 MessageType.HistoricalError => throw message.Exception!,
                 MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
                 _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
@@ -59,9 +59,9 @@ public static class HistoricalToLive2
         {
             if (hasHistoricalEnded)
             {
-                return message.Value;
+                return message.Values;
             }
-            liveBuffer!.Add(message.Value[0]);
+            liveBuffer!.Add(message.Values[0]);
             return Array.Empty<TValue>();
         }
     }
