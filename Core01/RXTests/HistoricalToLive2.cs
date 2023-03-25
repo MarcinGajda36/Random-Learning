@@ -40,7 +40,7 @@ public static class HistoricalToLive2
         public IList<TValue> HandleNextMessage(Message<TValue> message)
             => message.Type switch
             {
-                MessageType.Live => HandleLiveMessage(message),
+                MessageType.Live => HandleLiveMessage(message.Values),
                 MessageType.Historical => message.Values,
                 MessageType.HistoricalError => throw message.Exception!,
                 MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
@@ -55,13 +55,13 @@ public static class HistoricalToLive2
             return buffered!;
         }
 
-        private IList<TValue> HandleLiveMessage(Message<TValue> message)
+        private IList<TValue> HandleLiveMessage(IList<TValue> values)
         {
             if (hasHistoricalEnded)
             {
-                return message.Values;
+                return values;
             }
-            liveBuffer!.Add(message.Values[0]); // AddRange is so much less error-prone
+            liveBuffer!.Add(values[0]); // AddRange is so much less error-prone
             return Array.Empty<TValue>();
         }
     }
