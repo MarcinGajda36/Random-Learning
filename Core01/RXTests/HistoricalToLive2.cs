@@ -38,7 +38,6 @@ public static class HistoricalToLive2
         private List<TValue>? liveBuffer = new();
         private bool hasHistoricalEnded;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IList<TValue> HandleNextMessage(Message<TValue> message)
             => message.Type switch
             {
