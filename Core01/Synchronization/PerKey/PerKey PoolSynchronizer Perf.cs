@@ -43,8 +43,8 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     where TKey : notnull
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
+    private readonly static ArrayPool<int> arrayPool = ArrayPool<int>.Shared;
     private readonly SemaphoreSlim[] pool;
-    private readonly int poolIndexBitShift;
     private bool disposedValue;
 
     public PoolPerKeySynchronizerPerf()
@@ -56,7 +56,6 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         {
             throw new ArgumentOutOfRangeException(nameof(poolSize), poolSize, "Pool size has to be power of 2 and bigger then 0.");
         }
-        poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(poolSize.Value);
         pool = new SemaphoreSlim[poolSize.Value];
         for (int index = 0; index < pool.Length; index++)
         {
@@ -88,7 +87,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
     {
-        static void ReleaseLocked(SemaphoreSlim[] pool, Span<uint> locked)
+        static void ReleaseLocked(SemaphoreSlim[] pool, Span<int> locked)
         {
             for (int index = locked.Length - 1; index >= 0; index--)
             {
@@ -96,7 +95,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             }
         }
 
-        var keyIndexes = ArrayPool<uint>.Shared.Rent(pool.Length);
+        var keyIndexes = arrayPool.Rent(pool.Length);
         int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes);
         // We need order to avoid deadlock when:
         // 1) Thread 1 hold keys A and B
@@ -116,7 +115,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             catch
             {
                 ReleaseLocked(pool, keyIndexes.AsSpan(..index));
-                ArrayPool<uint>.Shared.Return(keyIndexes);
+                arrayPool.Return(keyIndexes);
                 throw;
             }
         }
@@ -128,7 +127,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         finally
         {
             ReleaseLocked(pool, keyIndexes.AsSpan(..keyIndexesCount));
-            ArrayPool<uint>.Shared.Return(keyIndexes);
+            arrayPool.Return(keyIndexes);
         }
     }
 
@@ -142,7 +141,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     //    return pool.Length;
     //}
 
-    private int FillWithKeyIndexes(IEnumerable<TKey> keys, uint[] keysIndexes)
+    private int FillWithKeyIndexes(IEnumerable<TKey> keys, int[] keysIndexes)
     {
         int keyCount = 0;
         foreach (var key in keys)
@@ -153,16 +152,28 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
                 keysIndexes[keyCount++] = keyIndex;
             }
             // For crazy amount of keys we can stop if keyCount == pool.Length
+            // but it feels like optimizing for worst case
         }
         return keyCount;
     }
 
-    private uint GetIndex(TKey key)
+    private int GetIndex(TKey key)
+    {
+        // Both bit shift and bit map needs pool size to be power of 2 to work (alternative is modulo)
+
+        // Path 1
+        var hash = EqualityComparer<TKey>.Default.GetHashCode(key);
+        var poolIndexBitMap = pool.Length - 1;
+        return hash & poolIndexBitMap;
+
+        // Path 2
         // HashFibonacci gives better hash distribution 
-        // bit shift needs pool size to be power of 2 to work (alternative is modulo)
         // Fibonacci and bit shift complement each other well for index distribution
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
-        => Hashing.Fibonacci(key) >> poolIndexBitShift;
+        var fibonacci = Hashing.Fibonacci(key);
+        var poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(pool.Length);
+        return (int)(fibonacci >> poolIndexBitShift);
+    }
 
     private void Dispose(bool disposing)
     {
@@ -170,7 +181,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         {
             if (disposing)
             {
-                Array.ForEach(pool, static semaphore => semaphore.Dispose());
+                Array.ForEach(pool, semaphore => semaphore.Dispose());
             }
 
             disposedValue = true;
