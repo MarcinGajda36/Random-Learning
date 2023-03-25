@@ -65,14 +65,14 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
         TKey key,
         TArgument argument,
-        Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
+        Func<TArgument, CancellationToken, Task<TResult>> resultFactory, // TKey is never needed as you can pass it in args 
         CancellationToken cancellationToken = default)
     {
         var semaphore = pool[GetIndex(key)];
         await semaphore.WaitAsync(cancellationToken);
         try
         {
-            return await resultFactory(key, argument, cancellationToken);
+            return await resultFactory(argument, cancellationToken);
         }
         finally
         {
@@ -202,7 +202,7 @@ public static class PerKey<TKey>
     public static Task<TResult> SynchronizeAsync<TArgument, TResult>(
         TKey key,
         TArgument argument,
-        Func<TKey, TArgument, CancellationToken, Task<TResult>> resultFactory,
+        Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
         => synchronizer.SynchronizeAsync(key, argument, resultFactory, cancellationToken);
 }
