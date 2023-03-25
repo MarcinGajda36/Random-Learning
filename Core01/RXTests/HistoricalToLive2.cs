@@ -58,13 +58,9 @@ public static class HistoricalToLive2
 
                 case MessageType.HistoricalCompleted:
                     hasHistoricalEnded = true;
-                    if (liveBuffer is null)
-                    {
-                        return Array.Empty<TValue>();
-                    }
                     var buffered = liveBuffer;
                     liveBuffer = null;
-                    return buffered;
+                    return buffered!;
 
                 default:
                     throw new InvalidOperationException($"Unknown message: '{message}'.");
