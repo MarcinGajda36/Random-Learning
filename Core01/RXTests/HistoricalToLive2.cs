@@ -61,7 +61,7 @@ public static class HistoricalToLive2
             {
                 return message.Values;
             }
-            liveBuffer!.Add(message.Values[0]);
+            liveBuffer!.Add(message.Values[0]); // AddRange is so much less error-prone
             return Array.Empty<TValue>();
         }
     }
