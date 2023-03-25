@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MarcinGajda.RXTests;
 public static class HistoricalToLive2
@@ -37,6 +38,7 @@ public static class HistoricalToLive2
         private List<TValue>? liveBuffer = new();
         private bool hasHistoricalEnded;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IList<TValue> HandleNextMessage(Message<TValue> message)
             => message.Type switch
             {
