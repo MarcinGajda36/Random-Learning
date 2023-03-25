@@ -50,9 +50,10 @@ public static class HistoricalToLive2
         private List<TValue> HandleHistoricalCompletion()
         {
             hasHistoricalEnded = true;
-            var buffered = liveBuffer;
-            liveBuffer = null;
-            return buffered!;
+            ref var buffered = ref liveBuffer;
+            var local = buffered;
+            buffered = null;
+            return local!;
         }
 
         private IList<TValue> HandleLiveMessage(Message<TValue> message)

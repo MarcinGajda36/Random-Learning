@@ -305,3 +305,10 @@ in message
 | HistoricalToLive2_Mutable |         10000 |  1.194 ms | 0.0068 ms | 0.0053 ms |  1.195 ms |    1 |         - |         - |         - |   664.33 KB |
 | HistoricalToLive2_Mutable |        250000 | 18.342 ms | 0.3665 ms | 0.5918 ms | 18.060 ms |    2 | 1000.0000 |         - |         - | 14794.52 KB |
 | HistoricalToLive2_Mutable |       1000000 | 71.331 ms | 1.2486 ms | 1.1679 ms | 71.152 ms |    3 | 9000.0000 | 2000.0000 | 2000.0000 | 59170.63 KB |
+
+ref swap liveBuffer
+|                    Method | ElementsCount |      Mean |     Error |    StdDev |    Median | Rank |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|----------:|-----:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.199 ms | 0.0239 ms | 0.0386 ms |  1.182 ms |    1 |         - |         - |         - |   664.33 KB |
+| HistoricalToLive2_Mutable |        250000 | 18.240 ms | 0.3579 ms | 0.5017 ms | 17.899 ms |    2 | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive2_Mutable |       1000000 | 70.529 ms | 0.7951 ms | 0.7048 ms | 70.677 ms |    3 | 9000.0000 | 2000.0000 | 2000.0000 | 59169.63 KB |
