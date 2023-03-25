@@ -47,7 +47,7 @@ public static class HistoricalToLive2
                         return message.Value;
                     }
 
-                    liveBuffer!.AddRange(message.Value);
+                    liveBuffer!.Add(message.Value[0]);
                     return Array.Empty<TValue>();
 
                 case MessageType.Historical:

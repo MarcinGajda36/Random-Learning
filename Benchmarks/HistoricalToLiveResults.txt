@@ -269,3 +269,11 @@ no list ??= new();
 | HistoricalToLive2_Mutable |         10000 |  1.249 ms | 0.0055 ms | 0.0046 ms |    1 |         - |         - |         - |   664.33 KB |
 | HistoricalToLive2_Mutable |        250000 | 19.384 ms | 0.1118 ms | 0.1046 ms |    2 | 1000.0000 |         - |         - | 14794.52 KB |
 | HistoricalToLive2_Mutable |       1000000 | 78.552 ms | 0.5030 ms | 0.4459 ms |    3 | 9000.0000 | 2000.0000 | 2000.0000 | 59173.43 KB |
+
+
+liveBuffer!.Add(message.Value[0]);
+|                    Method | ElementsCount |      Mean |     Error |    StdDev | Rank |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|-----:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.152 ms | 0.0130 ms | 0.0109 ms |    1 |         - |         - |         - |   664.33 KB |
+| HistoricalToLive2_Mutable |        250000 | 17.581 ms | 0.1394 ms | 0.1304 ms |    2 | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive2_Mutable |       1000000 | 71.375 ms | 1.2350 ms | 1.3727 ms |    3 | 9000.0000 | 2000.0000 | 2000.0000 |    59173 KB |
