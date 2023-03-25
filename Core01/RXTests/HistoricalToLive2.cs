@@ -34,7 +34,7 @@ public static class HistoricalToLive2
 
     private sealed class ConcatState<TValue>
     {
-        private List<TValue>? liveBuffer;
+        private List<TValue>? liveBuffer = new();
         private bool hasHistoricalEnded;
 
         public IList<TValue> HandleNextMessage(Message<TValue> message)
@@ -47,8 +47,7 @@ public static class HistoricalToLive2
                         return message.Value;
                     }
 
-                    liveBuffer ??= new List<TValue>();
-                    liveBuffer.AddRange(message.Value);
+                    liveBuffer!.AddRange(message.Value);
                     return Array.Empty<TValue>();
 
                 case MessageType.Historical:
