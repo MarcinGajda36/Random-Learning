@@ -43,7 +43,6 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     where TKey : notnull
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
-    private readonly static ArrayPool<int> arrayPool = ArrayPool<int>.Shared;
     private readonly SemaphoreSlim[] pool;
     private bool disposedValue;
 
@@ -95,7 +94,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             }
         }
 
-        var keyIndexes = arrayPool.Rent(pool.Length);
+        var keyIndexes = ArrayPool<int>.Shared.Rent(pool.Length);
         int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes);
         // We need order to avoid deadlock when:
         // 1) Thread 1 hold keys A and B
@@ -115,7 +114,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             catch
             {
                 ReleaseLocked(pool, keyIndexes.AsSpan(..index));
-                arrayPool.Return(keyIndexes);
+                ArrayPool<int>.Shared.Return(keyIndexes);
                 throw;
             }
         }
@@ -127,7 +126,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         finally
         {
             ReleaseLocked(pool, keyIndexes.AsSpan(..keyIndexesCount));
-            arrayPool.Return(keyIndexes);
+            ArrayPool<int>.Shared.Return(keyIndexes);
         }
     }
 
