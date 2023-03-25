@@ -38,33 +38,31 @@ public static class HistoricalToLive2
         private bool hasHistoricalEnded;
 
         public IList<TValue> HandleNextMessage(Message<TValue> message)
-        {
-            switch (message.Type)
+            => message.Type switch
             {
-                case MessageType.Live:
-                    if (hasHistoricalEnded)
-                    {
-                        return message.Value;
-                    }
+                MessageType.Live => HandleLiveMessage(message),
+                MessageType.Historical => message.Value,
+                MessageType.HistoricalError => throw message.Exception!,
+                MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
+                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+            };
 
-                    liveBuffer!.Add(message.Value[0]);
-                    return Array.Empty<TValue>();
+        private IList<TValue> HandleHistoricalCompletion()
+        {
+            hasHistoricalEnded = true;
+            var buffered = liveBuffer;
+            liveBuffer = null;
+            return buffered!;
+        }
 
-                case MessageType.Historical:
-                    return message.Value;
-
-                case MessageType.HistoricalError:
-                    throw message.Exception!;
-
-                case MessageType.HistoricalCompleted:
-                    hasHistoricalEnded = true;
-                    var buffered = liveBuffer;
-                    liveBuffer = null;
-                    return buffered!;
-
-                default:
-                    throw new InvalidOperationException($"Unknown message: '{message}'.");
+        private IList<TValue> HandleLiveMessage(Message<TValue> message)
+        {
+            if (hasHistoricalEnded)
+            {
+                return message.Value;
             }
+            liveBuffer!.Add(message.Value[0]);
+            return Array.Empty<TValue>();
         }
     }
 
