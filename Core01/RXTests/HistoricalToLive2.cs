@@ -47,7 +47,7 @@ public static class HistoricalToLive2
                 _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
             };
 
-        private IList<TValue> HandleHistoricalCompletion()
+        private List<TValue> HandleHistoricalCompletion()
         {
             hasHistoricalEnded = true;
             var buffered = liveBuffer;
