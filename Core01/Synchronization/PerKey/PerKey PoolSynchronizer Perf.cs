@@ -96,14 +96,6 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
 
         var keyIndexes = ArrayPool<int>.Shared.Rent(pool.Length);
         int keyIndexesCount = FillWithKeyIndexes(keys, keyIndexes);
-        // We need order to avoid deadlock when:
-        // 1) Thread 1 hold keys A and B
-        // 2) Thread 2 waits for A and B
-        // 3) Thread 3 waits for B and A
-        // 4) Thread 1 releases A and B
-        // 5) Thread 2 grabs A; Thread 3 grabs B
-        // 6) Thread 2 waits for B; Thread 3 waits for A infinitely
-        Array.Sort(keyIndexes, 0, keyIndexesCount);
 
         for (int index = 0; index < keyIndexesCount; index++)
         {
@@ -153,6 +145,14 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
             // For crazy amount of keys we can stop if keyCount == pool.Length
             // but it feels like optimizing for worst case
         }
+        // We need order to avoid deadlock when:
+        // 1) Thread 1 hold keys A and B
+        // 2) Thread 2 waits for A and B
+        // 3) Thread 3 waits for B and A
+        // 4) Thread 1 releases A and B
+        // 5) Thread 2 grabs A; Thread 3 grabs B
+        // 6) Thread 2 waits for B; Thread 3 waits for A infinitely
+        Array.Sort(keysIndexes, 0, keyCount);
         return keyCount;
     }
 
