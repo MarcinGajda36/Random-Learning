@@ -3,17 +3,14 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
-using BenchmarkDotNet.Order;
 using LanguageExt;
 using MarcinGajda.RXTests;
 
 namespace Benchmarks;
 
-[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.CacheMisses)]
-[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions)]
 public class HistoricalToLiveBenchmark_Halves
 {
-
     [Params(10_000, 250_000, 1_000_000)]
     public int ElementsCount { get; set; }
 
