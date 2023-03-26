@@ -1,7 +1,6 @@
 ﻿
 
-PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet build -c Release
-PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet C:\Users\kirgo\source\repos\Random-Learning\Benchmarks\bin\Release\net6.0\Benchmarks.dll
+PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet run -c Release
 
 HistoricalToLiveBenchmark 
 ElementsCount = 4096

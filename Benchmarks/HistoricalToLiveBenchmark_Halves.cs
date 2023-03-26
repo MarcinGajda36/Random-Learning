@@ -2,15 +2,15 @@
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Order;
 using LanguageExt;
 using MarcinGajda.RXTests;
 
 namespace Benchmarks;
 
-[MemoryDiagnoser]
+[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.CacheMisses)]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-[RankColumn]
 public class HistoricalToLiveBenchmark_Halves
 {
 
@@ -65,11 +65,11 @@ public class HistoricalToLiveBenchmark_Halves
         await task;
     }
 
-    //[Benchmark]
-    //public async Task HistoricalToLive2_Immutable()
-    //{
-    //    await WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
-    //}
+    [Benchmark]
+    public async Task HistoricalToLive2_Immutable()
+    {
+        await WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
+    }
 
     [Benchmark]
     public async Task HistoricalToLive2_Mutable()
