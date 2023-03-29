@@ -8,7 +8,7 @@ namespace MarcinGajda.Synchronization.Scheduling;
 internal sealed class RoundRobinTaskScheduler : TaskScheduler
 {
     const int MaxWorkers = 4; // 2,4,8 .. any power of 2 
-    readonly Worker[] workers = new Worker[MaxWorkers];
+    readonly SingleThreadScheduler[] workers = new SingleThreadScheduler[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
     int index;
@@ -19,9 +19,9 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         {
             queues[index] = new ConcurrentQueue<Task>();
         }
-        for (int index = 0; index < workers.Length; index++) // Current worker impl grabs neighbor queue in ctro
+        for (int index = 0; index < workers.Length; index++) // Current worker impl grabs neighbor queue in ctor
         {
-            workers[index] = new Worker(index, this);
+            workers[index] = new SingleThreadScheduler(index, this);
         }
         Array.ForEach(workers, worker => worker.Start());
     }
@@ -47,13 +47,13 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
     public override int MaximumConcurrencyLevel
         => workers.Length;
 
-    class Worker
+    class SingleThreadScheduler
     {
         readonly RoundRobinTaskScheduler parent;
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
         readonly ConcurrentQueue<Task> neighborQueue;
         readonly Thread thread;
-        readonly Task[] workBuffer = new Task[32];
+        readonly Worker worker;
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
@@ -61,18 +61,19 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         // 1) Writing to some buffer (maybe array from pool)
         // the free worker could take entire buffer and queues would start a new one
         // but how to deal with buffer re-size?
-        public Worker(int index, RoundRobinTaskScheduler parent)
+        public SingleThreadScheduler(int index, RoundRobinTaskScheduler parent)
         {
             this.parent = parent;
             currentQueue = parent.queues[index];
-            var queueIndex = (index + 1) & QueueIndexMask;
-            neighborQueue = AllQueues[queueIndex];
-            thread = new Thread(state => ((Worker)state!).Work());
+            var neighborQueueIndex = (index + 1) & QueueIndexMask;
+            neighborQueue = AllQueues[neighborQueueIndex];
+            thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
+            worker = new Worker(parent);
         }
 
         public void Start() => thread.Start(this);
 
-        void Work()
+        void Schedule()
         {
             while (true)
             {
@@ -92,43 +93,59 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void CurrentQueue()
         {
-            int bufferedWork = 0;
             while (currentQueue.TryDequeue(out var task))
             {
-                workBuffer[bufferedWork++] = task;
-                if (bufferedWork == workBuffer.Length)
-                {
-                    for (int index = 0; index < workBuffer.Length; index++)
-                    {
-                        ref var item = ref workBuffer[index];
-                        parent.TryExecuteTask(item);
-                        item = null;
-                    }
-                    bufferedWork = 0;
-                }
+                worker.AddToBuffer(task);
             }
-            for (int index = 0; index < bufferedWork; index++)
-            {
-                ref var item = ref workBuffer[index];
-                parent.TryExecuteTask(item);
-                item = null;
-            }
+            worker.FinishBuffer();
         }
 
         void HelpNeighbor()
         {
-            int bufferedWork = 0;
-            while (bufferedWork < workBuffer.Length
-                && neighborQueue.TryDequeue(out var task))
+            int limit = Worker.BufferLength;
+            while (limit > 0 && neighborQueue.TryDequeue(out var task))
             {
-                workBuffer[bufferedWork++] = task;
+                worker.AddToBuffer(task);
+                --limit;
+            }
+            worker.FinishBuffer();
+        }
+
+        struct Worker
+        {
+            public const int BufferLength = 32;
+
+            readonly RoundRobinTaskScheduler parent;
+            readonly Task[] buffer = new Task[BufferLength];
+            int buffered;
+
+            public Worker(RoundRobinTaskScheduler parent)
+                => this.parent = parent;
+
+            public void AddToBuffer(Task task)
+            {
+                buffer[buffered++] = task;
+                if (buffered == buffer.Length)
+                {
+                    for (int index = 0; index < buffer.Length; index++)
+                    {
+                        ref var item = ref buffer[index];
+                        parent.TryExecuteTask(item);
+                        item = null;
+                    }
+                    buffered = 0;
+                }
             }
 
-            for (int index = 0; index < bufferedWork; index++)
+            public void FinishBuffer()
             {
-                ref var item = ref workBuffer[index];
-                parent.TryExecuteTask(item);
-                item = null;
+                for (int index = 0; index < buffered; index++)
+                {
+                    ref var item = ref buffer[index];
+                    parent.TryExecuteTask(item);
+                    item = null;
+                }
+                buffered = 0;
             }
         }
     }
