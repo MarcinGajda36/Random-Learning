@@ -15,10 +15,13 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
     public RoundRobinTaskScheduler()
     {
-        for (int index = 0; index < workers.Length; index++)
+        for (int index = 0; index < queues.Length; index++)
+        {
+            queues[index] = new ConcurrentQueue<Task>();
+        }
+        for (int index = 0; index < workers.Length; index++) // Current worker impl grabs neighbor queue in ctro
         {
             workers[index] = new Worker(index, this);
-            queues[index] = new ConcurrentQueue<Task>();
         }
         Array.ForEach(workers, worker => worker.Start());
     }
