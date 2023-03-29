@@ -53,7 +53,6 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
         readonly ConcurrentQueue<Task> neighborQueue;
         readonly Thread thread;
-        readonly Worker worker;
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
@@ -68,7 +67,6 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             var neighborQueueIndex = (index + 1) & QueueIndexMask;
             neighborQueue = AllQueues[neighborQueueIndex];
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
-            worker = new Worker(parent);
         }
 
         public void Start() => thread.Start(this);
@@ -95,58 +93,56 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         {
             while (currentQueue.TryDequeue(out var task))
             {
-                worker.AddToBuffer(task);
+                parent.TryExecuteTask(task);
             }
-            worker.FinishBuffer();
         }
 
         void HelpNeighbor()
         {
-            int limit = Worker.BufferLength;
+            int limit = 32;
             while (limit > 0 && neighborQueue.TryDequeue(out var task))
             {
-                worker.AddToBuffer(task);
+                parent.TryExecuteTask(task);
                 --limit;
             }
-            worker.FinishBuffer();
         }
 
-        struct Worker
-        {
-            public const int BufferLength = 32;
+        //struct Worker
+        //{
+        //    public const int BufferLength = 32;
 
-            readonly RoundRobinTaskScheduler parent;
-            readonly Task[] buffer = new Task[BufferLength];
-            int buffered;
+        //    readonly RoundRobinTaskScheduler parent;
+        //    readonly Task[] buffer = new Task[BufferLength];
+        //    int buffered;
 
-            public Worker(RoundRobinTaskScheduler parent)
-                => this.parent = parent;
+        //    public Worker(RoundRobinTaskScheduler parent)
+        //        => this.parent = parent;
 
-            public void AddToBuffer(Task task)
-            {
-                buffer[buffered++] = task;
-                if (buffered == buffer.Length)
-                {
-                    for (int index = 0; index < buffer.Length; index++)
-                    {
-                        ref var item = ref buffer[index];
-                        parent.TryExecuteTask(item);
-                        item = null;
-                    }
-                    buffered = 0;
-                }
-            }
+        //    public void AddToBuffer(Task task)
+        //    {
+        //        buffer[buffered++] = task;
+        //        if (buffered == buffer.Length)
+        //        {
+        //            for (int index = 0; index < buffer.Length; index++)
+        //            {
+        //                ref var item = ref buffer[index];
+        //                parent.TryExecuteTask(item);
+        //                item = null;
+        //            }
+        //            buffered = 0;
+        //        }
+        //    }
 
-            public void FinishBuffer()
-            {
-                for (int index = 0; index < buffered; index++)
-                {
-                    ref var item = ref buffer[index];
-                    parent.TryExecuteTask(item);
-                    item = null;
-                }
-                buffered = 0;
-            }
-        }
+        //    public void FinishBuffer()
+        //    {
+        //        for (int index = 0; index < buffered; index++)
+        //        {
+        //            ref var item = ref buffer[index];
+        //            parent.TryExecuteTask(item);
+        //            item = null;
+        //        }
+        //        buffered = 0;
+        //    }
+        //}
     }
 }
