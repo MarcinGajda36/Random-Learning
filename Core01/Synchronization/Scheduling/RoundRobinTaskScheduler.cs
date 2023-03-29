@@ -53,6 +53,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
         readonly ConcurrentQueue<Task> neighborQueue;
         readonly Thread thread;
+        readonly Task[] workBuffer = new Task[32];
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
@@ -91,21 +92,43 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
         void CurrentQueue()
         {
-            // maybe buffer some tasks locally before executing? 
-            // 1 re-used array should be enough 
+            int bufferedWork = 0;
             while (currentQueue.TryDequeue(out var task))
             {
-                parent.TryExecuteTask(task);
+                workBuffer[bufferedWork++] = task;
+                if (bufferedWork == workBuffer.Length)
+                {
+                    for (int index = 0; index < workBuffer.Length; index++)
+                    {
+                        ref var item = ref workBuffer[index];
+                        parent.TryExecuteTask(item);
+                        item = null;
+                    }
+                    bufferedWork = 0;
+                }
+            }
+            for (int index = 0; index < bufferedWork; index++)
+            {
+                ref var item = ref workBuffer[index];
+                parent.TryExecuteTask(item);
+                item = null;
             }
         }
 
         void HelpNeighbor()
         {
-            var limit = 32;
-            while (limit > 0 && neighborQueue.TryDequeue(out var task))
+            int bufferedWork = 0;
+            while (bufferedWork < workBuffer.Length
+                && neighborQueue.TryDequeue(out var task))
             {
-                parent.TryExecuteTask(task);
-                --limit;
+                workBuffer[bufferedWork++] = task;
+            }
+
+            for (int index = 0; index < bufferedWork; index++)
+            {
+                ref var item = ref workBuffer[index];
+                parent.TryExecuteTask(item);
+                item = null;
             }
         }
     }

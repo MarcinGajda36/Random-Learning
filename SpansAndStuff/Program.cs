@@ -10,9 +10,20 @@ namespace SpansAndStuff
     {
         private static async Task Main()
         {
+            RefTest();
             Vectors.EqualsAny();
 
             await Task.Delay(-1);
+        }
+
+        private static int RefTest()
+        {
+            var arr = new[] { 1, 2, 3 };
+            ref var first = ref arr[0];
+            var firstPlus2 = first + 2;
+            first = 0;
+            var newFirst = arr[0];
+            return 0;
         }
 
         private static void Tests()
