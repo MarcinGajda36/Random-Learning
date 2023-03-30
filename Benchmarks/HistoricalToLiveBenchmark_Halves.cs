@@ -63,11 +63,11 @@ public class HistoricalToLiveBenchmark_Halves
         await task;
     }
 
-    [Benchmark]
-    public async Task HistoricalToLive2_Immutable()
-    {
-        await WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
-    }
+    //[Benchmark]
+    //public async Task HistoricalToLive2_Immutable()
+    //{
+    //    await WaitFor2LastValues(pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical));
+    //}
 
     [Benchmark]
     public async Task HistoricalToLive2_Mutable()

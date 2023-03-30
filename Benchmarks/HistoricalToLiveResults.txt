@@ -334,3 +334,18 @@ Package update
 |   HistoricalToLive2_Mutable |        250000 |  17.428 ms | 0.2214 ms | 0.2460 ms |  1000.0000 |         - |         - |  14794.52 KB |
 | HistoricalToLive2_Immutable |       1000000 | 186.342 ms | 1.6808 ms | 1.4899 ms | 47000.0000 | 3000.0000 | 1000.0000 | 292972.12 KB |
 |   HistoricalToLive2_Mutable |       1000000 |  68.997 ms | 0.5187 ms | 0.4049 ms |  9000.0000 | 2000.0000 | 2000.0000 |  59169.56 KB |
+
+
+.Buffer(TimeSpan.FromMilliseconds(16d), 32)
+|                    Method | ElementsCount |     Mean |    Error |   StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |---------:|---------:|---------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 | 30.02 ms | 0.556 ms | 0.546 ms |         - |         - |         - |   400.63 KB |
+| HistoricalToLive2_Mutable |        250000 | 29.70 ms | 0.355 ms | 0.296 ms |         - |         - |         - |  8173.43 KB |
+| HistoricalToLive2_Mutable |       1000000 | 76.67 ms | 0.934 ms | 0.874 ms | 5000.0000 | 2000.0000 | 2000.0000 | 32685.35 KB |
+
+.Buffer(TimeSpan.FromMilliseconds(8d), 128)
+|                    Method | ElementsCount |     Mean |    Error |   StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |---------:|---------:|---------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 | 14.65 ms | 0.289 ms | 0.442 ms |         - |         - |         - |   309.72 KB |
+| HistoricalToLive2_Mutable |        250000 | 29.45 ms | 0.576 ms | 0.538 ms |         - |         - |         - |  5907.38 KB |
+| HistoricalToLive2_Mutable |       1000000 | 61.15 ms | 0.989 ms | 0.925 ms | 3000.0000 | 2000.0000 | 2000.0000 | 23616.52 KB |
