@@ -323,3 +323,14 @@ IList HandleLiveMessage
 | HistoricalToLive2_Mutable |         10000 |  1.156 ms | 0.0137 ms | 0.0128 ms |    1 |         - |         - |         - |   664.33 KB |
 | HistoricalToLive2_Mutable |        250000 | 17.649 ms | 0.0735 ms | 0.0614 ms |    2 | 1000.0000 |         - |         - | 14794.52 KB |
 | HistoricalToLive2_Mutable |       1000000 | 70.984 ms | 0.7009 ms | 0.6556 ms |    3 | 9000.0000 | 2000.0000 | 2000.0000 | 59171.47 KB |
+
+
+Package update 
+|                      Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |    Allocated |
+|---------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|-------------:|
+| HistoricalToLive2_Immutable |         10000 |   2.539 ms | 0.0397 ms | 0.0372 ms |          - |         - |         - |   2932.73 KB |
+|   HistoricalToLive2_Mutable |         10000 |   1.153 ms | 0.0087 ms | 0.0077 ms |          - |         - |         - |    664.33 KB |
+| HistoricalToLive2_Immutable |        250000 |  46.656 ms | 0.4036 ms | 0.3578 ms | 11000.0000 | 1000.0000 |         - |  73245.23 KB |
+|   HistoricalToLive2_Mutable |        250000 |  17.428 ms | 0.2214 ms | 0.2460 ms |  1000.0000 |         - |         - |  14794.52 KB |
+| HistoricalToLive2_Immutable |       1000000 | 186.342 ms | 1.6808 ms | 1.4899 ms | 47000.0000 | 3000.0000 | 1000.0000 | 292972.12 KB |
+|   HistoricalToLive2_Mutable |       1000000 |  68.997 ms | 0.5187 ms | 0.4049 ms |  9000.0000 | 2000.0000 | 2000.0000 |  59169.56 KB |

@@ -9,6 +9,7 @@ using MarcinGajda.RXTests;
 namespace Benchmarks;
 
 //[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions)]
+[MemoryDiagnoser]
 public class HistoricalToLiveBenchmark_Halves
 {
     [Params(10_000, 250_000, 1_000_000)]
