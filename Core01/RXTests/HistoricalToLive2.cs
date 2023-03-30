@@ -91,7 +91,7 @@ public static class HistoricalToLive2
         .Select(notification => notification.Kind switch
         {
             NotificationKind.OnNext => Message.Historical(notification.Value),
-            NotificationKind.OnError => Message.HistoricalError<TValue>(notification.Exception),
+            NotificationKind.OnError => Message.HistoricalError<TValue>(notification.Exception!),
             NotificationKind.OnCompleted => Message.HistoricalCompleted<TValue>(),
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });

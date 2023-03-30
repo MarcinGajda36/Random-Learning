@@ -57,7 +57,7 @@ public static class HistoricalToLive
         .Select<Notification<TValue>, IMessage>(notification => notification switch
         {
             { Kind: NotificationKind.OnNext, Value: var value } => new Historical<TValue>(value),
-            { Kind: NotificationKind.OnError, Exception: var exception } => new HistoricalError(exception),
+            { Kind: NotificationKind.OnError, Exception: var exception } => new HistoricalError(exception!),
             { Kind: NotificationKind.OnCompleted } => new HistoricalCompleted(),
             var unknown => throw new InvalidOperationException($"Unknown notification: '{unknown}'.")
         });
@@ -125,7 +125,7 @@ public static class HistoricalToLive1_Dedup
         .Select<Notification<TValue>, IMessage>(notification => notification switch
         {
             { Kind: NotificationKind.OnNext, Value: var value } => new Historical<TValue>(value),
-            { Kind: NotificationKind.OnError, Exception: var exception } => new HistoricalError(exception),
+            { Kind: NotificationKind.OnError, Exception: var exception } => new HistoricalError(exception!),
             { Kind: NotificationKind.OnCompleted } => new HistoricalCompleted(),
             var unknown => throw new InvalidOperationException($"Unknown notification: '{unknown}'.")
         });

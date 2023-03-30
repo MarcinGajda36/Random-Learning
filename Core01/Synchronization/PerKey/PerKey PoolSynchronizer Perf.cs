@@ -169,9 +169,10 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
         // HashFibonacci gives better hash distribution 
         // Fibonacci and bit shift complement each other well for index distribution
         // https://www.youtube.com/watch?v=9XNcbN08Zvc&list=PLqWncHdBPoD4-d_VSZ0MB0IBKQY0rwYLd&index=5
-        var fibonacci = Hashing.Fibonacci(key);
-        var poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(pool.Length);
-        return (int)(fibonacci >> poolIndexBitShift);
+
+        //var fibonacci = Hashing.Fibonacci(key);
+        //var poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(pool.Length);
+        //return (int)(fibonacci >> poolIndexBitShift);
     }
 
     private void Dispose(bool disposing)
