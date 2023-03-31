@@ -14,7 +14,6 @@ internal class StatefullAsyncEnumerable
     public ImmutableArray<int> State1 { get; set; } = ImmutableArray<int>.Empty;
     public ImmutableDictionary<int, string> State2 { get; set; } = ImmutableDictionary<int, string>.Empty;
 
-
     private async Task<ImmutableDictionary<int, string>> SomeAsyncStaff(Message message)
     {
         return message switch
