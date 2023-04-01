@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace MarcinGajda.Synchronizers.Pooling;
@@ -38,7 +39,7 @@ public class ThreadStaticPool<TValue>
 
         public Pool(ThreadStaticPool<TValue> parent)
         {
-            values = new TValue?[parent.sizePerPool];
+            values = new TValue?[parent.sizePerThread];
             factory = parent.factory;
         }
 
@@ -46,10 +47,14 @@ public class ThreadStaticPool<TValue>
         {
             if (available > 0)
             {
-                ref var toRent = ref values[--available];
-                var value = toRent;
-                toRent = default; // TODO needed only if RuntimeHelpers.IsReferenceOrContainsReferences<TValue>()
-                return value!;
+                if (RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
+                {
+                    ref var toRent = ref values[--available];
+                    var value = toRent;
+                    toRent = default;
+                    return value!;
+                }
+                return values[--available]!;
             }
             return factory();
         }
@@ -64,12 +69,12 @@ public class ThreadStaticPool<TValue>
     }
 
     [ThreadStatic] static Pool? pool;
-    readonly int sizePerPool;
+    readonly int sizePerThread;
     readonly Func<TValue> factory;
 
-    public ThreadStaticPool(int size, Func<TValue> factory)
+    public ThreadStaticPool(int sizePerThread, Func<TValue> factory)
     {
-        sizePerPool = Math.Max(size / Environment.ProcessorCount, 2);
+        this.sizePerThread = sizePerThread;
         this.factory = factory;
     }
 

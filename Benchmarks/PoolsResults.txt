@@ -238,3 +238,12 @@ class pool
 | ThreadStatic | 500000 |       1 |       32 | 20.18 ms | 0.380 ms | 0.373 ms | 20.11 ms |    1 |     872 B |
 | ThreadStatic | 500000 |      16 |       32 | 50.26 ms | 2.157 ms | 6.359 ms | 47.87 ms |    2 |    3152 B |
 | ThreadStatic | 500000 |      16 |     1024 | 51.69 ms | 2.385 ms | 7.031 ms | 49.18 ms |    2 |   19024 B |
+
+|       Method |  Rents | Threads | PoolSize |     Mean |    Error |   StdDev |   Median | Rank | Allocated |
+|------------- |------- |-------- |--------- |---------:|---------:|---------:|---------:|-----:|----------:|
+| ThreadStatic | 500000 |       1 |       32 | 19.69 ms | 0.383 ms | 0.425 ms | 19.57 ms |    1 |    1096 B |
+| ThreadStatic | 500000 |       1 |      512 | 19.74 ms | 0.379 ms | 0.437 ms | 19.75 ms |    1 |    4936 B |
+| ThreadStatic | 500000 |       1 |        8 | 20.18 ms | 0.387 ms | 0.567 ms | 20.11 ms |    1 |     904 B |
+| ThreadStatic | 500000 |      16 |       32 | 49.37 ms | 2.016 ms | 5.912 ms | 46.36 ms |    2 |    6736 B |
+| ThreadStatic | 500000 |      16 |        8 | 50.01 ms | 2.146 ms | 6.327 ms | 47.79 ms |    2 |    3664 B |
+| ThreadStatic | 500000 |      16 |      512 | 51.33 ms | 2.247 ms | 6.625 ms | 49.42 ms |    2 |   68176 B |
