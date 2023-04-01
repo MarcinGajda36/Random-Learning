@@ -5,7 +5,6 @@ using Microsoft.FSharp.Collections;
 using Microsoft.FSharp.Core;
 using static Types;
 
-
 namespace MarcinGajda.Fs
 {
     internal class FTypesSharing

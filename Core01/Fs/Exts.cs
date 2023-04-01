@@ -9,7 +9,6 @@ namespace MarcinGajda.Fs
     public static class Exts
     {
 
-
         public static T MinBy<T, TR>(this IEnumerable<T> ts, Func<T, TR> func)
             => ListModule.MinBy(FSharpFunc<T, TR>.FromConverter(t => func(t)), WeakCache<T>.GetList(ts));
 

@@ -52,7 +52,6 @@ namespace MarcinGajda.DataflowTests
             await syncAction.Completion;
         }
 
-
         public static async IAsyncEnumerable<int> AsyncEnumerable([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             int i = 0;

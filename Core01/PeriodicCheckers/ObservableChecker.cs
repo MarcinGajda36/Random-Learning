@@ -23,7 +23,6 @@ namespace MarcinGajda.PeriodicCheckers
                 .Select(i => Task.WhenAll((new[] { i }).Select(Task.FromResult)))
                 .Do(async resullts => Array.ForEach(await resullts, Console.WriteLine));
 
-
             var lastResults = await allResults;
         }
     }

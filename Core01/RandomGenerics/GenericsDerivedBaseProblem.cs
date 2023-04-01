@@ -24,7 +24,6 @@ namespace MarcinGajda.RandomGenerics
             public new T Abc { get => (T)base.Abc; set => base.Abc = value; }
         }
 
-
         public void TTTTTTTest()
         {
             var a = new Test<Derived> { Abc = new Derived() };

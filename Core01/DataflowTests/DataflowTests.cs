@@ -29,7 +29,6 @@ namespace MarcinGajda.DataflowTests
             IDisposable link = batchBlock.LinkTo(actionBlock);
         }
 
-
         private static Task Produce(BufferBlock<int> queue, IEnumerable<int> values)
             => Task.WhenAll(values.Select(queue.SendAsync));
         public static Task ProduceAll(BufferBlock<int> queue)

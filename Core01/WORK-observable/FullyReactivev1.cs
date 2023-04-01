@@ -7,7 +7,6 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using LanguageExt;
 
-
 namespace MarcinGajda.WORK_observable
 {
     public class NotifierHub1

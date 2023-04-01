@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 
-
 public class FooBar
 {
     private readonly int n;
@@ -72,7 +71,6 @@ public class FooBar2
         }
     }
 }
-
 
 public class FooBar1
 {

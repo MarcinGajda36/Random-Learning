@@ -14,7 +14,6 @@ namespace MarcinGajda.AsyncDispose_
             await Task.Delay(100);
         }
 
-
     }
     public class AsyncDisposableObject : IAsyncDisposable
     {

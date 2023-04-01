@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronizers;
 
-
 public sealed partial class PoolPerKeySynchronizer<TKey>
     : IDisposable
     where TKey : notnull

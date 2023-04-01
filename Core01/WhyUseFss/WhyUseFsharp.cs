@@ -61,7 +61,6 @@ namespace MarcinGajda.WhyUseFss
                 return FromState(newState);
             }
 
-
         }
 
         /// <summary>         
@@ -145,8 +144,6 @@ namespace MarcinGajda.WhyUseFss
                 state => { emptyFn(state); return 0; },
                 state => { activeFn(state); return 0; },
                 state => { paidForyFn(state); return 0; });
-
-
 
     }
 

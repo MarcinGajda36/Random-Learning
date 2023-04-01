@@ -11,7 +11,6 @@ internal class PerKeyWithPool
     private readonly PoolPerKeySynchronizerPerf<Guid> synchronizer = new(PoolSize);
     private readonly PerKeyPool<Guid, Queue<int>> queuePool = new(PoolSize, () => new());
 
-
     public Task<int> Caller1(Guid id)
     {
         var queue = queuePool.Get(id);
@@ -27,6 +26,5 @@ internal class PerKeyWithPool
     {
         return Task.FromResult(0);
     }
-
 
 }

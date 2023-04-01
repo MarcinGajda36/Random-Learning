@@ -9,7 +9,6 @@ namespace SpansAndStuff
         {
             int[] ints = { 1, 2, 3, 4, 5 };
 
-
             int[] fstSeg = ints[0..2];
         }
 

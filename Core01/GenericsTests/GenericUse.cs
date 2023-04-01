@@ -7,7 +7,6 @@
 
         public GenericUse(TGeneric generic) => this.generic = generic;
 
-
         public int GetPropVal => generic.Prop;
     }
 }

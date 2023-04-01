@@ -18,6 +18,5 @@ namespace MarcinGajda.DataflowTests
 
         public Task<bool> Enqueue(int toEnqueue) => bufferBlock.SendAsync(toEnqueue);
 
-
     }
 }
