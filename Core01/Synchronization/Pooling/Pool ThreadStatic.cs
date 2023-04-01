@@ -48,7 +48,7 @@ public class ThreadStaticPool<TValue>
             {
                 ref var toRent = ref values[--available];
                 var value = toRent;
-                toRent = default;
+                toRent = default; // TODO needed only if RuntimeHelpers.IsReferenceOrContainsReferences<TValue>()
                 return value!;
             }
             return factory();
@@ -74,13 +74,9 @@ public class ThreadStaticPool<TValue>
     }
 
     public Lease Rent()
-    {
-        if (pool is null)
-        {
-            return new Lease(factory(), this);
-        }
-        return new Lease(pool.GetOrCreate(), this);
-    }
+        => pool is null
+        ? new Lease(factory(), this)
+        : new Lease(pool.GetOrCreate(), this);
 
     void Return(TValue value)
     {
