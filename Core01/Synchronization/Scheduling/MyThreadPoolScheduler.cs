@@ -55,7 +55,7 @@ internal sealed class MyThreadPoolScheduler : TaskScheduler
 
     uint NextEnqueueIndex(uint queueInfo)
     {
-        var count = (GetQueueCount(queueInfo) + 1) & CountMask; // can i go GetQueueCount(queueInfo + 1)
+        var count = (GetQueueCount(queueInfo) + 1) & CountMask; // can i go GetQueueCount(queueInfo + 1)?
         var enqueueIndex = GetEnqueueIndex(queueInfo);
         enqueueIndex = (enqueueIndex + 1) & WrapAroundMask;
         enqueueIndex <<= enqueueIndexBitShift;
