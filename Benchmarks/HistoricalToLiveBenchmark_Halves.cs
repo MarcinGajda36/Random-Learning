@@ -79,6 +79,6 @@ public class HistoricalToLiveBenchmark_Halves
     [Benchmark]
     public async Task HistoricalToLive3_Mutable()
     {
-        await WaitFor2LastValues(pair => HistoricalToLive3.ConcatLiveAfterHistory(pair.Live, pair.Historical).ToObservable());
+        await WaitFor2LastValues(pair => HistoricalToLive3.ConcatLiveAfterHistory(pair.Live.ToAsyncEnumerable(), pair.Historical.ToAsyncEnumerable()).ToObservable());
     }
 }

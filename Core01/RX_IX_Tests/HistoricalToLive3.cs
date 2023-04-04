@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MarcinGajda.RX_IX_Tests;
 public static class HistoricalToLive3
@@ -68,17 +71,44 @@ public static class HistoricalToLive3
 
     private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
 
-    public static IAsyncEnumerable<TValue> ConcatLiveAfterHistory<TValue>(
-        IObservable<TValue> live,
-        IObservable<TValue> historical)
-        // I feel like trying IAsyncEnumerable https://github.com/dotnet/reactive/blob/main/Ix.NET/Source/System.Interactive.Async/System/Linq/Operators/Merge.cs
-        => AsyncEnumerableEx.Merge(
-            GetLiveMessages(live).ToAsyncEnumerable(),
-            GetHistoricalMessages(historical).ToAsyncEnumerable())
-        .Scan(
-            new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
-            HandleNextMessage)
-        .SelectMany(state => state.Return.ToAsyncEnumerable());
+    // System.Interactive.Async fails to get benchmarked https://github.com/dotnet/reactive/blob/main/Ix.NET/Source/System.Interactive.Async/System/Linq/Operators/Merge.cs
+    public static async IAsyncEnumerable<TValue> ConcatLiveAfterHistory<TValue>(
+        IAsyncEnumerable<TValue> live,
+        IAsyncEnumerable<TValue> historical,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        bool hasHistoricalEnded = false;
+        var liveBuffer = new List<TValue>();
+        await using var liveEnumerator = live.GetAsyncEnumerator(cancellationToken);
+
+        async Task BufferLiveUntilHistoryEnds()
+        {
+            while (hasHistoricalEnded != true
+                && await liveEnumerator.MoveNextAsync(cancellationToken))
+            {
+                liveBuffer.Add(liveEnumerator.Current);
+            }
+
+        }
+        var liveBufferTask = BufferLiveUntilHistoryEnds();
+
+        await foreach (var history in historical)
+        {
+            yield return history;
+        }
+        hasHistoricalEnded = true;
+        await liveBufferTask;
+
+        foreach (var buffered in liveBuffer)
+        {
+            yield return buffered;
+        }
+
+        while (await liveEnumerator.MoveNextAsync(cancellationToken))
+        {
+            yield return liveEnumerator.Current;
+        }
+    }
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
         => previous with { Return = previous.State.HandleNextMessage(message) };
