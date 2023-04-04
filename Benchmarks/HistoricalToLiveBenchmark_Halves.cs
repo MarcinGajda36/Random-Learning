@@ -4,6 +4,7 @@ using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using LanguageExt;
+using MarcinGajda.RX_IX_Tests;
 using MarcinGajda.RXTests;
 
 namespace Benchmarks;
@@ -73,5 +74,11 @@ public class HistoricalToLiveBenchmark_Halves
     public async Task HistoricalToLive2_Mutable()
     {
         await WaitFor2LastValues(pair => HistoricalToLive2.ConcatLiveAfterHistory(pair.Live, pair.Historical));
+    }
+
+    [Benchmark]
+    public async Task HistoricalToLive3_Mutable()
+    {
+        await WaitFor2LastValues(pair => HistoricalToLive3.ConcatLiveAfterHistory(pair.Live, pair.Historical));
     }
 }
