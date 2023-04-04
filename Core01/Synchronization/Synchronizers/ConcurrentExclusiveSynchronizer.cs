@@ -54,22 +54,23 @@ internal class ConcurrentExclusiveSynchronizer
     private readonly ActionBlock<IOperation> exclusive;
     private readonly ActionBlock<IOperation> concurrent;
 
-    public ConcurrentExclusiveSynchronizer()
+    public ConcurrentExclusiveSynchronizer(ConcurrentExclusiveSchedulerPair? schedulerPair = null)
     {
-        var concurrentExclusive = new ConcurrentExclusiveSchedulerPair();
+        schedulerPair ??= new ConcurrentExclusiveSchedulerPair();
         exclusive = new ActionBlock<IOperation>(
-            static operation => operation.ExecuteAsync(),
+            ExecuteAsync,
             new ExecutionDataflowBlockOptions
             {
-                TaskScheduler = concurrentExclusive.ExclusiveScheduler
+                TaskScheduler = schedulerPair.ExclusiveScheduler
             });
 
+        var concurrentScheduler = schedulerPair.ConcurrentScheduler;
         concurrent = new ActionBlock<IOperation>(
-            static operation => operation.ExecuteAsync(),
+            ExecuteAsync,
             new ExecutionDataflowBlockOptions
             {
-                MaxDegreeOfParallelism = DataflowBlockOptions.Unbounded,
-                TaskScheduler = concurrentExclusive.ConcurrentScheduler
+                MaxDegreeOfParallelism = concurrentScheduler.MaximumConcurrencyLevel,
+                TaskScheduler = concurrentScheduler
             });
     }
 
@@ -88,4 +89,7 @@ internal class ConcurrentExclusiveSynchronizer
         _ = runner.Post(operation);
         return await operation.Task;
     }
+
+    private static Task ExecuteAsync(IOperation operation)
+        => operation.ExecuteAsync();
 }
