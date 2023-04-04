@@ -349,3 +349,11 @@ Package update
 | HistoricalToLive2_Mutable |         10000 | 14.65 ms | 0.289 ms | 0.442 ms |         - |         - |         - |   309.72 KB |
 | HistoricalToLive2_Mutable |        250000 | 29.45 ms | 0.576 ms | 0.538 ms |         - |         - |         - |  5907.38 KB |
 | HistoricalToLive2_Mutable |       1000000 | 61.15 ms | 0.989 ms | 0.925 ms | 3000.0000 | 2000.0000 | 2000.0000 | 23616.52 KB |
+
+
+fresh 04.04.2023
+|                    Method | ElementsCount |      Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.181 ms | 0.0211 ms | 0.0243 ms |         - |         - |         - |   664.33 KB |
+| HistoricalToLive2_Mutable |        250000 | 17.633 ms | 0.1492 ms | 0.1395 ms | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive2_Mutable |       1000000 | 68.495 ms | 0.5888 ms | 0.4597 ms | 9000.0000 | 2000.0000 | 2000.0000 |    59172 KB |
