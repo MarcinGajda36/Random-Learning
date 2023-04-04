@@ -5,7 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 
 namespace MarcinGajda.RX_IX_Tests;
-public class HistoricalToLive3
+public static class HistoricalToLive3
 {
     private enum MessageType : byte
     {
@@ -32,38 +32,56 @@ public class HistoricalToLive3
             => new(MessageType.HistoricalCompleted, Array.Empty<TValue>(), null);
     }
 
-    readonly record struct ConcatState<TValue>(IList<TValue> AvailableReturn, bool HasHistoricalEnded, List<TValue>? LiveBuffer);
-
-    public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
-        IObservable<TValue> live,
-        IObservable<TValue> historical)
-        => GetLiveMessages(live)
-        .Merge(GetHistoricalMessages(historical))
-        .Scan(new ConcatState<TValue>(Array.Empty<TValue>(), false, new List<TValue>()), HandleNextMessage)
-        .SelectMany(state => state.AvailableReturn);
-
-    private static ConcatState<TValue> HandleNextMessage<TValue>(ConcatState<TValue> state, Message<TValue> message)
+    private sealed class ConcatState<TValue>
     {
-        if (state.HasHistoricalEnded)
+        private List<TValue>? liveBuffer = new();
+        private bool hasHistoricalEnded;
+
+        public IList<TValue> HandleNextMessage(Message<TValue> message)
+            => message.Type switch
+            {
+                MessageType.Live => HandleLiveMessage(message.Values),
+                MessageType.Historical => message.Values,
+                MessageType.HistoricalError => throw message.Exception!,
+                MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
+                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+            };
+
+        private List<TValue> HandleHistoricalCompletion()
         {
-            return state with { AvailableReturn = message.Values };
+            hasHistoricalEnded = true;
+            var buffered = liveBuffer;
+            liveBuffer = null;
+            return buffered!;
         }
 
-        return message.Type switch
+        private IList<TValue> HandleLiveMessage(IList<TValue> values)
         {
-            MessageType.Live => HandleLiveDuringHistory(state, message.Values),
-            MessageType.Historical => state with { AvailableReturn = message.Values },
-            MessageType.HistoricalError => throw message.Exception!,
-            MessageType.HistoricalCompleted => state with { AvailableReturn = state.LiveBuffer!, HasHistoricalEnded = true, LiveBuffer = null },
-            _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
-        };
+            if (hasHistoricalEnded)
+            {
+                return values;
+            }
+            liveBuffer!.Add(values[0]); // AddRange is so much less error-prone
+            return Array.Empty<TValue>();
+        }
     }
 
-    private static ConcatState<TValue> HandleLiveDuringHistory<TValue>(in ConcatState<TValue> state, IList<TValue> values)
-    {
-        state.LiveBuffer!.Add(values[0]);
-        return state with { AvailableReturn = Array.Empty<TValue>() };
-    }
+    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+
+    public static IAsyncEnumerable<TValue> ConcatLiveAfterHistory<TValue>(
+        IObservable<TValue> live,
+        IObservable<TValue> historical)
+        // I feel like trying IAsyncEnumerable https://github.com/dotnet/reactive/blob/main/Ix.NET/Source/System.Interactive.Async/System/Linq/Operators/Merge.cs
+        => AsyncEnumerableEx.Merge(
+            GetLiveMessages(live).ToAsyncEnumerable(),
+            GetHistoricalMessages(historical).ToAsyncEnumerable())
+        .Scan(
+            new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
+            HandleNextMessage)
+        .SelectMany(state => state.Return.ToAsyncEnumerable());
+
+    private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
+        => previous with { Return = previous.State.HandleNextMessage(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => Message.Live(new[] { live }));
