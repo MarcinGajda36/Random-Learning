@@ -51,7 +51,7 @@ public class HistoricalToLive3
 
         return message.Type switch
         {
-            MessageType.Live => HandleLiveDuringHistory(state, message.Values),
+            MessageType.Live => HandleLiveDuringHistory(state.LiveBuffer!, message.Values[0]),
             MessageType.Historical => state with { AvailableReturn = message.Values },
             MessageType.HistoricalError => throw message.Exception!,
             MessageType.HistoricalCompleted => state with { AvailableReturn = state.LiveBuffer!, HasHistoricalEnded = true, LiveBuffer = null },
@@ -59,10 +59,10 @@ public class HistoricalToLive3
         };
     }
 
-    private static ConcatState<TValue> HandleLiveDuringHistory<TValue>(in ConcatState<TValue> state, IList<TValue> values)
+    private static ConcatState<TValue> HandleLiveDuringHistory<TValue>(List<TValue> liveBuffer, TValue value)
     {
-        state.LiveBuffer!.Add(values[0]);
-        return state with { AvailableReturn = Array.Empty<TValue>() };
+        liveBuffer.Add(value);
+        return new(Array.Empty<TValue>(), false, liveBuffer);
     }
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)

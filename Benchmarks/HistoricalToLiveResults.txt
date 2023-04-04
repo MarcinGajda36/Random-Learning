@@ -399,3 +399,13 @@ ConcatState struct field order
 | HistoricalToLive3_Mutable |        250000 | 17.342 ms | 0.1844 ms | 0.1724 ms | 17.307 ms | 1000.0000 |         - |         - |  14794.5 KB |
 | HistoricalToLive2_Mutable |       1000000 | 69.252 ms | 1.0342 ms | 0.9674 ms | 69.069 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59173.13 KB |
 | HistoricalToLive3_Mutable |       1000000 | 70.122 ms | 1.1933 ms | 1.1162 ms | 69.785 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59174.14 KB |
+
+lighter HandleLiveDuringHistory
+|                    Method | ElementsCount |      Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.162 ms | 0.0147 ms | 0.0130 ms |         - |         - |         - |   664.33 KB |
+| HistoricalToLive3_Mutable |         10000 |  1.185 ms | 0.0127 ms | 0.0118 ms |         - |         - |         - |   664.31 KB |
+| HistoricalToLive2_Mutable |        250000 | 17.141 ms | 0.1686 ms | 0.1495 ms | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive3_Mutable |        250000 | 17.435 ms | 0.1370 ms | 0.1281 ms | 1000.0000 |         - |         - |  14794.5 KB |
+| HistoricalToLive2_Mutable |       1000000 | 68.716 ms | 0.7524 ms | 0.7038 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59169.22 KB |
+| HistoricalToLive3_Mutable |       1000000 | 70.307 ms | 0.8086 ms | 0.7168 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59173.77 KB |
