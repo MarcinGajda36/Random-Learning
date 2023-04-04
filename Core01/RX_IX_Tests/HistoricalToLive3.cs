@@ -32,14 +32,14 @@ public class HistoricalToLive3
             => new(MessageType.HistoricalCompleted, Array.Empty<TValue>(), null);
     }
 
-    readonly record struct ConcatState<TValue>(List<TValue>? LiveBuffer, bool HasHistoricalEnded, IList<TValue> AvailableReturn);
+    readonly record struct ConcatState<TValue>(IList<TValue> AvailableReturn, bool HasHistoricalEnded, List<TValue>? LiveBuffer);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
         IObservable<TValue> historical)
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
-        .Scan(new ConcatState<TValue>(new List<TValue>(), false, Array.Empty<TValue>()), HandleNextMessage)
+        .Scan(new ConcatState<TValue>(Array.Empty<TValue>(), false, new List<TValue>()), HandleNextMessage)
         .SelectMany(state => state.AvailableReturn);
 
     private static ConcatState<TValue> HandleNextMessage<TValue>(ConcatState<TValue> state, Message<TValue> message)
