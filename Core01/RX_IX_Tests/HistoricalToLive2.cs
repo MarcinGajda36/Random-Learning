@@ -72,7 +72,7 @@ public static class HistoricalToLive2
         IObservable<TValue> live,
         IObservable<TValue> historical)
         => GetLiveMessages(live)
-        .Merge(GetHistoricalMessages(historical))
+        .Merge(GetHistoricalMessages(historical)) // I feel like trying IAsyncEnumerable https://github.com/dotnet/reactive/blob/main/Ix.NET/Source/System.Interactive.Async/System/Linq/Operators/Merge.cs
         .Scan(
             new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
             HandleNextMessage)
