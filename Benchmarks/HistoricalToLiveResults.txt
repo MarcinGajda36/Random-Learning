@@ -368,3 +368,14 @@ trying a third one with mutation + pattern matching
 | HistoricalToLive3_Mutable |        250000 | 17.584 ms | 0.1384 ms | 0.1227 ms | 1000.0000 |         - |         - |  14794.5 KB |
 | HistoricalToLive2_Mutable |       1000000 | 68.871 ms | 0.8356 ms | 0.7407 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59169.11 KB |
 | HistoricalToLive3_Mutable |       1000000 | 71.546 ms | 0.6417 ms | 0.5689 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59174.67 KB |
+
+
+early history ended check
+|                    Method | ElementsCount |      Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.220 ms | 0.0173 ms | 0.0162 ms |         - |         - |         - |   664.33 KB |
+| HistoricalToLive3_Mutable |         10000 |  1.168 ms | 0.0102 ms | 0.0091 ms |         - |         - |         - |   664.31 KB |
+| HistoricalToLive2_Mutable |        250000 | 17.354 ms | 0.2182 ms | 0.2143 ms | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive3_Mutable |        250000 | 17.781 ms | 0.1324 ms | 0.1239 ms | 1000.0000 |         - |         - |  14794.5 KB |
+| HistoricalToLive2_Mutable |       1000000 | 69.692 ms | 0.7035 ms | 0.6581 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59171.25 KB |
+| HistoricalToLive3_Mutable |       1000000 | 71.022 ms | 0.9007 ms | 0.8426 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59168.85 KB |

@@ -43,15 +43,21 @@ public class HistoricalToLive3
         .SelectMany(state => state.AvailableReturn);
 
     private static ConcatState<TValue> HandleNextMessage<TValue>(ConcatState<TValue> state, Message<TValue> message)
-        => (state, message) switch
+    {
+        if (state.HasHistoricalEnded)
         {
-            ({ HasHistoricalEnded: true }, _) => state with { AvailableReturn = message.Values },
-            ({ HasHistoricalEnded: false }, { Type: MessageType.Live }) => HandleLiveDuringHistory(state, message.Values),
-            (_, { Type: MessageType.Historical }) => state with { AvailableReturn = message.Values },
-            (_, { Type: MessageType.HistoricalError }) => throw message.Exception!,
-            (_, { Type: MessageType.HistoricalCompleted }) => state with { AvailableReturn = state.LiveBuffer!, HasHistoricalEnded = true, LiveBuffer = null },
+            return state with { AvailableReturn = message.Values };
+        }
+
+        return message.Type switch
+        {
+            MessageType.Live => HandleLiveDuringHistory(state, message.Values),
+            MessageType.Historical => state with { AvailableReturn = message.Values },
+            MessageType.HistoricalError => throw message.Exception!,
+            MessageType.HistoricalCompleted => state with { AvailableReturn = state.LiveBuffer!, HasHistoricalEnded = true, LiveBuffer = null },
             _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
         };
+    }
 
     private static ConcatState<TValue> HandleLiveDuringHistory<TValue>(ConcatState<TValue> state, IList<TValue> values)
     {
