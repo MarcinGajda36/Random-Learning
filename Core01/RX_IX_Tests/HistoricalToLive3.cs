@@ -59,7 +59,7 @@ public class HistoricalToLive3
         };
     }
 
-    private static ConcatState<TValue> HandleLiveDuringHistory<TValue>(ConcatState<TValue> state, IList<TValue> values)
+    private static ConcatState<TValue> HandleLiveDuringHistory<TValue>(in ConcatState<TValue> state, IList<TValue> values)
     {
         state.LiveBuffer!.Add(values[0]);
         return state with { AvailableReturn = Array.Empty<TValue>() };

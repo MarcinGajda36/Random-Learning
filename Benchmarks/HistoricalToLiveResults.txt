@@ -379,3 +379,13 @@ early history ended check
 | HistoricalToLive3_Mutable |        250000 | 17.781 ms | 0.1324 ms | 0.1239 ms | 1000.0000 |         - |         - |  14794.5 KB |
 | HistoricalToLive2_Mutable |       1000000 | 69.692 ms | 0.7035 ms | 0.6581 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59171.25 KB |
 | HistoricalToLive3_Mutable |       1000000 | 71.022 ms | 0.9007 ms | 0.8426 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59168.85 KB |
+
+in -> HandleLiveDuringHistory<TValue>(in ConcatState<TValue> state
+|                    Method | ElementsCount |      Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.155 ms | 0.0081 ms | 0.0068 ms |         - |         - |         - |   664.33 KB |
+| HistoricalToLive3_Mutable |         10000 |  1.179 ms | 0.0071 ms | 0.0060 ms |         - |         - |         - |   664.31 KB |
+| HistoricalToLive2_Mutable |        250000 | 17.443 ms | 0.1234 ms | 0.1154 ms | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive3_Mutable |        250000 | 17.813 ms | 0.1949 ms | 0.2166 ms | 1000.0000 |         - |         - |  14794.5 KB |
+| HistoricalToLive2_Mutable |       1000000 | 68.976 ms | 0.4834 ms | 0.4285 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59167.53 KB |
+| HistoricalToLive3_Mutable |       1000000 | 70.417 ms | 1.3637 ms | 1.5705 ms | 9000.0000 | 2000.0000 | 2000.0000 |  59167.8 KB |
