@@ -428,3 +428,20 @@ directly creating Message<T>
 | HistoricalToLive2_Mutable |         10000 |  1.148 ms | 0.0151 ms | 0.0133 ms |         - |         - |         - |   664.33 KB |
 | HistoricalToLive2_Mutable |        250000 | 17.480 ms | 0.0343 ms | 0.0304 ms | 1000.0000 |         - |         - | 14794.52 KB |
 | HistoricalToLive2_Mutable |       1000000 | 68.931 ms | 0.5931 ms | 0.4953 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59167.53 KB |
+
+
+adding string tests
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|       HistoricalToLive2_Mutable_Ints |         10000 |   1.172 ms | 0.0072 ms | 0.0068 ms |          - |         - |         - |   664.41 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.216 ms | 0.0149 ms | 0.0139 ms |          - |         - |         - |   742.56 KB |
+|    HistoricalToLive2_Mutable_Strings |         10000 |   2.065 ms | 0.0188 ms | 0.0176 ms |          - |         - |         - |   856.39 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.008 ms | 0.0207 ms | 0.0161 ms |          - |         - |         - |   700.14 KB |
+|       HistoricalToLive2_Mutable_Ints |        250000 |  17.142 ms | 0.1453 ms | 0.1427 ms |  1000.0000 |         - |         - |  14794.6 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.126 ms | 0.2226 ms | 0.1859 ms |  2000.0000 |         - |         - | 16747.75 KB |
+|    HistoricalToLive2_Mutable_Strings |        250000 |  31.622 ms | 0.2773 ms | 0.2594 ms |  2000.0000 | 1000.0000 | 1000.0000 | 17866.91 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.392 ms | 0.3617 ms | 0.3383 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.66 KB |
+|       HistoricalToLive2_Mutable_Ints |       1000000 |  68.159 ms | 0.6808 ms | 0.6035 ms |  9000.0000 | 2000.0000 | 2000.0000 | 59169.37 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.357 ms | 0.6008 ms | 0.5017 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.26 KB |
+|    HistoricalToLive2_Mutable_Strings |       1000000 | 119.958 ms | 1.3416 ms | 1.2549 ms | 10000.0000 | 3000.0000 | 3000.0000 | 71465.74 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 114.621 ms | 1.2767 ms | 1.1942 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.84 KB |
