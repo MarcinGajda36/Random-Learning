@@ -445,3 +445,25 @@ adding string tests
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.357 ms | 0.6008 ms | 0.5017 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.26 KB |
 |    HistoricalToLive2_Mutable_Strings |       1000000 | 119.958 ms | 1.3416 ms | 1.2549 ms | 10000.0000 | 3000.0000 | 3000.0000 | 71465.74 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 114.621 ms | 1.2767 ms | 1.1942 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.84 KB |
+
+adding immutable benchmarks 
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |    Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|-------------:|
+|     HistoricalToLive2_Immutable_Ints |         10000 |   2.552 ms | 0.0391 ms | 0.0366 ms |          - |         - |         - |   2932.81 KB |
+|       HistoricalToLive2_Mutable_Ints |         10000 |   1.176 ms | 0.0101 ms | 0.0094 ms |          - |         - |         - |    664.41 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.200 ms | 0.0089 ms | 0.0083 ms |          - |         - |         - |    742.56 KB |
+|  HistoricalToLive2_Immutable_Strings |         10000 |   3.707 ms | 0.0235 ms | 0.0208 ms |          - |         - |         - |   2932.82 KB |
+|    HistoricalToLive2_Mutable_Strings |         10000 |   2.111 ms | 0.0241 ms | 0.0226 ms |          - |         - |         - |    856.39 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.080 ms | 0.0234 ms | 0.0219 ms |          - |         - |         - |    700.14 KB |
+|     HistoricalToLive2_Immutable_Ints |        250000 |  45.725 ms | 0.6288 ms | 0.5882 ms | 11000.0000 | 1000.0000 |         - |  73245.31 KB |
+|       HistoricalToLive2_Mutable_Ints |        250000 |  17.291 ms | 0.1228 ms | 0.1876 ms |  1000.0000 |         - |         - |   14794.6 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.520 ms | 0.1058 ms | 0.0938 ms |  2000.0000 |         - |         - |  16747.75 KB |
+|  HistoricalToLive2_Immutable_Strings |        250000 |  64.682 ms | 1.1785 ms | 1.1023 ms | 11000.0000 | 1000.0000 |         - |  73245.32 KB |
+|    HistoricalToLive2_Mutable_Strings |        250000 |  30.112 ms | 0.3510 ms | 0.3112 ms |  2000.0000 | 1000.0000 | 1000.0000 |  17866.91 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.916 ms | 0.3778 ms | 0.3534 ms |  2000.0000 | 1000.0000 | 1000.0000 |  13960.66 KB |
+|     HistoricalToLive2_Immutable_Ints |       1000000 | 183.942 ms | 1.0494 ms | 0.9816 ms | 47000.0000 | 3000.0000 | 1000.0000 |  292972.2 KB |
+|       HistoricalToLive2_Mutable_Ints |       1000000 |  69.364 ms | 0.6990 ms | 0.6538 ms |  9000.0000 | 2000.0000 | 2000.0000 |  59168.43 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.380 ms | 0.6161 ms | 0.5763 ms | 10000.0000 | 2000.0000 | 2000.0000 |  66980.13 KB |
+|  HistoricalToLive2_Immutable_Strings |       1000000 | 260.569 ms | 2.2374 ms | 2.0928 ms | 47000.0000 | 3000.0000 | 1000.0000 | 292972.21 KB |
+|    HistoricalToLive2_Mutable_Strings |       1000000 | 118.753 ms | 1.2885 ms | 1.1422 ms | 10000.0000 | 3000.0000 | 3000.0000 |  71461.34 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 116.468 ms | 1.1419 ms | 1.0123 ms |  8000.0000 | 3000.0000 | 3000.0000 |  55837.01 KB |
