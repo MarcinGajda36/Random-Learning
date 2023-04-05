@@ -8,7 +8,7 @@ namespace MarcinGajda.Collections
 {
     public static class ArraysTests
     {
-        public static async Task RentTest()
+        public static void RentTest()
         {
             string[] rented = ArrayPool<string>.Shared.Rent(100);
             try

@@ -19,13 +19,13 @@ internal class Program
         var p1 = new Person { Name = "asdasd" };
         var refp1 = Ref(p1);
         var refp2 = Ref(p1);
-        _ = sync(() =>
+        _ = atomic(() =>
         {
             _ = refp1.Swap(p => p with { Name = "Kappa" });
             _ = refp2.Swap(p => p with { Name = "LOL" });
         });
 
-        var (pp1, pp2) = sync(() => (refp1.Value, refp2.Value));
+        var (pp1, pp2) = atomic(() => (refp1.Value, refp2.Value));
 
         int l = "asdasd" switch
         {

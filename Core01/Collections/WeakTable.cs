@@ -9,7 +9,7 @@ namespace MarcinGajda.Collections
         public static void Test1()
         {
             var cwt = new ConditionalWeakTable<object, string>();
-            object second = new { Test = 2 };
+            object? second = new { Test = 2 };
             object third = new { Test = 3 };
             cwt.Add(first, "First");
             cwt.Add(second, "Second");
@@ -45,7 +45,7 @@ namespace MarcinGajda.Collections
 
             GC.Collect();
 
-            ClassData data = null;
+            ClassData? data = null;
 
             if (wr2.Target == null)
             {

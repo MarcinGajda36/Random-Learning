@@ -7,7 +7,7 @@ namespace MarcinGajda.Copy
     {
         public static T? Idk<T>(T? t)
             where T : struct => t;
-        public static T Idk<T>(T? t)
+        public static T? Idk<T>(T? t)
             where T : class => t;
 
         public static async Task CopyFileAsync(string sourcePath, string destinationPath, int bufferSize = 4096, bool overwrite = true)
