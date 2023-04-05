@@ -16,7 +16,7 @@ public sealed partial class PoolPerKeyConcurrentExclusive<TKey>
         : this(DefaultSize) { }
 
     public PoolPerKeyConcurrentExclusive(PowerOfTwo poolSize)
-        => pool = new(DefaultSize, () => new ConcurrentExclusiveSynchronizer());
+        => pool = new(poolSize, () => new ConcurrentExclusiveSynchronizer());
 
     public Task<TResult> ConcurrentAsync<TResult>(
         TKey key,
