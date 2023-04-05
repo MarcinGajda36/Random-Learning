@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Net.Http;
+using System.Net.Security;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 
 namespace SpansAndStuff;
 public static class Vectors
@@ -15,5 +18,18 @@ public static class Vectors
 
         var haystack = new Vector<int>(haystackSpan);
         var equalsAny = Vector.EqualsAny(needle, haystack);
+
+        // kinda bad place 
+        var handler = new SocketsHttpHandler
+        {
+            SslOptions = new SslClientAuthenticationOptions()
+            {
+                // This has bad default of NoCheck and i see default 'Online' here:
+                // https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/working-with-certificates#certificate-revocation-list
+                CertificateRevocationCheckMode = X509RevocationMode.Online
+            },
+            PooledConnectionLifetime = TimeSpan.FromMinutes(15) // Recreate every 15 minutes
+        };
+        var client = new HttpClient(handler);
     }
 }
