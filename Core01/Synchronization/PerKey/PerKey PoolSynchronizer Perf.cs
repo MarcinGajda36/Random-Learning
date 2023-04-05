@@ -43,6 +43,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     where TKey : notnull
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
+    // Pool of ReadWriteLocks would also be nice https://github.com/dotnet/dotNext/blob/master/src/DotNext.Threading/Threading/AsyncReaderWriterLock.cs
     private readonly SemaphoreSlim[] pool;
     private bool disposedValue;
 
