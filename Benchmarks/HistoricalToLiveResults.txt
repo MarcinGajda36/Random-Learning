@@ -420,3 +420,11 @@ initial manual IAsyncEnumerable HistoricalToLive3_Mutable
 | HistoricalToLive3_Mutable |        250000 |   272.898 ms | 1.4727 ms | 1.3776 ms |  32000.0000 |         - |         - | 200247.98 KB |
 | HistoricalToLive2_Mutable |       1000000 |    69.127 ms | 0.5885 ms | 0.5216 ms |   9000.0000 | 2000.0000 | 2000.0000 |  59169.53 KB |
 | HistoricalToLive3_Mutable |       1000000 | 1,098.896 ms | 5.3220 ms | 4.7178 ms | 130000.0000 | 1000.0000 | 1000.0000 | 800976.66 KB |
+
+
+directly creating Message<T>
+|                    Method | ElementsCount |      Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|-------------------------- |-------------- |----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive2_Mutable |         10000 |  1.148 ms | 0.0151 ms | 0.0133 ms |         - |         - |         - |   664.33 KB |
+| HistoricalToLive2_Mutable |        250000 | 17.480 ms | 0.0343 ms | 0.0304 ms | 1000.0000 |         - |         - | 14794.52 KB |
+| HistoricalToLive2_Mutable |       1000000 | 68.931 ms | 0.5931 ms | 0.4953 ms | 9000.0000 | 2000.0000 | 2000.0000 | 59167.53 KB |
