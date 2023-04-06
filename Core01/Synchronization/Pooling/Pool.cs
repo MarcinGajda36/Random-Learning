@@ -4,12 +4,12 @@ using System.Numerics;
 
 namespace MarcinGajda.Synchronizers.Pooling;
 
-public sealed class PerKeyPool<TKey, TInsance>
+public class PerKeyPool<TKey, TInsance>
     where TKey : notnull
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
-    private readonly ImmutableArray<TInsance> pool;
     private readonly int poolIndexBitShift;
+    protected ImmutableArray<TInsance> Pool { get; }
 
     public PerKeyPool(Func<TInsance> factory)
         : this(DefaultSize, factory) { }
@@ -22,17 +22,50 @@ public sealed class PerKeyPool<TKey, TInsance>
         }
 
         var poolBuilder = ImmutableArray.CreateBuilder<TInsance>((int)poolSize.Value);
-        for (int index = 0; index < pool.Length; index++)
+        for (int index = 0; index < Pool.Length; index++)
         {
             poolBuilder.Add(factory());
         }
-        pool = poolBuilder.MoveToImmutable();
-        poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(pool.Length);
+        Pool = poolBuilder.MoveToImmutable();
+        poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(Pool.Length);
     }
 
     public TInsance Get(TKey key)
-        => pool[GetIndex(key)];
+        => Pool[GetIndex(key)];
 
     private int GetIndex(TKey key)
         => (int)(Hashing.Fibonacci(key) >> poolIndexBitShift);
+}
+
+public class PerKeyDisposablePoolV2<TKey, TInsance>
+    : PerKeyPool<TKey, TInsance>, IDisposable
+    where TInsance : IDisposable
+    where TKey : notnull
+
+{
+    private bool disposedValue;
+
+    public PerKeyDisposablePoolV2(Func<TInsance> factory) : base(factory) { }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                foreach (var instance in Pool)
+                {
+                    instance.Dispose();
+                }
+            }
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
