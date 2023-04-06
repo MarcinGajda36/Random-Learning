@@ -41,7 +41,6 @@ public class PerKeyDisposablePoolV2<TKey, TInsance>
     : PerKeyPool<TKey, TInsance>, IDisposable
     where TInsance : IDisposable
     where TKey : notnull
-
 {
     private bool disposedValue;
 
