@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Numerics;
+using System.Threading;
 
 namespace MarcinGajda.Synchronizers.Pooling;
 
@@ -67,4 +68,12 @@ public class PerKeyDisposablePoolV2<TKey, TInsance>
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+}
+
+public class PerKeySynchronizerV3<TKey>
+    : PerKeyDisposablePoolV2<TKey, SemaphoreSlim>
+    where TKey : notnull
+{
+    public PerKeySynchronizerV3()
+        : base(() => new SemaphoreSlim(1, 1)) { }
 }
