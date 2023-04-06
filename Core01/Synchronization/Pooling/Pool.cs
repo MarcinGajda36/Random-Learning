@@ -77,3 +77,12 @@ public class PerKeySynchronizerV3<TKey>
     public PerKeySynchronizerV3()
         : base(() => new SemaphoreSlim(1, 1)) { }
 }
+
+public class Test
+{
+    public Test()
+    {
+        using var pool = new PerKeySynchronizerV3<Guid>();
+        pool.Get(Guid.NewGuid());
+    }
+}
