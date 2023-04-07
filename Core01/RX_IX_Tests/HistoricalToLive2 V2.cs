@@ -23,7 +23,7 @@ public static class HistoricalToLive2_V2
         private bool hasHistoricalEnded;
 
         public IList<TValue> HandleNextMessage(Message<TValue> message)
-            => message.Type switch
+            => message.Type switch // Maybe try if/else if; maybe if only for live? 
             {
                 MessageType.Live => HandleLiveMessage((TValue)message.Value!),
                 MessageType.Historical => (IList<TValue>)message.Value!,
