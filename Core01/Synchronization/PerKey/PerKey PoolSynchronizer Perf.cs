@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronization.PerKey;
 
 public static class Hashing
 {

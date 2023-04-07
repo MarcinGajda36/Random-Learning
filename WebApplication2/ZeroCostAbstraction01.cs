@@ -1,4 +1,4 @@
-﻿namespace WebApplication2;
+﻿namespace DITesting;
 
 public interface IClock { DateTimeOffset UtcNow(); }
 public struct Clock : IClock

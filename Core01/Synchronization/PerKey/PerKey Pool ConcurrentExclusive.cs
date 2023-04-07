@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using MarcinGajda.Synchronization.Pooling;
 using MarcinGajda.Synchronization.Synchronizers;
-using MarcinGajda.Synchronizers.Pooling;
 
-namespace MarcinGajda.Synchronizers;
+namespace MarcinGajda.Synchronization.PerKey;
 
 public sealed partial class PoolPerKeyConcurrentExclusive<TKey>
     where TKey : notnull

@@ -4,7 +4,7 @@ using System.Reactive.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using LanguageExt;
-using MarcinGajda.RXTests;
+using MarcinGajda.RX_IX_Tests;
 
 namespace Benchmarks;
 

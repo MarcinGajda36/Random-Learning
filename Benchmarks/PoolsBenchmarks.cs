@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Order;
-using MarcinGajda.Synchronizers.Pooling;
+using MarcinGajda.Synchronization.Pooling;
 
 namespace Benchmarks;
 

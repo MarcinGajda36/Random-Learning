@@ -2,7 +2,7 @@
 using System.Reactive.Subjects;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
-using MarcinGajda.RXTests;
+using MarcinGajda.RX_IX_Tests;
 
 namespace Benchmarks;
 

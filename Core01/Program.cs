@@ -14,7 +14,7 @@ using MarcinGajda.Copy;
 using MarcinGajda.DataflowTests;
 using MarcinGajda.Fs;
 using MarcinGajda.PeriodicCheckers;
-using MarcinGajda.RXTests;
+using MarcinGajda.RX_IX_Tests;
 using MarcinGajda.Structs;
 using MarcinGajda.Synchronizers.Pooling;
 using MarcinGajda.WORK_observable;

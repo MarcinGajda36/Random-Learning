@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using LanguageExt;
 
-namespace MarcinGajda.RXTests
+namespace MarcinGajda.RX_IX_Tests
 {
     public static class Observables
     {
@@ -22,7 +22,7 @@ namespace MarcinGajda.RXTests
         {
             using var subject = new Subject<string>();
             subject.OnNext("a");
-            using IDisposable consoleSub = subject.Subscribe(Console.WriteLine);
+            using var consoleSub = subject.Subscribe(Console.WriteLine);
             subject.OnNext("b");
             subject.OnNext("c");
         }
@@ -64,12 +64,12 @@ namespace MarcinGajda.RXTests
         }
         public static async void Throws()
         {
-            IObservable<int> throws = Observable.Throw<int>(new Exception());
+            var throws = Observable.Throw<int>(new Exception());
             await throws;
         }
         public static async void Create()
         {
-            IObservable<int> observable = Observable.Create<int>(observer =>
+            var observable = Observable.Create<int>(observer =>
             {
                 observer.OnNext(1);
                 observer.OnNext(2);
@@ -81,12 +81,12 @@ namespace MarcinGajda.RXTests
         }
         public static async void Create1()
         {
-            IObservable<int> Empty = Observable.Create<int>(observer =>
+            var Empty = Observable.Create<int>(observer =>
             {
                 observer.OnCompleted();
                 return Disposable.Empty;
             });
-            IObservable<int> Never = Observable.Create<int>(observer => Disposable.Empty);
+            var Never = Observable.Create<int>(observer => Disposable.Empty);
             IObservable<T> Throw<T>(Exception exception) => Observable.Create<T>(observer =>
                                                                          {
                                                                              observer.OnError(exception);
@@ -118,7 +118,7 @@ namespace MarcinGajda.RXTests
         }
         public static void StartAction()
         {
-            IObservable<int> start = Observable.Start(() =>
+            var start = Observable.Start(() =>
             {
                 for (int i = 0; i < 1000; i++)
                 {
@@ -129,7 +129,7 @@ namespace MarcinGajda.RXTests
         }
         public static void Tests()
         {
-            IObservable<IGroupedObservable<int, IEnumerable<int>>> a = Task.FromResult(new[] { 1, 2, 3 })
+            var a = Task.FromResult(new[] { 1, 2, 3 })
                 .ToObservable()
                 .GroupBy(i => i.Length)
                 .SelectMany(async i =>
@@ -143,7 +143,7 @@ namespace MarcinGajda.RXTests
         }
         public static void MyAny<T>(IObservable<T> observable, Func<T, bool> condition)
         {
-            IObservable<bool> any = Observable.Create<bool>(observer =>
+            var any = Observable.Create<bool>(observer =>
             observable.Take(1).Subscribe(
                 (_) =>
                 {
@@ -155,7 +155,7 @@ namespace MarcinGajda.RXTests
                     observer.OnNext(false);
                     observer.OnCompleted();
                 }));
-            IObservable<bool> conditionalAny = Observable.Create<bool>(observer =>
+            var conditionalAny = Observable.Create<bool>(observer =>
             observable.Where(condition).Take(1).Subscribe(
                 (_) =>
                 {
@@ -170,11 +170,11 @@ namespace MarcinGajda.RXTests
         }
         public static void MyRunning()
         {
-            IObservable<int> min = Observable.Range(0, 100)
+            var min = Observable.Range(0, 100)
                 .Scan(Math.Min)
                 .Distinct();
 
-            IObservable<int> max = Observable.Range(0, 100)
+            var max = Observable.Range(0, 100)
                 .Scan(int.MinValue, Math.Max)// int.MinValue probably not needed 
                 .Distinct();
         }
@@ -183,14 +183,14 @@ namespace MarcinGajda.RXTests
             IObservable<T> Min<T>(IObservable<T> source)
             {
 
-                Comparer<T> comparer = Comparer<T>.Default;
+                var comparer = Comparer<T>.Default;
                 T minOf(T x, T y) => comparer.Compare(x, y) < 0 ? x : y;
                 return source.Scan(minOf).DistinctUntilChanged();
             }
         }
         public static void IAsyncEnumerableAndOb()
         {
-            ValueTask<List<int>> list = Task.FromResult(1)
+            var list = Task.FromResult(1)
                 .ToObservable()
                 .SelectMany(Observable.Range)
                 .ToAsyncEnumerable()
@@ -200,11 +200,11 @@ namespace MarcinGajda.RXTests
 
         public static async Task AndThenWhen()
         {
-            Pattern<int, string> pattern = Observable.Range(1, 10)
+            var pattern = Observable.Range(1, 10)
                 .And(Observable.Range(10, 10).Select(x => x.ToString()));
-            Plan<string> plain = pattern.Then((left, right) => left.ToString() + " " + right);
-            IObservable<string> sums = Observable.When(plain);
-            using IDisposable sub = sums.Subscribe(Console.WriteLine);
+            var plain = pattern.Then((left, right) => left.ToString() + " " + right);
+            var sums = Observable.When(plain);
+            using var sub = sums.Subscribe(Console.WriteLine);
             _ = await sums;
         }
 
@@ -225,23 +225,23 @@ namespace MarcinGajda.RXTests
                 .ToList()
                 .ToTask();
 
-            IQueryable<int> qu = Task.FromResult(1)
+            var qu = Task.FromResult(1)
                 .ToObservable()
                 .AsQbservable()
                 .ToQueryable();
 
-            IObservable<int> manyAsync = Observable.Range(1, 10)
+            var manyAsync = Observable.Range(1, 10)
                 .Select(async x => await Task.FromResult(x))
                 .Merge();// .Merge() -> parallel | .Concat() -> sequencial
 
-            IConnectableObservable<int> connectable = Observable.Range(1, 10).Publish();
-            IObservable<int> refCount = connectable.RefCount();
+            var connectable = Observable.Range(1, 10).Publish();
+            var refCount = connectable.RefCount();
 
-            IConnectableObservable<long> replay = Observable.Interval(TimeSpan.FromSeconds(1))
+            var replay = Observable.Interval(TimeSpan.FromSeconds(1))
                 .Replay();
-            IObservable<long> refCountReplay = replay.RefCount();
+            var refCountReplay = replay.RefCount();
 
-            IConnectableObservable<long> manualReplay = Observable.Interval(TimeSpan.FromSeconds(1))
+            var manualReplay = Observable.Interval(TimeSpan.FromSeconds(1))
                 .Multicast(new ReplaySubject<long>());
             var counted = new RefCountDisposable(new CancellationTokenSource());
             var msgSenders = Task.FromResult(new[] { new { SenderId = "", MsgId = Guid.NewGuid() } });
@@ -252,7 +252,7 @@ namespace MarcinGajda.RXTests
                 .SelectMany(async sndrGroup => (sndrGroup.Key, await sndrGroup.ToList()))
                 .ToDictionary(sndrGroup => sndrGroup.Key, sndrGroup => sndrGroup.Item2);
 
-            IDictionary<int, IList<Site>> result = await GetSource()
+            var result = await GetSource()
                 .GroupBy(o => o.SiteId)
                 .SelectMany(async group => new { group.Key, List = await group.ToList() })
                 .ToDictionary(group => group.Key, group => group.List);
@@ -279,7 +279,7 @@ namespace MarcinGajda.RXTests
 
         public static void Schedulerss()
         {
-            IScheduler schedule1 = Scheduler.ThreadPool;
+            var schedule1 = Scheduler.ThreadPool;
             IScheduler scheduler = TaskPoolScheduler.Default;
             using var serialDisp = new SerialDisposable();
             Action<int, Action<int>> work = (x, self) =>
@@ -288,7 +288,7 @@ namespace MarcinGajda.RXTests
                 self(x);
             };
 
-            IDisposable token = scheduler.Schedule(1, work);
+            var token = scheduler.Schedule(1, work);
             Console.ReadLine();
             Console.WriteLine("Canceling");
             token.Dispose();
@@ -296,10 +296,10 @@ namespace MarcinGajda.RXTests
         }
         public static void Windows()
         {
-            var observable = MyWindow(Observable.Range(0, 10), 3);
+            var observable = Observable.Range(0, 10).MyWindow(3);
             using var s1 = observable.Subscribe(obs => obs.Subscribe(Console.WriteLine));
 
-            var observable1 = MyWindow1(Observable.Range(0, 10), 3);
+            var observable1 = Observable.Range(0, 10).MyWindow1(3);
             using var s2 = observable1.Subscribe(obs => obs.Subscribe(Console.WriteLine));
         }
         public static IObservable<IObservable<T>> MyWindow<T>(

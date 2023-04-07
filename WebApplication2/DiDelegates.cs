@@ -1,4 +1,4 @@
-﻿namespace WebApplication2;
+﻿namespace DITesting;
 
 public delegate TClient ClientFactory<out TClient>(string url, HttpClient httpClient);
 

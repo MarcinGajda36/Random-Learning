@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MarcinGajda.Synchronizers;
-using MarcinGajda.Synchronizers.Pooling;
+using MarcinGajda.Synchronization.Pooling;
 
 namespace MarcinGajda.Synchronization.PerKey;
 internal class PerKeyWithPool

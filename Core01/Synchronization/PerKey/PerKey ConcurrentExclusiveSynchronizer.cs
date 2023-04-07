@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MarcinGajda.Synchronization.Synchronizers;
 
-namespace MarcinGajda.Synchronizers.PerKey;
+namespace MarcinGajda.Synchronization.PerKey;
 
 public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
     where TKey : notnull

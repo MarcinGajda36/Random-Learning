@@ -1,6 +1,6 @@
-using WebApplication2.Background;
+using DITesting.Background;
 
-namespace WebApplication2;
+namespace DITesting;
 
 public class Program
 {

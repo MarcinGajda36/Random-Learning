@@ -2,8 +2,9 @@
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Threading;
+using MarcinGajda.Synchronization.PerKey;
 
-namespace MarcinGajda.Synchronizers.Pooling;
+namespace MarcinGajda.Synchronization.Pooling;
 
 public class PerKeyPool<TKey, TInsance>
     where TKey : notnull

@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace MarcinGajda.Synchronizers.Pooling;
+namespace MarcinGajda.Synchronization.Pooling;
 public class ThreadStaticPool<TValue>
 {
     public struct Lease : IDisposable

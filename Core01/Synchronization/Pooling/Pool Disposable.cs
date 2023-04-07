@@ -2,8 +2,9 @@
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using MarcinGajda.Synchronization.PerKey;
 
-namespace MarcinGajda.Synchronizers.Pooling;
+namespace MarcinGajda.Synchronization.Pooling;
 
 public sealed class PerKeyDisposablePool<TKey, TInsance>
     : IDisposable

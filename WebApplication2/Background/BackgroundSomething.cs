@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.Intrinsics;
 
-namespace WebApplication2.Background;
+namespace DITesting.Background;
 
 public delegate DateTimeOffset UtcNow();
 public delegate bool DateValidatior<T>(DateTimeOffset date, T toValidate);

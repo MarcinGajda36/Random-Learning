@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace MarcinGajda.RXTests;
+namespace MarcinGajda.RX_IX_Tests;
 public static class HistoricalToLive2_V2
 {
     private enum MessageType : byte
@@ -32,7 +32,7 @@ public static class HistoricalToLive2_V2
         private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
         {
             List<TValue> liveBuffer = new();
-            return (Message<TValue> message)
+            return (message)
                 => message.Type switch
                 {
                     MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),

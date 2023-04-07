@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace MarcinGajda.RXTests;
+namespace MarcinGajda.RX_IX_Tests;
 
 public static class HistoricalToLive
 {
@@ -110,7 +110,7 @@ public static class HistoricalToLive1_Dedup
             (_, Historical<TValue>(var historical))
                 => state with { AvailableMessages = Observable.Return(historical), LiveBuffer = state.LiveBuffer.Remove(historical, state.Comparer) },
             (_, HistoricalCompleted)
-                => state with { AvailableMessages = Observable.ToObservable(state.LiveBuffer), LiveBuffer = ImmutableList<TValue>.Empty, HasHistoricalEnded = true },
+                => state with { AvailableMessages = state.LiveBuffer.ToObservable(), LiveBuffer = ImmutableList<TValue>.Empty, HasHistoricalEnded = true },
             (_, HistoricalError(var exception))
                 => throw exception,
             var unknown => throw new InvalidOperationException($"Unknown message state pair: '{unknown}'.")
