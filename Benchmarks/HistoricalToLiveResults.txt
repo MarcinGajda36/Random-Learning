@@ -478,3 +478,13 @@ adding immutable benchmarks
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.049 ms | 0.4406 ms | 0.4122 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.66 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  69.809 ms | 0.8576 ms | 0.8022 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.21 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 116.283 ms | 1.4428 ms | 1.3496 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.84 KB |
+
+
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.199 ms | 0.0078 ms | 0.0073 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.024 ms | 0.0124 ms | 0.0103 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.457 ms | 0.3148 ms | 0.2945 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.261 ms | 0.4894 ms | 0.4578 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.268 ms | 0.8924 ms | 0.7452 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.22 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 114.610 ms | 1.8681 ms | 1.7474 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |

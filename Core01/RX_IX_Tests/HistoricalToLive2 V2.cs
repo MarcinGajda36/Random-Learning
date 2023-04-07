@@ -19,39 +19,44 @@ public static class HistoricalToLive2_V2
 
     private sealed class ConcatState<TValue>
     {
-        private List<TValue>? liveBuffer = new();
-        private bool hasHistoricalEnded;
+        public Func<Message<TValue>, IList<TValue>> Handler { get; private set; }
 
-        public IList<TValue> HandleNextMessage(Message<TValue> message)
-            => message.Type switch // Maybe try if/else if; maybe if only for live? 
-            {
-                MessageType.Live => HandleLiveMessage((TValue)message.Value!),
-                MessageType.Historical => (IList<TValue>)message.Value!,
-                MessageType.HistoricalError => throw (Exception)message.Value!,
-                MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
-                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
-            };
-
-        private List<TValue> HandleHistoricalCompletion()
+        public ConcatState()
         {
-            hasHistoricalEnded = true;
-            var buffered = liveBuffer;
-            liveBuffer = null;
-            return buffered!;
+            Handler = HistoryAndLiveHandler();
         }
 
-        private IList<TValue> HandleLiveMessage(TValue value) // Can i have a function for handling live, and when history ends i swap function to unbranched?
+        private readonly static Func<Message<TValue>, IList<TValue>> liveHandler
+            = (Message<TValue> message) => new[] { (TValue)message.Value! };
+
+        private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
         {
-            if (hasHistoricalEnded)
-            {
-                return new[] { value };
-            }
-            liveBuffer!.Add(value);
+            List<TValue> liveBuffer = new();
+            return (Message<TValue> message)
+                => message.Type switch
+                {
+                    MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
+                    MessageType.Historical => (IList<TValue>)message.Value!,
+                    MessageType.HistoricalError => throw (Exception)message.Value!,
+                    MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
+                    _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+                };
+        }
+
+        private List<TValue> HandleHistoricalCompletion(List<TValue> buffer)
+        {
+            Handler = liveHandler;
+            return buffer!;
+        }
+
+        private static IList<TValue> HandleLiveMessage(List<TValue> buffer, TValue value)
+        {
+            buffer.Add(value);
             return Array.Empty<TValue>();
         }
     }
 
-    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State); // replace ConcatState<> with Func<Message<TValue>, IList<TValue>>?
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -64,7 +69,7 @@ public static class HistoricalToLive2_V2
         .SelectMany(state => state.Return);
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
-        => previous with { Return = previous.State.HandleNextMessage(message) };
+        => previous with { Return = previous.State.Handler(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => new Message<TValue>(MessageType.Live, live));
