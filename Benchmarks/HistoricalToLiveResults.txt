@@ -479,7 +479,7 @@ adding immutable benchmarks
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  69.809 ms | 0.8576 ms | 0.8022 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.21 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 116.283 ms | 1.4428 ms | 1.3496 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.84 KB |
 
-
+Func<> handler
 |                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
 |------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
 |    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.199 ms | 0.0078 ms | 0.0073 ms |          - |         - |         - |   742.65 KB |
