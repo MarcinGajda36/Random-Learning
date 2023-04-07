@@ -27,7 +27,7 @@ public static class HistoricalToLive2_V2
         }
 
         private readonly static Func<Message<TValue>, IList<TValue>> liveHandler
-            = (Message<TValue> message) => new[] { (TValue)message.Value! };
+            = static (Message<TValue> message) => new[] { (TValue)message.Value! };
 
         private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
         {

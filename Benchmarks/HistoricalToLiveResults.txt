@@ -498,3 +498,13 @@ custom 'in' taking handler
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.488 ms | 0.4298 ms | 0.3810 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.346 ms | 0.6405 ms | 0.5348 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.21 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 116.200 ms | 1.7825 ms | 1.6673 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.96 KB |
+
+liveHandler = static (...)
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.240 ms | 0.0114 ms | 0.0101 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.005 ms | 0.0343 ms | 0.0321 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.405 ms | 0.2403 ms | 0.2006 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.842 ms | 0.4666 ms | 0.4136 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  67.995 ms | 1.0675 ms | 0.9985 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66982.14 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 112.060 ms | 1.7052 ms | 1.5951 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
