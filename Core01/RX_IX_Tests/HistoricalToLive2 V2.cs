@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using MarcinGajda.RX_IX_Tests;
 
 namespace MarcinGajda.RXTests;
 public static class HistoricalToLive2_V2
@@ -28,7 +27,7 @@ public static class HistoricalToLive2_V2
         }
 
         private static IList<TValue> LiveHandler(Message<TValue> message)
-            => new[] { Box<TValue>.GetValue(message.Value!) };
+            => new[] { (TValue)message.Value! };
 
         private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
         {
@@ -36,9 +35,9 @@ public static class HistoricalToLive2_V2
             return (Message<TValue> message)
                 => message.Type switch
                 {
-                    MessageType.Live => HandleLiveMessage(liveBuffer, Box<TValue>.GetValue(message.Value!)),
-                    MessageType.Historical => Box<IList<TValue>>.GetValue(message.Value!),
-                    MessageType.HistoricalError => throw Box<Exception>.GetValue(message.Value!),
+                    MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
+                    MessageType.Historical => (IList<TValue>)message.Value!,
+                    MessageType.HistoricalError => throw (Exception)message.Value!,
                     MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
                     _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
                 };
@@ -73,7 +72,7 @@ public static class HistoricalToLive2_V2
         => previous with { Return = previous.State.Handler(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live.Select(live => new Message<TValue>(MessageType.Live, Box<TValue>.New(live)));
+        => live.Select(live => new Message<TValue>(MessageType.Live, live));
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
@@ -81,8 +80,8 @@ public static class HistoricalToLive2_V2
         .Materialize()
         .Select(notification => notification.Kind switch
         {
-            NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, Box<IList<TValue>>.New(notification.Value)),
-            NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, Box<Exception>.New(notification.Exception!)),
+            NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, notification.Value),
+            NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, notification.Exception),
             NotificationKind.OnCompleted => new Message<TValue>(MessageType.HistoricalCompleted, null),
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
