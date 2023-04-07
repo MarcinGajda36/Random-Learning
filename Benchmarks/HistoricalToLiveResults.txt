@@ -508,3 +508,13 @@ liveHandler = static (...)
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.842 ms | 0.4666 ms | 0.4136 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  67.995 ms | 1.0675 ms | 0.9985 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66982.14 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 112.060 ms | 1.7052 ms | 1.5951 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+field handler instead of property
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.190 ms | 0.0093 ms | 0.0087 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.013 ms | 0.0265 ms | 0.0235 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.323 ms | 0.1332 ms | 0.1181 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.848 ms | 0.2841 ms | 0.2372 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  67.980 ms | 1.1021 ms | 0.9770 ms | 10000.0000 | 2000.0000 | 2000.0000 |  66980.8 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 115.505 ms | 1.3722 ms | 1.2836 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
