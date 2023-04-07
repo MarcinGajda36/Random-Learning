@@ -56,7 +56,7 @@ public static class HistoricalToLive2_V2
         }
     }
 
-    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State); // replace ConcatState<> with Func<Message<TValue>, IList<TValue>>?
+    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -86,3 +86,38 @@ public static class HistoricalToLive2_V2
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
 }
+
+// tried replacing ConcatState<> with Func<Message<TValue>, Concat<TValue>> but got stuck on initializing HistoryAndLiveHandler
+//private readonly record struct Concat<TValue>(IList<TValue> Return, Func<Message<TValue>, Concat<TValue>> Handler)
+//{
+//    public static Concat<TValue> Initial { get; } = new(Array.Empty<TValue>(), HistoryAndLiveHandler());
+
+//    private readonly static Func<Message<TValue>, Concat<TValue>> liveHandler
+//        = (Message<TValue> message) => new(new[] { (TValue)message.Value! }, liveHandler!);
+
+//    private Func<Message<TValue>, Concat<TValue>> HistoryAndLiveHandler()
+//    {
+//        var @this = this;
+//        List<TValue> liveBuffer = new();
+//        return (Message<TValue> message)
+//            => message.Type switch
+//            {
+//                MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!, @this.Handler),
+//                MessageType.Historical => new((IList<TValue>)message.Value!, @this.Handler),
+//                MessageType.HistoricalError => throw (Exception)message.Value!,
+//                MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
+//                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+//            };
+//    }
+
+//    private static Concat<TValue> HandleHistoricalCompletion(List<TValue> buffer)
+//    {
+//        return new(buffer, liveHandler);
+//    }
+
+//    private static Concat<TValue> HandleLiveMessage(List<TValue> buffer, TValue value, Func<Message<TValue>, Concat<TValue>> handler)
+//    {
+//        buffer.Add(value);
+//        return new(Array.Empty<TValue>(), handler);
+//    }
+//}
