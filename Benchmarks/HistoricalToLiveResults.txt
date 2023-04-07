@@ -518,3 +518,14 @@ field handler instead of property
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.848 ms | 0.2841 ms | 0.2372 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  67.980 ms | 1.1021 ms | 0.9770 ms | 10000.0000 | 2000.0000 | 2000.0000 |  66980.8 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 115.505 ms | 1.3722 ms | 1.2836 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+
+making historical and live lambdas static 
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.216 ms | 0.0127 ms | 0.0113 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.035 ms | 0.0404 ms | 0.0415 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  18.503 ms | 0.2030 ms | 0.1899 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.761 ms | 0.2579 ms | 0.2412 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.513 ms | 0.5961 ms | 0.4978 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.41 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 114.402 ms | 1.3298 ms | 1.2439 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
