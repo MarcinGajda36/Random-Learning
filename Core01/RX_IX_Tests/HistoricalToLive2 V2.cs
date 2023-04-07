@@ -32,15 +32,14 @@ public static class HistoricalToLive2_V2
         private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
         {
             List<TValue> liveBuffer = new();
-            return (message)
-                => message.Type switch
-                {
-                    MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
-                    MessageType.Historical => (IList<TValue>)message.Value!,
-                    MessageType.HistoricalError => throw (Exception)message.Value!,
-                    MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
-                    _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
-                };
+            return (message) => message.Type switch
+            {
+                MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
+                MessageType.Historical => (IList<TValue>)message.Value!,
+                MessageType.HistoricalError => throw (Exception)message.Value!,
+                MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
+                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+            };
         }
 
         private List<TValue> HandleHistoricalCompletion(List<TValue> buffer)
