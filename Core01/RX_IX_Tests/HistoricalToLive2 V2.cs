@@ -7,6 +7,8 @@ using System.Reactive.Linq;
 namespace MarcinGajda.RXTests;
 public static class HistoricalToLive2_V2
 {
+    private delegate IList<TValue> Handler<TValue>(in Message<TValue> message);
+
     private enum MessageType : byte
     {
         Live = 0,
@@ -19,20 +21,20 @@ public static class HistoricalToLive2_V2
 
     private sealed class ConcatState<TValue>
     {
-        public Func<Message<TValue>, IList<TValue>> Handler { get; private set; }
+        public Handler<TValue> Handler { get; private set; }
 
         public ConcatState()
         {
             Handler = HistoryAndLiveHandler();
         }
 
-        private readonly static Func<Message<TValue>, IList<TValue>> liveHandler
-            = (Message<TValue> message) => new[] { (TValue)message.Value! };
+        private readonly static Handler<TValue> liveHandler
+            = (in Message<TValue> message) => new[] { (TValue)message.Value! };
 
-        private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
+        private Handler<TValue> HistoryAndLiveHandler()
         {
             List<TValue> liveBuffer = new();
-            return (Message<TValue> message)
+            return (in Message<TValue> message)
                 => message.Type switch
                 {
                     MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
@@ -69,7 +71,7 @@ public static class HistoricalToLive2_V2
         .SelectMany(state => state.Return);
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
-        => previous with { Return = previous.State.Handler(message) };
+        => previous with { Return = previous.State.Handler(in message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => new Message<TValue>(MessageType.Live, live));

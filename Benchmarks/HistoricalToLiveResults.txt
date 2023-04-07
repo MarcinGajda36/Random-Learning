@@ -488,3 +488,13 @@ adding immutable benchmarks
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.261 ms | 0.4894 ms | 0.4578 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.268 ms | 0.8924 ms | 0.7452 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.22 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 114.610 ms | 1.8681 ms | 1.7474 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+custom 'in' taking handler
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.197 ms | 0.0113 ms | 0.0094 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   1.989 ms | 0.0068 ms | 0.0053 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.317 ms | 0.3376 ms | 0.2993 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  28.488 ms | 0.4298 ms | 0.3810 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  68.346 ms | 0.6405 ms | 0.5348 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.21 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 116.200 ms | 1.7825 ms | 1.6673 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.96 KB |
