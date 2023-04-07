@@ -3,97 +3,101 @@ using System.Reflection.Emit;
 using LanguageExt;
 
 namespace MarcinGajda.RX_IX_Tests;
-public class Box<TValue>
+internal class Box<A>
 {
-    public readonly TValue Value;
+    public readonly A Value;
 
-    public static readonly Func<TValue, object> New = typeof(TValue).IsValueType
-        ? MakeNewStruct()
-        : MakeNewClass();
-
-    public static readonly Func<object, TValue> GetValue = typeof(TValue).IsValueType
-        ? GetValueStruct()
-        : GetValueClass();
-
-    public Box(TValue value)
-    {
+    public Box(A value) =>
         Value = value;
+
+    public static readonly Func<A, object> New;
+    public static readonly Func<object, A> GetValue;
+
+    static Box()
+    {
+        New = typeof(A).IsValueType
+            ? MakeNewStruct()
+            : MakeNewClass();
+
+        GetValue = typeof(A).IsValueType
+            ? GetValueStruct()
+            : GetValueClass();
     }
 
-    static Func<object, TValue> GetValueClass()
+    static Func<object, A> GetValueClass()
     {
         if (ILCapability.Available)
         {
-            var dynamic = new DynamicMethod("GetValue_Class", typeof(TValue), new[] { typeof(object) }, typeof(TValue).Module, true);
+            var dynamic = new DynamicMethod("GetValue_Class", typeof(A), new[] { typeof(object) }, typeof(A).Module, true);
             var il = dynamic.GetILGenerator();
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ret);
 
-            return (Func<object, TValue>)dynamic.CreateDelegate(typeof(Func<object, TValue>));
+            return (Func<object, A>)dynamic.CreateDelegate(typeof(Func<object, A>));
         }
         else
         {
-            return (object x) => (TValue)x;
+            return (object x) => (A)x;
         }
     }
 
-    static Func<object, TValue> GetValueStruct()
+    static Func<object, A> GetValueStruct()
     {
         if (ILCapability.Available)
         {
-            var field = typeof(Box<TValue>).GetField("Value");
-            var dynamic = new DynamicMethod("GetValue_Struct", typeof(TValue), new[] { typeof(object) }, typeof(TValue).Module, true);
+            var field = typeof(Box<A>).GetField("Value");
+            var dynamic = new DynamicMethod("GetValue_Struct", typeof(A), new[] { typeof(object) }, typeof(A).Module, true);
             var il = dynamic.GetILGenerator();
 
             il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Castclass, typeof(Box<TValue>));
+            il.Emit(OpCodes.Castclass, typeof(Box<A>));
             il.Emit(OpCodes.Ldfld, field);
             il.Emit(OpCodes.Ret);
 
-            return (Func<object, TValue>)dynamic.CreateDelegate(typeof(Func<object, TValue>));
+            return (Func<object, A>)dynamic.CreateDelegate(typeof(Func<object, A>));
         }
         else
         {
-            return (object x) => ((Box<TValue>)x).Value;
+            return (object x) => ((Box<A>)x).Value;
         }
     }
 
-    static Func<TValue, object> MakeNewClass()
+    static Func<A, object> MakeNewClass()
     {
         if (ILCapability.Available)
         {
-            var dynamic = new DynamicMethod("New_Class", typeof(object), new[] { typeof(TValue) }, typeof(TValue).Module, true);
+            var dynamic = new DynamicMethod("New_Class", typeof(object), new[] { typeof(A) }, typeof(A).Module, true);
             var il = dynamic.GetILGenerator();
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ret);
 
-            return (Func<TValue, object>)dynamic.CreateDelegate(typeof(Func<TValue, object>));
+            return (Func<A, object>)dynamic.CreateDelegate(typeof(Func<A, object>));
         }
         else
         {
-            return static (TValue x) => x;
+            return static (A x) => (object)x;
         }
     }
 
-    static Func<TValue, object> MakeNewStruct()
+    static Func<A, object> MakeNewStruct()
     {
         if (ILCapability.Available)
         {
-            var ctor = typeof(Box<TValue>).GetConstructor(new[] { typeof(TValue) });
-            var dynamic = new DynamicMethod("New_Struct", typeof(object), new[] { typeof(TValue) }, typeof(TValue).Module, true);
+            var ctor = typeof(Box<A>).GetConstructor(new[] { typeof(A) });
+            var dynamic = new DynamicMethod("New_Struct", typeof(object), new[] { typeof(A) }, typeof(A).Module, true);
             var il = dynamic.GetILGenerator();
 
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Newobj, ctor);
             il.Emit(OpCodes.Ret);
 
-            return (Func<TValue, object>)dynamic.CreateDelegate(typeof(Func<TValue, object>));
+            return (Func<A, object>)dynamic.CreateDelegate(typeof(Func<A, object>));
         }
         else
         {
-            return static (TValue x) => new Box<TValue>(x);
+            return static (A x) => new Box<A>(x);
         }
     }
 }

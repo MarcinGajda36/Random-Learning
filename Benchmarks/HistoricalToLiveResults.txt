@@ -545,9 +545,9 @@ static method for LiveHandler
 Lang-ext Box<T>
 |                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
 |------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
-|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.204 ms | 0.0221 ms | 0.0207 ms |          - |         - |         - |   742.65 KB |
-| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.216 ms | 0.0347 ms | 0.0341 ms |          - |         - |         - |   700.23 KB |
-|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.873 ms | 0.2216 ms | 0.2072 ms |  2000.0000 |         - |         - | 16747.84 KB |
-| HistoricalToLive2_V2_Mutable_Strings |        250000 |  35.899 ms | 0.3828 ms | 0.3394 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
-|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  76.432 ms | 0.7308 ms | 0.6836 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.22 KB |
-| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 130.757 ms | 2.4156 ms | 2.2596 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.210 ms | 0.0090 ms | 0.0075 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.187 ms | 0.0181 ms | 0.0161 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  18.997 ms | 0.1527 ms | 0.1428 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  32.548 ms | 0.5248 ms | 0.4382 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  70.986 ms | 0.7007 ms | 0.6555 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.97 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 129.294 ms | 2.4989 ms | 2.3374 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
