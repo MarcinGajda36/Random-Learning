@@ -19,11 +19,11 @@ public static class HistoricalToLive2_V2
 
     private sealed class ConcatState<TValue>
     {
-        public Func<Message<TValue>, IList<TValue>> handler;
+        public Func<Message<TValue>, IList<TValue>> Handler { get; private set; }
 
         public ConcatState()
         {
-            handler = HistoryAndLiveHandler();
+            Handler = HistoryAndLiveHandler();
         }
 
         private readonly static Func<Message<TValue>, IList<TValue>> liveHandler
@@ -45,7 +45,7 @@ public static class HistoricalToLive2_V2
 
         private List<TValue> HandleHistoricalCompletion(List<TValue> buffer)
         {
-            handler = liveHandler;
+            Handler = liveHandler;
             return buffer!;
         }
 
@@ -69,7 +69,7 @@ public static class HistoricalToLive2_V2
         .SelectMany(state => state.Return);
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
-        => previous with { Return = previous.State.handler(message) };
+        => previous with { Return = previous.State.Handler(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => new Message<TValue>(MessageType.Live, live));
