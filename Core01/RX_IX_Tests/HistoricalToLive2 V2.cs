@@ -40,7 +40,7 @@ public static class HistoricalToLive2_V2
             return buffered!;
         }
 
-        private IList<TValue> HandleLiveMessage(TValue value)
+        private IList<TValue> HandleLiveMessage(TValue value) // Can i have a function for handling live, and when history ends i swap function to unbranched?
         {
             if (hasHistoricalEnded)
             {
