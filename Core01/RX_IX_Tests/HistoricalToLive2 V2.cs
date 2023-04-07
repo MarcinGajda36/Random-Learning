@@ -72,13 +72,13 @@ public static class HistoricalToLive2_V2
         => previous with { Return = previous.State.Handler(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live.Select(static live => new Message<TValue>(MessageType.Live, live));
+        => live.Select(live => new Message<TValue>(MessageType.Live, live));
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
         .ToList()
         .Materialize()
-        .Select(static notification => notification.Kind switch
+        .Select(notification => notification.Kind switch
         {
             NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, notification.Value),
             NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, notification.Exception),
