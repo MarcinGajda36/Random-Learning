@@ -46,7 +46,7 @@ public static class HistoricalToLive2_V2
         private List<TValue> HandleHistoricalCompletion(List<TValue> buffer)
         {
             Handler = liveHandler;
-            return buffer!;
+            return buffer;
         }
 
         private static IList<TValue> HandleLiveMessage(List<TValue> buffer, TValue value)
