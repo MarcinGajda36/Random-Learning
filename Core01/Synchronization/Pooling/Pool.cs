@@ -6,6 +6,7 @@ using MarcinGajda.Synchronization.PerKey;
 
 namespace MarcinGajda.Synchronization.Pooling;
 
+// TODO idea: Pool<DataflowBlock> with linking
 public class PerKeyPool<TKey, TInsance>
     where TKey : notnull
 {
