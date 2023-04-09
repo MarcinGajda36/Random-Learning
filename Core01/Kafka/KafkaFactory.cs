@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -38,6 +39,48 @@ public sealed partial class KafkaFactory
         finally
         {
             client.Close();
+        }
+    }
+
+    public static IObservable<ConsumeResult<TKey, TValue>> IObservableTestClient<TKey, TValue>(KafkaSettings kafkaSettings)
+        => Observable.Using(
+            () => CreateConsumer<TKey, TValue>(kafkaSettings),
+            consumer => Observable.Create<ConsumeResult<TKey, TValue>>((observer, cancellation) =>
+            {
+                string topic = kafkaSettings.Topic;
+                consumer.Subscribe(topic);
+                Consume(consumer, observer, cancellation);
+                return Task.CompletedTask;
+            }));
+
+    private static IConsumer<TKey, TValue> CreateConsumer<TKey, TValue>(KafkaSettings kafkaSettings)
+    {
+        var configuration = new ConsumerConfig()
+        {
+            BootstrapServers = kafkaSettings.BootstrapServers,
+            GroupId = kafkaSettings.GroupId,
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+        };
+        return new ConsumerBuilder<TKey, TValue>(configuration).Build();
+    }
+
+    private static void Consume<TKey, TValue>(IConsumer<TKey, TValue> consumer, IObserver<ConsumeResult<TKey, TValue>> observer, CancellationToken cancellation)
+    {
+        try
+        {
+            while (cancellation.IsCancellationRequested is false)
+            {
+                observer.OnNext(consumer.Consume(cancellation));
+            }
+            observer.OnCompleted();
+        }
+        catch (Exception exception)
+        {
+            observer.OnError(exception);
+        }
+        finally
+        {
+            consumer.Close();
         }
     }
 
