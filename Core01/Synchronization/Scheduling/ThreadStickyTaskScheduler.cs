@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
-internal sealed class ThreadStickyTaskScheduler : TaskScheduler
+sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
     readonly record struct QueueEventPair(ConcurrentQueue<Task> Queue, ManualResetEventSlim EventSlim);
 
@@ -50,17 +51,21 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
     }
 
     protected override IEnumerable<Task>? GetScheduledTasks()
-        => null;
+        => queues.SelectMany(queue => queue);
 
     public override int MaximumConcurrencyLevel
         => workers.Length;
 
-    class SingleThreadScheduler
+    public void Dispose()
+        => Array.ForEach(workers, worker => worker.Dispose());
+
+    class SingleThreadScheduler : IDisposable
     {
         readonly ThreadStickyTaskScheduler parent;
         readonly ConcurrentQueue<Task> queue; // I can try something like in SpiningPool
         readonly ManualResetEventSlim @event;
         readonly Thread thread;
+        readonly CancellationTokenSource cancellation;
         readonly int index;
         bool previousNeighbor;
 
@@ -77,6 +82,7 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
             queue = parent.queues[index];
             @event = new ManualResetEventSlim();
             parent.queueEventPairs[index] = new QueueEventPair(queue, @event);
+            cancellation = new CancellationTokenSource();
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
         }
 
@@ -85,7 +91,8 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
 
         void Schedule()
         {
-            while (true)
+            var token = cancellation.Token;
+            while (token.IsCancellationRequested is false)
             {
                 CurrentQueue();
                 HelpNeighbor();
@@ -96,8 +103,11 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
                 }
                 else
                 {
-                    @event.Wait();
-                    @event.Reset();
+                    @event.Wait(token);
+                    if (token.IsCancellationRequested is false)
+                    {
+                        @event.Reset();
+                    }
                 }
             }
         }
@@ -128,6 +138,14 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
             }
         }
 
+        public void Dispose()
+        {
+            cancellation.Cancel();
+            cancellation.Dispose();
+            @event.Dispose();
+        }
+
+        // I was thinking about buffering some before working
         //struct Worker
         //{
         //    public const int BufferLength = 32;
