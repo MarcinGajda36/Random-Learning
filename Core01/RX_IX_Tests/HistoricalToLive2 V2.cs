@@ -17,6 +17,7 @@ public static class HistoricalToLive2_V2
 
     private readonly record struct Message<TValue>(MessageType Type, object? Value);
 
+    //interface IHandler<TValue> { IList<TValue> Handle(Message<TValue> message); } // TODO can try more OOP
     private sealed class ConcatState<TValue>
     {
         public Func<Message<TValue>, IList<TValue>> Handler { get; private set; }
