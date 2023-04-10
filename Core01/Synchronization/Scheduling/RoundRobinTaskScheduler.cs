@@ -28,7 +28,7 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
 
     public void ByIdQueueTask(int id, Task task)
     {
-        var index = id & QueueIndexMask;
+        var index = id & QueueIndexMask; // work stealing with neighborQueue makes it useless 
         queues[index].Enqueue(task);
     }
 
