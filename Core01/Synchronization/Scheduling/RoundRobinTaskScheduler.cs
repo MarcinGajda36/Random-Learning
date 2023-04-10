@@ -26,9 +26,13 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         Array.ForEach(workers, worker => worker.Start());
     }
 
+    public void ThreadIdQueueTask(Task task)
+        => ByIdQueueTask(Environment.CurrentManagedThreadId, task);
+
     public void ByIdQueueTask(int id, Task task)
     {
-        var index = id & QueueIndexMask; // work stealing with neighborQueue makes it useless 
+        // work stealing with neighborQueue creates possibility for same id tasks to be executed concurrently
+        var index = id & QueueIndexMask;
         queues[index].Enqueue(task);
     }
 
