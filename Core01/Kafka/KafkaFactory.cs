@@ -99,7 +99,6 @@ public sealed partial class KafkaFactory
         int maxDegreeOfParallelism,
         CancellationToken cancellationToken)
     {
-
         var kafkaProcessor = new ProcessAndOffsetProcessor<TKey, TValue>(
             consumer,
             processor,
@@ -107,16 +106,19 @@ public sealed partial class KafkaFactory
             cancellationToken);
 
         await Task.WhenAll(
-            ConsumeAndProcessAsync(consumer, kafkaProcessor, cancellationToken),
+            Task.Factory.StartNew(
+                () => ConsumeAndProcessAsync(consumer, kafkaProcessor, cancellationToken),
+                cancellationToken,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default),
             kafkaProcessor.Completion);
     }
 
-    private static async Task ConsumeAndProcessAsync<TKey, TValue>(
+    private static void ConsumeAndProcessAsync<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
         ProcessAndOffsetProcessor<TKey, TValue> kafkaProcessor,
         CancellationToken cancellationToken)
     {
-        await Task.Yield();
         while (cancellationToken.IsCancellationRequested is false)
         {
             try
