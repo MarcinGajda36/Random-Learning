@@ -21,9 +21,6 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         for (int index = 0; index < queues.Length; index++)
         {
             queues[index] = new ConcurrentQueue<Task>();
-        }
-        for (int index = 0; index < workers.Length; index++) // Current worker impl grabs neighbor queue in ctor
-        {
             workers[index] = new SingleThreadScheduler(index, this);
         }
         Array.ForEach(workers, worker => worker.Start());
