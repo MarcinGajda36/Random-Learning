@@ -5,14 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
-internal sealed class ThreadStickyTaskScheduler : TaskScheduler
+internal sealed class RoundRobinTaskScheduler : TaskScheduler
 {
     const int MaxWorkers = 4; // 2,4,8 .. any power of 2 
     readonly SingleThreadScheduler[] workers = new SingleThreadScheduler[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
+    int index;
 
-    public ThreadStickyTaskScheduler()
+    public RoundRobinTaskScheduler()
     {
         for (int index = 0; index < queues.Length; index++)
         {
@@ -27,7 +28,7 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
 
     protected override void QueueTask(Task task)
     {
-        var index = Environment.CurrentManagedThreadId & QueueIndexMask;
+        var index = Interlocked.Increment(ref this.index) & QueueIndexMask;
         queues[index].Enqueue(task);
     }
 
@@ -49,7 +50,7 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
     class SingleThreadScheduler
     {
         // TODO try ManualResetEventSlim
-        readonly ThreadStickyTaskScheduler parent;
+        readonly RoundRobinTaskScheduler parent;
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
         readonly ConcurrentQueue<Task> neighborQueue;
         readonly Thread thread;
@@ -60,7 +61,7 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
         // 1) Writing to some buffer (maybe array from pool)
         // the free worker could take entire buffer and queues would start a new one
         // but how to deal with buffer re-size?
-        public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
+        public SingleThreadScheduler(int index, RoundRobinTaskScheduler parent)
         {
             this.parent = parent;
             currentQueue = parent.queues[index];
