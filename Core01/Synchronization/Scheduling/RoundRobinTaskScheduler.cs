@@ -26,6 +26,15 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         Array.ForEach(workers, worker => worker.Start());
     }
 
+    public void SameWorkerQueueTask(int id, Task task)
+    {
+        var index = id & QueueIndexMask;
+        queues[index].Enqueue(task);
+    }
+
+    public void RoundRobinQueueTask(Task task)
+        => QueueTask(task);
+
     protected override void QueueTask(Task task)
     {
         var index = Interlocked.Increment(ref this.index) & QueueIndexMask;
