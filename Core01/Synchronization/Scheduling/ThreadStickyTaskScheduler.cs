@@ -8,12 +8,9 @@ using System.Threading.Tasks;
 namespace MarcinGajda.Synchronization.Scheduling;
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
-    readonly record struct QueueEventPair(ConcurrentQueue<Task> Queue, ManualResetEventSlim EventSlim);
-
     const int MaxWorkers = 4; // 2,4,8 .. any power of 2 
     readonly SingleThreadScheduler[] workers = new SingleThreadScheduler[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
-    readonly QueueEventPair[] queueEventPairs = new QueueEventPair[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
 
     public ThreadStickyTaskScheduler()
@@ -29,12 +26,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     {
         // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
         var index = Environment.CurrentManagedThreadId & QueueIndexMask;
-        var pair = queueEventPairs[index];
-        pair.Queue.Enqueue(task);
-        if (pair.EventSlim.IsSet is false)
-        {
-            pair.EventSlim.Set();
-        }
+        queues[index].Enqueue(task);
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
@@ -57,9 +49,12 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 
     class SingleThreadScheduler : IDisposable
     {
+        // Tried ManualResetEventSlim and it's cool but not for this implementation
         readonly ThreadStickyTaskScheduler parent;
-        readonly ConcurrentQueue<Task> queue; // I can try something like in SpiningPool
-        readonly ManualResetEventSlim @event;
+
+        // How to replace ConcurrentQueue<Task>?
+        // I can try something like in SpiningPool
+        readonly ConcurrentQueue<Task> queue;
         readonly Thread thread;
         readonly CancellationTokenSource cancellation;
         readonly int index;
@@ -67,17 +62,11 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
-        // How to replace ConcurrentQueue<Task>?
-        // 1) Writing to some buffer (maybe array from pool)
-        // the free worker could take entire buffer and queues would start a new one
-        // but how to deal with buffer re-size?
         public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
         {
             this.index = index;
             this.parent = parent;
-            @event = new ManualResetEventSlim();
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
-            parent.queueEventPairs[index] = new QueueEventPair(queue, @event);
             cancellation = new CancellationTokenSource();
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
         }
@@ -99,13 +88,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 }
                 else
                 {
-                    // TODO I may like Thread.Yield or Sleep more because 
-                    // currently there is possibility that some threads are overworked while other sleep forever
-                    @event.Wait(token);
-                    if (token.IsCancellationRequested is false)
-                    {
-                        @event.Reset();
-                    }
+                    Thread.Sleep(1);
                 }
             }
         }
@@ -140,7 +123,6 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         {
             cancellation.Cancel();
             cancellation.Dispose();
-            @event.Dispose();
         }
 
         // I was thinking about buffering some before working
