@@ -551,3 +551,14 @@ Lang-ext Box<T>
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  32.548 ms | 0.5248 ms | 0.4382 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  70.986 ms | 0.7007 ms | 0.6555 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.97 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 129.294 ms | 2.4989 ms | 2.3374 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+
+trying Func<> handler in Concat<>
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.193 ms | 0.0126 ms | 0.0118 ms |          - |         - |         - |   742.62 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   2.085 ms | 0.0158 ms | 0.0132 ms |          - |         - |         - |    700.2 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.812 ms | 0.3389 ms | 0.3329 ms |  2000.0000 |         - |         - |  16747.8 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.568 ms | 0.4448 ms | 0.3715 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.71 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  70.135 ms | 0.8425 ms | 0.7880 ms | 10000.0000 | 2000.0000 | 2000.0000 |  66982.3 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 117.608 ms | 0.9614 ms | 0.8993 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.89 KB |

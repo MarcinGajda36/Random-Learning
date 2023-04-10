@@ -16,7 +16,7 @@ using MarcinGajda.Fs;
 using MarcinGajda.PeriodicCheckers;
 using MarcinGajda.RX_IX_Tests;
 using MarcinGajda.Structs;
-using MarcinGajda.Synchronizers.Pooling;
+using MarcinGajda.Synchronization.Pooling;
 using MarcinGajda.WORK_observable;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
