@@ -18,9 +18,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 
     public ThreadStickyTaskScheduler()
     {
-        for (int index = 0; index < queues.Length; index++)
+        for (int index = 0; index < workers.Length; index++)
         {
-            queues[index] = new ConcurrentQueue<Task>();
             workers[index] = new SingleThreadScheduler(index, this);
         }
         Array.ForEach(workers, worker => worker.Start());
@@ -76,8 +75,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         {
             this.index = index;
             this.parent = parent;
-            queue = parent.queues[index];
             @event = new ManualResetEventSlim();
+            queue = parent.queues[index] = new ConcurrentQueue<Task>();
             parent.queueEventPairs[index] = new QueueEventPair(queue, @event);
             cancellation = new CancellationTokenSource();
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
