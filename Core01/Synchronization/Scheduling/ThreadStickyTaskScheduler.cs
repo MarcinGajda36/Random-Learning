@@ -53,7 +53,8 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
         readonly ThreadStickyTaskScheduler parent;
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
         readonly Thread thread;
-        int nextIndex = 0;
+        readonly int index;
+        bool previousNeighbor;
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
@@ -63,13 +64,14 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
         // but how to deal with buffer re-size?
         public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
         {
+            this.index = index;
             this.parent = parent;
             currentQueue = parent.queues[index];
-            var neighborQueueIndex = (index + 1) & QueueIndexMask;
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
         }
 
-        public void Start() => thread.Start(this);
+        public void Start()
+            => thread.Start(this);
 
         void Schedule()
         {
@@ -97,15 +99,16 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
             }
         }
 
-        ConcurrentQueue<Task> GetQueue()
+        ConcurrentQueue<Task> GetNeighborQueue()
         {
-            var index = ++nextIndex & QueueIndexMask;
-            return AllQueues[index];
+            var neighbour = previousNeighbor ? (index - 1) : (index + 1);
+            previousNeighbor = !previousNeighbor;
+            return AllQueues[neighbour & QueueIndexMask];
         }
 
         void HelpNeighbor()
         {
-            var queue = GetQueue();
+            var queue = GetNeighborQueue();
             int limit = 32;
             while (limit > 0 && queue.TryDequeue(out var task))
             {
