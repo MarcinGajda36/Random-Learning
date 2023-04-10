@@ -11,7 +11,6 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
     readonly SingleThreadScheduler[] workers = new SingleThreadScheduler[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
-    int index;
 
     public RoundRobinTaskScheduler()
     {
@@ -26,22 +25,10 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         Array.ForEach(workers, worker => worker.Start());
     }
 
-    public void ThreadIdQueueTask(Task task)
-        => ByIdQueueTask(Environment.CurrentManagedThreadId, task);
-
-    public void ByIdQueueTask(int id, Task task)
-    {
-        // work stealing with neighborQueue creates possibility for same id tasks to be executed concurrently
-        var index = id & QueueIndexMask;
-        queues[index].Enqueue(task);
-    }
-
-    public void RoundRobinQueueTask(Task task)
-        => QueueTask(task);
-
     protected override void QueueTask(Task task)
     {
-        var index = Interlocked.Increment(ref this.index) & QueueIndexMask;
+        // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
+        var index = Environment.CurrentManagedThreadId & QueueIndexMask;
         queues[index].Enqueue(task);
     }
 
@@ -65,8 +52,8 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
         // TODO try ManualResetEventSlim
         readonly RoundRobinTaskScheduler parent;
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
-        readonly ConcurrentQueue<Task> neighborQueue;
         readonly Thread thread;
+        int nextIndex = 0;
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
@@ -79,7 +66,6 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             this.parent = parent;
             currentQueue = parent.queues[index];
             var neighborQueueIndex = (index + 1) & QueueIndexMask;
-            neighborQueue = AllQueues[neighborQueueIndex];
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
         }
 
@@ -111,10 +97,17 @@ internal sealed class RoundRobinTaskScheduler : TaskScheduler
             }
         }
 
+        ConcurrentQueue<Task> GetQueue()
+        {
+            var index = ++nextIndex & QueueIndexMask;
+            return AllQueues[index];
+        }
+
         void HelpNeighbor()
         {
+            var queue = GetQueue();
             int limit = 32;
-            while (limit > 0 && neighborQueue.TryDequeue(out var task))
+            while (limit > 0 && queue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
                 --limit;
