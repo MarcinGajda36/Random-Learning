@@ -58,8 +58,8 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
     class SingleThreadScheduler
     {
         readonly ThreadStickyTaskScheduler parent;
-        readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
-        readonly ManualResetEventSlim currentEvent;
+        readonly ConcurrentQueue<Task> queue; // I can try something like in SpiningPool
+        readonly ManualResetEventSlim @event;
         readonly Thread thread;
         readonly int index;
         bool previousNeighbor;
@@ -74,9 +74,9 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
         {
             this.index = index;
             this.parent = parent;
-            currentQueue = parent.queues[index];
-            currentEvent = new ManualResetEventSlim();
-            parent.queueEventPairs[index] = new QueueEventPair(currentQueue, currentEvent);
+            queue = parent.queues[index];
+            @event = new ManualResetEventSlim();
+            parent.queueEventPairs[index] = new QueueEventPair(queue, @event);
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
         }
 
@@ -90,21 +90,21 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
                 CurrentQueue();
                 HelpNeighbor();
 
-                if (currentQueue.TryDequeue(out var task))
+                if (queue.TryDequeue(out var task))
                 {
                     parent.TryExecuteTask(task);
                 }
                 else
                 {
-                    currentEvent.Wait();
-                    currentEvent.Reset();
+                    @event.Wait();
+                    @event.Reset();
                 }
             }
         }
 
         void CurrentQueue()
         {
-            while (currentQueue.TryDequeue(out var task))
+            while (queue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
             }
