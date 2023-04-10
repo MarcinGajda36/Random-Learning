@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 namespace MarcinGajda.Synchronization.Scheduling;
 internal sealed class ThreadStickyTaskScheduler : TaskScheduler
 {
+    readonly record struct QueueEventPair(ConcurrentQueue<Task> Queue, ManualResetEventSlim EventSlim);
+
     const int MaxWorkers = 4; // 2,4,8 .. any power of 2 
     readonly SingleThreadScheduler[] workers = new SingleThreadScheduler[MaxWorkers];
     readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
+    readonly QueueEventPair[] queueEventPairs = new QueueEventPair[MaxWorkers];
     const int QueueIndexMask = MaxWorkers - 1;
 
     public ThreadStickyTaskScheduler()
@@ -29,7 +32,12 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
     {
         // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
         var index = Environment.CurrentManagedThreadId & QueueIndexMask;
-        queues[index].Enqueue(task);
+        var pair = queueEventPairs[index];
+        pair.Queue.Enqueue(task);
+        if (pair.EventSlim.IsSet is false)
+        {
+            pair.EventSlim.Set();
+        }
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
@@ -49,9 +57,9 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
 
     class SingleThreadScheduler
     {
-        // TODO try ManualResetEventSlim
         readonly ThreadStickyTaskScheduler parent;
         readonly ConcurrentQueue<Task> currentQueue; // I can try something like in SpiningPool
+        readonly ManualResetEventSlim currentEvent;
         readonly Thread thread;
         readonly int index;
         bool previousNeighbor;
@@ -67,6 +75,8 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
             this.index = index;
             this.parent = parent;
             currentQueue = parent.queues[index];
+            currentEvent = new ManualResetEventSlim();
+            parent.queueEventPairs[index] = new QueueEventPair(currentQueue, currentEvent);
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
         }
 
@@ -86,7 +96,8 @@ internal sealed class ThreadStickyTaskScheduler : TaskScheduler
                 }
                 else
                 {
-                    Thread.Yield();
+                    currentEvent.Wait();
+                    currentEvent.Reset();
                 }
             }
         }
