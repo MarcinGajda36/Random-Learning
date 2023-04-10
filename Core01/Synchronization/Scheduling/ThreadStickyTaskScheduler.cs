@@ -99,6 +99,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 }
                 else
                 {
+                    // TODO I may like Thread.Yield or Sleep more because 
+                    // currently there is possibility that some threads are overworked while other sleep forever
                     @event.Wait(token);
                     if (token.IsCancellationRequested is false)
                     {
