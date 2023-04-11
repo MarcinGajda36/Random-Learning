@@ -17,46 +17,40 @@ public static class HistoricalToLive2_V2
 
     private readonly record struct Message<TValue>(MessageType Type, object? Value);
 
-    //interface IHandler<TValue> { IList<TValue> Handle(Message<TValue> message); } // TODO can try more OOP
-    private sealed class ConcatState<TValue>
+    abstract class Handler<TValue>
     {
-        public Func<Message<TValue>, IList<TValue>> Handler { get; private set; }
-
-        public ConcatState()
-        {
-            Handler = HistoryAndLiveHandler();
-        }
-
-        private static IList<TValue> LiveHandler(Message<TValue> message)
-            => new[] { (TValue)message.Value! };
-
-        private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
-        {
-            List<TValue> liveBuffer = new();
-            return (message) => message.Type switch
-            {
-                MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
-                MessageType.Historical => (IList<TValue>)message.Value!,
-                MessageType.HistoricalError => throw (Exception)message.Value!,
-                MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
-                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
-            };
-        }
-
-        private List<TValue> HandleHistoricalCompletion(List<TValue> buffer)
-        {
-            Handler = LiveHandler;
-            return buffer;
-        }
-
-        private static IList<TValue> HandleLiveMessage(List<TValue> buffer, TValue value)
-        {
-            buffer.Add(value);
-            return Array.Empty<TValue>();
-        }
+        public abstract Concat<TValue> Handle(Message<TValue> message); // Can pass by in
     }
 
-    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    sealed class LiveHandler<TValue> : Handler<TValue>
+    {
+        public static readonly LiveHandler<TValue> Default = new();
+
+        public override Concat<TValue> Handle(Message<TValue> message)
+            => new(new[] { (TValue)message.Value! }, this);
+    }
+
+    sealed class HistoricalAndLiveHandler<TValue> : Handler<TValue>
+    {
+        private readonly List<TValue> liveBuffer = new();
+        private Concat<TValue> HandleLiveMessage(TValue value)
+        {
+            liveBuffer.Add(value);
+            return new(Array.Empty<TValue>(), this);
+        }
+
+        public override Concat<TValue> Handle(Message<TValue> message)
+            => message.Type switch
+            {
+                MessageType.Live => HandleLiveMessage((TValue)message.Value!),
+                MessageType.Historical => new((IList<TValue>)message.Value!, this),
+                MessageType.HistoricalError => throw (Exception)message.Value!,
+                MessageType.HistoricalCompleted => new(liveBuffer, LiveHandler<TValue>.Default),
+                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+            };
+    }
+
+    private readonly record struct Concat<TValue>(IList<TValue> Return, Handler<TValue> Handler);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -64,12 +58,12 @@ public static class HistoricalToLive2_V2
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(
-            new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
+            new Concat<TValue>(Array.Empty<TValue>(), new HistoricalAndLiveHandler<TValue>()),
             HandleNextMessage)
         .SelectMany(state => state.Return);
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
-        => previous with { Return = previous.State.Handler(message) };
+        => previous.Handler.Handle(message);
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => new Message<TValue>(MessageType.Live, live));
