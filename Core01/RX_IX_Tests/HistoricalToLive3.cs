@@ -38,6 +38,7 @@ public static class HistoricalToLive3
         {
             yield return buffered;
         }
+        liveBuffer = null;
 
         while (await liveEnumerator.MoveNextAsync(cancellationToken))
         {
