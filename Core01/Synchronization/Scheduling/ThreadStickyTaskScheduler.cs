@@ -2,19 +2,29 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
-    const int MaxWorkers = 4; // 2,4,8 .. any power of 2 
-    readonly SingleThreadScheduler[] workers = new SingleThreadScheduler[MaxWorkers];
-    readonly ConcurrentQueue<Task>[] queues = new ConcurrentQueue<Task>[MaxWorkers];
-    const int QueueIndexMask = MaxWorkers - 1;
+    const int DefaultMaxWorkers = 4;
 
-    public ThreadStickyTaskScheduler()
+    readonly SingleThreadScheduler[] workers;
+    readonly ConcurrentQueue<Task>[] queues;
+    readonly int queueIndexMask;
+
+    public ThreadStickyTaskScheduler(int concurrencyLevel = DefaultMaxWorkers)
     {
+        if (concurrencyLevel < 2 || BitOperations.IsPow2(concurrencyLevel) is false)
+        {
+            throw new ArgumentOutOfRangeException(nameof(concurrencyLevel), concurrencyLevel, "Expected at least 2 and a power of 2.");
+        }
+
+        queueIndexMask = concurrencyLevel - 1;
+        workers = new SingleThreadScheduler[concurrencyLevel];
+        queues = new ConcurrentQueue<Task>[concurrencyLevel];
         for (int index = 0; index < workers.Length; index++)
         {
             workers[index] = new SingleThreadScheduler(index, this);
@@ -25,7 +35,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     protected override void QueueTask(Task task)
     {
         // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
-        var index = Environment.CurrentManagedThreadId & QueueIndexMask;
+        var index = Environment.CurrentManagedThreadId & queueIndexMask;
         queues[index].Enqueue(task);
     }
 
@@ -58,6 +68,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         readonly Thread thread;
         readonly CancellationTokenSource cancellation;
         readonly int index;
+        readonly int queueIndexMask;
         bool previousNeighbor;
 
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
@@ -66,6 +77,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         {
             this.index = index;
             this.parent = parent;
+            queueIndexMask = parent.queueIndexMask;
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
             cancellation = new CancellationTokenSource();
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
@@ -105,7 +117,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         {
             previousNeighbor = !previousNeighbor;
             var neighbour = previousNeighbor ? (index - 1) : (index + 1);
-            return AllQueues[neighbour & QueueIndexMask];
+            return AllQueues[neighbour & queueIndexMask];
         }
 
         void HelpNeighbor()
