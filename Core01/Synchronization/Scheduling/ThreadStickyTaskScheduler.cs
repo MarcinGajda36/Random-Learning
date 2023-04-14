@@ -79,8 +79,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             this.parent = parent;
             queueIndexMask = parent.queueIndexMask;
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
-            cancellation = new CancellationTokenSource();
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
+            cancellation = new CancellationTokenSource();
         }
 
         public void Start()
