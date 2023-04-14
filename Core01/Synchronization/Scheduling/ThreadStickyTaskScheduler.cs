@@ -100,7 +100,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 }
                 else
                 {
-                    Thread.Sleep(1);
+                    Thread.Yield();
                 }
             }
         }
