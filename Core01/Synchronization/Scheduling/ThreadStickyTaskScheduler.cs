@@ -33,22 +33,10 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         Array.ForEach(workers, worker => worker.Start());
     }
 
-    [ThreadStatic] static int queueIndex;
-    [ThreadStatic] static int callCount;
     protected override void QueueTask(Task task)
     {
-        if (callCount is 0)
-        {
-            // without shuffling worst case all threads enqueue on one index 
-            // maybe i should detect that in SingleThreadScheduler ctor to not pay any 'QueueTask' cost?
-            queueIndex = Environment.CurrentManagedThreadId & queueIndexMask;
-        }
-        queues[queueIndex].Enqueue(task);
-
-        if ((++callCount & 63) is 0)
-        {
-            queueIndex = (queueIndex + 1) & queueIndexMask;
-        }
+        var index = Environment.CurrentManagedThreadId & queueIndexMask;
+        queues[index].Enqueue(task);
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
@@ -92,10 +80,14 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             this.parent = parent;
             queueIndexMask = parent.queueIndexMask;
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
-            thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
-            // TODO i can detect if too much threads enqueue on the same index here 
-            // maybe they should enqueue on it's own index to maximize data locality?
-            // thread.ManagedThreadId 
+            do
+            {
+                thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
+                // Why loop?
+                // 1 this prevents worst case that all threads enqueue to the same queue
+                //  if Environment.CurrentManagedThreadId is used for enqueue
+                // 2 if current thread needs to enqueue task then doing that on separate queue increases chances for parallelism
+            } while ((thread.ManagedThreadId & queueIndexMask) == index);
             cancellation = new CancellationTokenSource();
         }
 
