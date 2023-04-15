@@ -84,10 +84,10 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             {
                 thread = new Thread(static state => ((SingleThreadScheduler)state!).Schedule());
                 // Why loop?
-                // 1 this prevents worst case that all threads enqueue to the same queue
+                // 1) this prevents worst case that all threads enqueue to the same queue
                 //  if Environment.CurrentManagedThreadId is used for enqueue
-                // 2 if current thread needs to enqueue task then doing that on separate queue increases chances for parallelism
-                // 3 i expect this to be one time cost at startup to increase performance at runtime
+                // 2) if current thread needs to enqueue task then doing that on separate queue increases chances for parallelism
+                // 3) i expect this to be one time cost at startup to increase performance at runtime
             } while ((thread.ManagedThreadId & queueIndexMask) != nextIndex);
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
             cancellation = new CancellationTokenSource();
