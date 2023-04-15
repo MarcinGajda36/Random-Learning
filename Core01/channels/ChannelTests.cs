@@ -9,6 +9,8 @@ namespace MarcinGajda.channels
     {
 
         private readonly Channel<int> _channel = Channel.CreateUnbounded<int>();
+        public ChannelReader<int> Reader => _channel.Reader;
+        public ChannelWriter<int> Writer => _channel.Writer;
 
         public async Task WriteThenRead()
         {
@@ -22,6 +24,17 @@ namespace MarcinGajda.channels
                 bool read = reader.TryRead(out int element);
             }
             await reader.ReadAllAsync().Select(x => x).ForEachAsync(Console.WriteLine);
+        }
+
+        public async Task ReaderTest()
+        {
+            while (await Reader.WaitToReadAsync())
+            {
+                while (Reader.TryRead(out int element)) // Spinning in sync for perf
+                {
+                    Console.WriteLine(element);
+                }
+            }
         }
     }
 }
