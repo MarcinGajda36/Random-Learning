@@ -79,6 +79,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             this.index = index;
             this.parent = parent;
             queueIndexMask = parent.queueIndexMask;
+            var nextIndex = (index + 1) & queueIndexMask;
             do
             {
                 thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
@@ -86,7 +87,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 // 1 this prevents worst case that all threads enqueue to the same queue
                 //  if Environment.CurrentManagedThreadId is used for enqueue
                 // 2 if current thread needs to enqueue task then doing that on separate queue increases chances for parallelism
-            } while ((thread.ManagedThreadId & queueIndexMask) == index);
+                // 3 i expect this to be one time cost at startup to increase performance at runtime
+            } while ((thread.ManagedThreadId & queueIndexMask) != nextIndex);
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
             cancellation = new CancellationTokenSource();
         }
