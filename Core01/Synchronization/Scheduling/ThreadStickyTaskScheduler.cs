@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
 
-// TODO I wonder if i can make singleton process and have other processes on the same machine talk to it via queues?
-// look like this is it: https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-use-anonymous-pipes-for-local-interprocess-communication
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
     const int DefaultMaxWorkers = 4;
@@ -139,44 +137,66 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             cancellation.Cancel();
             cancellation.Dispose();
         }
-
-        // I was thinking about buffering some before working
-        //struct Worker
-        //{
-        //    public const int BufferLength = 32;
-
-        //    readonly RoundRobinTaskScheduler parent;
-        //    readonly Task[] buffer = new Task[BufferLength];
-        //    int buffered;
-
-        //    public Worker(RoundRobinTaskScheduler parent)
-        //        => this.parent = parent;
-
-        //    public void AddToBuffer(Task task)
-        //    {
-        //        buffer[buffered++] = task;
-        //        if (buffered == buffer.Length)
-        //        {
-        //            for (int index = 0; index < buffer.Length; index++)
-        //            {
-        //                ref var item = ref buffer[index];
-        //                parent.TryExecuteTask(item);
-        //                item = null;
-        //            }
-        //            buffered = 0;
-        //        }
-        //    }
-
-        //    public void FinishBuffer()
-        //    {
-        //        for (int index = 0; index < buffered; index++)
-        //        {
-        //            ref var item = ref buffer[index];
-        //            parent.TryExecuteTask(item);
-        //            item = null;
-        //        }
-        //        buffered = 0;
-        //    }
-        //}
     }
 }
+
+// Random thoughts: 
+
+// ---------------------------------
+// TODO I wonder if i can make singleton process and have other processes on the same machine talk to it via queues?
+// look like this is it: https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-use-anonymous-pipes-for-local-interprocess-communication
+
+// ---------------------------------
+// 1 producer 
+//  -> BufferBlock
+//  new BufferBlock<int>(new DataflowBlockOptions { TaskScheduler = TaskScheduler.Default });
+// 1 caching consumer 
+//  -> 1 TransformBlock + BroadcastBlock (caching is cheap enough that pool is overkill)
+//  -> or ActionBlock that posts to BroadcastBlock in func (if caching fails then linked blocks need filter logic)
+//  new BroadcastBlock<int>(null, new DataflowBlockOptions { TaskScheduler = TaskScheduler.Default });
+// 2 sending consumers
+//  -> Here pool start to make sense right? 
+//  -> maybe just 2? 2 feels bad because you get all multi-threating problems and not much concurrency, but it's bias right? 
+//
+// all block take scheduler so myScheduler can be used there
+// but there is a risk that work gets terribly distributed and all threads schedule for 1 thread right? 
+
+// ---------------------------------
+// I was thinking about buffering some before working
+//struct Worker
+//{
+//    public const int BufferLength = 32;
+
+//    readonly RoundRobinTaskScheduler parent;
+//    readonly Task[] buffer = new Task[BufferLength];
+//    int buffered;
+
+//    public Worker(RoundRobinTaskScheduler parent)
+//        => this.parent = parent;
+
+//    public void AddToBuffer(Task task)
+//    {
+//        buffer[buffered++] = task;
+//        if (buffered == buffer.Length)
+//        {
+//            for (int index = 0; index < buffer.Length; index++)
+//            {
+//                ref var item = ref buffer[index];
+//                parent.TryExecuteTask(item);
+//                item = null;
+//            }
+//            buffered = 0;
+//        }
+//    }
+
+//    public void FinishBuffer()
+//    {
+//        for (int index = 0; index < buffered; index++)
+//        {
+//            ref var item = ref buffer[index];
+//            parent.TryExecuteTask(item);
+//            item = null;
+//        }
+//        buffered = 0;
+//    }
+//}
