@@ -33,11 +33,20 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         Array.ForEach(workers, worker => worker.Start());
     }
 
+    [ThreadStatic] static int queueIndex;
+    [ThreadStatic] static int callCount;
     protected override void QueueTask(Task task)
     {
-        // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
-        var index = Environment.CurrentManagedThreadId & queueIndexMask;
-        queues[index].Enqueue(task);
+        if (callCount is 0)
+        {
+            queueIndex = Environment.CurrentManagedThreadId & queueIndexMask;
+        }
+        queues[queueIndex].Enqueue(task);
+
+        if ((++callCount & 63) is 0)
+        {
+            queueIndex = (queueIndex + 1) & queueIndexMask;
+        }
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
@@ -72,6 +81,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         readonly int queueIndexMask;
         bool previousNeighbor;
 
+        // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
         public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
