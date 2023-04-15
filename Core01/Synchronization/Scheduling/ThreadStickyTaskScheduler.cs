@@ -39,6 +39,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     {
         if (callCount is 0)
         {
+            // without shuffling worst case all threads enqueue on one index 
+            // maybe i should detect that in SingleThreadScheduler ctor to not pay any 'QueueTask' cost?
             queueIndex = Environment.CurrentManagedThreadId & queueIndexMask;
         }
         queues[queueIndex].Enqueue(task);
@@ -91,6 +93,9 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             queueIndexMask = parent.queueIndexMask;
             queue = parent.queues[index] = new ConcurrentQueue<Task>();
             thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
+            // TODO i can detect if too much threads enqueue on the same index here 
+            // maybe they should enqueue on it's own index to maximize data locality?
+            // thread.ManagedThreadId 
             cancellation = new CancellationTokenSource();
         }
 
