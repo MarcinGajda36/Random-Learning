@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
+
+// TODO I wonder if i can make singleton process and have other processes on the same machine talk to it via queues?
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
     const int DefaultMaxWorkers = 4;
