@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -10,13 +11,24 @@ namespace SpansAndStuff
     {
         private static async Task Main()
         {
-            RefTest();
+            RefTestArray();
             Vectors.EqualsAny();
 
             await Task.Delay(-1);
         }
 
-        private static int RefTest()
+        private static void RefTestDict()
+        {
+            var d = new Dictionary<int, int>();
+            ref var value = ref CollectionsMarshal.GetValueRefOrNullRef(d, 1);
+            if (Unsafe.IsNullRef(ref value))
+            {
+                // Here i can use value
+                return;
+            }
+        }
+
+        private static int RefTestArray()
         {
             var arr = new[] { 1, 2, 3 };
             ref var first = ref arr[0];
@@ -76,6 +88,5 @@ namespace SpansAndStuff
             str.AsSpan().CopyTo(dest.Slice(0, str.Length).Span);
 
         }
-
     }
 }
