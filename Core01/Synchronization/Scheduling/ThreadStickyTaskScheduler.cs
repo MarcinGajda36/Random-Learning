@@ -71,7 +71,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         readonly int queueIndexMask;
         bool previousNeighbor;
 
-        // work stealing with neighborQueue creates possibility for same queue tasks to be executed concurrently
+        // work stealing with neighborQueue creates possibility for same queue to be dequeued concurrently
         ConcurrentQueue<Task>[] AllQueues => parent.queues;
 
         public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
