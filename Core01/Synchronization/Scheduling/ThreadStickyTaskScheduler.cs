@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace MarcinGajda.Synchronization.Scheduling;
 
 // TODO I wonder if i can make singleton process and have other processes on the same machine talk to it via queues?
+// look like this is it: https://learn.microsoft.com/en-us/dotnet/standard/io/how-to-use-anonymous-pipes-for-local-interprocess-communication
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
     const int DefaultMaxWorkers = 4;
