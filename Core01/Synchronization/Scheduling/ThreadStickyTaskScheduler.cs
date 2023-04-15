@@ -82,7 +82,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             var nextIndex = (index + 1) & queueIndexMask;
             do
             {
-                thread = new Thread(state => ((SingleThreadScheduler)state!).Schedule());
+                thread = new Thread(static state => ((SingleThreadScheduler)state!).Schedule());
                 // Why loop?
                 // 1 this prevents worst case that all threads enqueue to the same queue
                 //  if Environment.CurrentManagedThreadId is used for enqueue
