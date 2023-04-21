@@ -63,7 +63,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         readonly ThreadStickyTaskScheduler parent;
 
         // How to replace ConcurrentQueue<Task>?
-        // I can try something like in SpiningPool
+        // I can try something like in SpinningPool
         readonly ConcurrentQueue<Task> queue;
         readonly Thread thread;
         readonly CancellationTokenSource cancellation;
@@ -126,8 +126,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         ConcurrentQueue<Task> GetNeighborQueue()
         {
             previousNeighbor = !previousNeighbor;
-            var neighbour = previousNeighbor ? (index - 1) : (index + 1);
-            return AllQueues[neighbour & queueIndexMask];
+            var neighbors = previousNeighbor ? (index - 1) : (index + 1);
+            return AllQueues[neighbors & queueIndexMask];
         }
 
         void HelpNeighbor()

@@ -7,24 +7,24 @@ using MarcinGajda.Synchronization.PerKey;
 namespace MarcinGajda.Synchronization.Pooling;
 
 // TODO idea: Pool<DataflowBlock> with linking
-public class PerKeyPool<TKey, TInsance>
+public class PerKeyPool<TKey, TInstance>
     where TKey : notnull
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
     private readonly int poolIndexBitShift;
-    protected ImmutableArray<TInsance> Pool { get; }
+    protected ImmutableArray<TInstance> Pool { get; }
 
-    public PerKeyPool(Func<TInsance> factory)
+    public PerKeyPool(Func<TInstance> factory)
         : this(DefaultSize, factory) { }
 
-    public PerKeyPool(PowerOfTwo poolSize, Func<TInsance> factory)
+    public PerKeyPool(PowerOfTwo poolSize, Func<TInstance> factory)
     {
         if (poolSize.Value < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(poolSize), poolSize, "Pool size has to be bigger then 0.");
         }
 
-        var poolBuilder = ImmutableArray.CreateBuilder<TInsance>((int)poolSize.Value);
+        var poolBuilder = ImmutableArray.CreateBuilder<TInstance>((int)poolSize.Value);
         for (int index = 0; index < Pool.Length; index++)
         {
             poolBuilder.Add(factory());
@@ -33,21 +33,21 @@ public class PerKeyPool<TKey, TInsance>
         poolIndexBitShift = (sizeof(int) * 8) - BitOperations.TrailingZeroCount(Pool.Length);
     }
 
-    public TInsance Get(TKey key)
+    public TInstance Get(TKey key)
         => Pool[GetIndex(key)];
 
     private int GetIndex(TKey key)
         => (int)(Hashing.Fibonacci(key) >> poolIndexBitShift);
 }
 
-public class PerKeyDisposablePoolV2<TKey, TInsance>
-    : PerKeyPool<TKey, TInsance>, IDisposable
-    where TInsance : IDisposable
+public class PerKeyDisposablePoolV2<TKey, TInstance>
+    : PerKeyPool<TKey, TInstance>, IDisposable
+    where TInstance : IDisposable
     where TKey : notnull
 {
     private bool disposedValue;
 
-    public PerKeyDisposablePoolV2(Func<TInsance> factory) : base(factory) { }
+    public PerKeyDisposablePoolV2(Func<TInstance> factory) : base(factory) { }
 
     protected virtual void Dispose(bool disposing)
     {
