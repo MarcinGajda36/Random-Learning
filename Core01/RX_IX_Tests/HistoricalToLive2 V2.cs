@@ -15,22 +15,22 @@ public static class HistoricalToLive2_V2
         HistoricalCompleted,
     }
 
-    private readonly record struct Message<TValue>(MessageType Type, object? Value);
+    private readonly record struct Message(MessageType Type, object? Value);
 
-    //interface IHandler<TValue> { IList<TValue> Handle(Message<TValue> message); } // TODO can try more OOP
+    //interface IHandler<TValue> { IList<TValue> Handle(Message message); } // TODO can try more OOP
     private sealed class ConcatState<TValue>
     {
-        public Func<Message<TValue>, IList<TValue>> Handler { get; private set; }
+        public Func<Message, IList<TValue>> Handler { get; private set; }
 
         public ConcatState()
         {
             Handler = HistoryAndLiveHandler();
         }
 
-        private static IList<TValue> LiveHandler(Message<TValue> message)
+        private static IList<TValue> LiveHandler(Message message)
             => new[] { (TValue)message.Value! };
 
-        private Func<Message<TValue>, IList<TValue>> HistoryAndLiveHandler()
+        private Func<Message, IList<TValue>> HistoryAndLiveHandler()
         {
             List<TValue> liveBuffer = new();
             return (message) => message.Type switch
@@ -68,21 +68,21 @@ public static class HistoricalToLive2_V2
             HandleNextMessage)
         .SelectMany(state => state.Return);
 
-    private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
+    private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message message)
         => previous with { Return = previous.State.Handler(message) };
 
-    private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live.Select(live => new Message<TValue>(MessageType.Live, live));
+    private static IObservable<Message> GetLiveMessages<TValue>(IObservable<TValue> live)
+        => live.Select(live => new Message(MessageType.Live, live));
 
-    private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
+    private static IObservable<Message> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
         .ToList()
         .Materialize()
         .Select(notification => notification.Kind switch
         {
-            NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, notification.Value),
-            NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, notification.Exception),
-            NotificationKind.OnCompleted => new Message<TValue>(MessageType.HistoricalCompleted, null),
+            NotificationKind.OnNext => new Message(MessageType.Historical, notification.Value),
+            NotificationKind.OnError => new Message(MessageType.HistoricalError, notification.Exception),
+            NotificationKind.OnCompleted => new Message(MessageType.HistoricalCompleted, null),
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
 }

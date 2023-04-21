@@ -593,3 +593,13 @@ abstract Handler<T>
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.328 ms | 0.3541 ms | 0.3139 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  70.317 ms | 1.3545 ms | 1.3910 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.84 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 115.465 ms | 1.3102 ms | 1.1615 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+removing unnecesary <TValue> of Message
+|                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.188 ms | 0.0123 ms | 0.0115 ms |          - |         - |         - |   742.65 KB |
+| HistoricalToLive2_V2_Mutable_Strings |         10000 |   1.971 ms | 0.0296 ms | 0.0263 ms |          - |         - |         - |   700.23 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |        250000 |  17.278 ms | 0.0975 ms | 0.0864 ms |  2000.0000 |         - |         - | 16747.84 KB |
+| HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.432 ms | 0.5728 ms | 0.5883 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  71.255 ms | 0.6285 ms | 0.5572 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.02 KB |
+| HistoricalToLive2_V2_Mutable_Strings |       1000000 | 115.966 ms | 2.1732 ms | 1.8148 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
