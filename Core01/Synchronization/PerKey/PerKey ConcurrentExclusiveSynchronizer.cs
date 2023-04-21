@@ -16,11 +16,11 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
         {
             private readonly IDisposable refCount;
 
-            public bool IsAquired { get; }
+            public bool IsAcquired { get; }
 
-            public Lease(bool isAquired, IDisposable refCount)
+            public Lease(bool isAcquired, IDisposable refCount)
             {
-                IsAquired = isAquired;
+                IsAcquired = isAcquired;
                 this.refCount = refCount;
             }
 
@@ -51,8 +51,8 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
         public Lease GetLease()
         {
             var refCount = refCountDisposable.GetDisposable();
-            bool isAquired = refCountDisposable.IsDisposed is false;
-            return new Lease(isAquired, refCount);
+            bool isAcquired = refCountDisposable.IsDisposed is false;
+            return new Lease(isAcquired, refCount);
         }
 
         public Task<TResult> Run<TResult>(
@@ -82,7 +82,7 @@ public sealed class PerKeyConcurrentExclusiveSynchronizer<TKey>
             if (synchronizers.TryGetValue(key, out var oldSynchronizer))
             {
                 using var lease = oldSynchronizer.GetLease();
-                if (lease.IsAquired)
+                if (lease.IsAcquired)
                 {
                     return await oldSynchronizer.Run(operationType, operation, cancellationToken);
                 }

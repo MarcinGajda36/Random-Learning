@@ -6,27 +6,27 @@ using MarcinGajda.Synchronization.PerKey;
 
 namespace MarcinGajda.Synchronization.Pooling;
 
-public sealed class PerKeyDisposablePool<TKey, TInsance>
+public sealed class PerKeyDisposablePool<TKey, TInstance>
     : IDisposable
-    where TInsance : IDisposable
+    where TInstance : IDisposable
     where TKey : notnull
 {
     public static PowerOfTwo DefaultSize { get; } = new PowerOfTwo(32);
-    private readonly TInsance[] pool;
+    private readonly TInstance[] pool;
     private readonly int poolIndexBitShift;
     private bool disposedValue;
 
-    public PerKeyDisposablePool(Func<TInsance> factory)
+    public PerKeyDisposablePool(Func<TInstance> factory)
         : this(DefaultSize, factory) { }
 
-    public PerKeyDisposablePool(PowerOfTwo powerOfTwo, Func<TInsance> factory)
+    public PerKeyDisposablePool(PowerOfTwo powerOfTwo, Func<TInstance> factory)
     {
         if (powerOfTwo.Value < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(powerOfTwo), powerOfTwo, "Pool size has to be bigger then 0.");
         }
 
-        pool = new TInsance[powerOfTwo.Value];
+        pool = new TInstance[powerOfTwo.Value];
         for (int index = 0; index < pool.Length; index++)
         {
             pool[index] = factory();
@@ -37,20 +37,20 @@ public sealed class PerKeyDisposablePool<TKey, TInsance>
     public TResult Use<TArgument, TResult>(
         TKey key,
         TArgument argument,
-        Func<TKey, TArgument, TInsance, TResult> resultFactory)
+        Func<TKey, TArgument, TInstance, TResult> resultFactory)
     {
-        var insance = pool[GetIndex(key)];
-        return resultFactory(key, argument, insance);
+        var instance = pool[GetIndex(key)];
+        return resultFactory(key, argument, instance);
     }
 
     public Task<TResult> UseAsync<TArgument, TResult>(
         TKey key,
         TArgument argument,
-        Func<TKey, TArgument, TInsance, CancellationToken, Task<TResult>> resultFactory,
+        Func<TKey, TArgument, TInstance, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
     {
-        var insance = pool[GetIndex(key)];
-        return resultFactory(key, argument, insance, cancellationToken);
+        var instance = pool[GetIndex(key)];
+        return resultFactory(key, argument, instance, cancellationToken);
     }
 
     private uint GetIndex(TKey key)
