@@ -594,7 +594,7 @@ abstract Handler<T>
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  70.317 ms | 1.3545 ms | 1.3910 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.84 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 115.465 ms | 1.3102 ms | 1.1615 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
 
-removing unnecesary <TValue> of Message
+removing unnecessary <TValue> of Message
 |                               Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
 |------------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
 |    HistoricalToLive2_V2_Mutable_Ints |         10000 |   1.188 ms | 0.0123 ms | 0.0115 ms |          - |         - |         - |   742.65 KB |
