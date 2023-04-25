@@ -66,7 +66,7 @@ public static class HistoricalToLive2_V2
         .Scan(
             new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
             HandleNextMessage)
-        .SelectMany(state => state.Return);
+        .SelectMany(state => state.Return); // TODO try Maybe<T> + where 
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message message)
         => previous with { Return = previous.State.Handler(message) };
