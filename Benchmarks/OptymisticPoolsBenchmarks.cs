@@ -31,7 +31,7 @@ public class OptymisticPoolsBenchmarks
     [IterationSetup(Target = nameof(SpinningV2))]
     public void SetupSpinningV2()
     {
-        Setup<SpiningPool<RandomType>, SpiningPool<RandomType>.Lease>();
+        Setup<SpinningPool<RandomType>, SpinningPool<RandomType>.Lease>();
     }
 
     public void Setup<TPool, TLease>()
@@ -68,7 +68,7 @@ public class OptymisticPoolsBenchmarks
     [Benchmark]
     public void SpinningV2()
     {
-        var pool = new SpiningPool<RandomType>(PoolSize, createRandomType);
+        var pool = new SpinningPool<RandomType>(PoolSize, createRandomType);
         Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
     }
 }

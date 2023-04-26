@@ -3,15 +3,15 @@ using System.Threading;
 using MarcinGajda.Synchronization.PerKey;
 
 namespace MarcinGajda.Synchronization.Pooling;
-public class SpiningPool<TValue> where TValue : class
+public class SpinningPool<TValue> where TValue : class
 {
     public struct Lease : IDisposable
     {
-        readonly SpiningPool<TValue> parent;
+        readonly SpinningPool<TValue> parent;
         TValue? value;
         public TValue Value => value ?? throw new ObjectDisposedException(nameof(Lease));
 
-        public Lease(TValue value, SpiningPool<TValue> parent)
+        public Lease(TValue value, SpinningPool<TValue> parent)
         {
             this.value = value;
             this.parent = parent;
@@ -33,10 +33,10 @@ public class SpiningPool<TValue> where TValue : class
     int returnIndex;
     int rentIndex;
 
-    public SpiningPool(int size, Func<TValue> factory)
+    public SpinningPool(int size, Func<TValue> factory)
         : this(new PowerOfTwo((uint)size), factory) { }
 
-    public SpiningPool(PowerOfTwo size, Func<TValue> factory)
+    public SpinningPool(PowerOfTwo size, Func<TValue> factory)
     {
         if (size.Value < 1)
         {
