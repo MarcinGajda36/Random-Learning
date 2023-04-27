@@ -12,7 +12,7 @@ internal class Program
         //    ElementsCount = 1_000_000,
         //};
         //await benchmarks.HistoricalToLive2_V2_Mutable_Ints();
-        //await benchmarks.HistoricalToLive2_V2_Mutable_Strings();
+        //await benchmarks.HistoricalToLive2_V2_Strings();
 
         BenchmarkRunner.Run<HistoricalToLiveBenchmark_Halves>();
         await Task.CompletedTask;
