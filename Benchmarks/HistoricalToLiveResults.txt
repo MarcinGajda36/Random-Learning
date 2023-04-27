@@ -620,3 +620,15 @@ removing unnecessary <TValue> of Message
 |      HistoricalToLive69_Ints |       1000000 |  65.340 ms | 0.2057 ms | 0.1606 ms |  3000.0000 | 1000.0000 | 1000.0000 | 27537.49 KB |
 | HistoricalToLive2_V2_Strings |       1000000 | 112.730 ms | 1.8932 ms | 1.7709 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
 |   HistoricalToLive69_Strings |       1000000 | 118.769 ms | 1.8433 ms | 1.7242 ms |  4000.0000 | 2000.0000 | 2000.0000 | 31639.76 KB |
+
+
+
+ifs -> switch
+|                     Method | ElementsCount |       Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|--------------------------- |-------------- |-----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+|    HistoricalToLive69_Ints |         10000 |   1.347 ms | 0.0266 ms | 0.0346 ms |         - |         - |         - |    301.9 KB |
+| HistoricalToLive69_Strings |         10000 |   2.109 ms | 0.0418 ms | 0.0543 ms |         - |         - |         - |   365.89 KB |
+|    HistoricalToLive69_Ints |        250000 |  16.541 ms | 0.2117 ms | 0.1768 ms |         - |         - |         - |  6886.99 KB |
+| HistoricalToLive69_Strings |        250000 |  30.144 ms | 0.5357 ms | 0.6169 ms |         - |         - |         - |  7910.98 KB |
+|    HistoricalToLive69_Ints |       1000000 |  68.271 ms | 1.1368 ms | 1.5176 ms | 3000.0000 | 1000.0000 | 1000.0000 | 27537.49 KB |
+| HistoricalToLive69_Strings |       1000000 | 121.480 ms | 1.2225 ms | 0.9544 ms | 4000.0000 | 2000.0000 | 2000.0000 | 31636.42 KB |

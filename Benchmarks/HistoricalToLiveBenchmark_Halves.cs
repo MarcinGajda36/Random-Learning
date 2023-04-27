@@ -21,7 +21,7 @@ public class HistoricalToLiveBenchmark_Halves
     private Subject<int> HistoricalInts { get; set; } = new();
 
     //[IterationSetup(Targets = new[] { nameof(HistoricalToLive2_Mutable_Ints), nameof(HistoricalToLive2_V2_Mutable_Ints), nameof(HistoricalToLive2_Immutable_Ints) })]
-    [IterationSetup(Targets = new[] { nameof(HistoricalToLive2_V2_Ints), nameof(HistoricalToLive69_Ints) })]
+    [IterationSetup(Targets = new[] { nameof(HistoricalToLive69_Ints) })]
     public void SetUpInts()
     {
         LiveInts?.Dispose();
@@ -37,7 +37,7 @@ public class HistoricalToLiveBenchmark_Halves
     private Subject<string> HistoricalStrings { get; set; } = new();
 
     //[IterationSetup(Targets = new[] { nameof(HistoricalToLive2_Mutable_Strings), nameof(HistoricalToLive2_V2_Strings), nameof(HistoricalToLive2_Immutable_Strings) })]
-    [IterationSetup(Targets = new[] { nameof(HistoricalToLive2_V2_Strings), nameof(HistoricalToLive69_Strings) })]
+    [IterationSetup(Targets = new[] { nameof(HistoricalToLive69_Strings) })]
     public void SetUpStrings()
     {
         LiveStrings?.Dispose();
@@ -102,15 +102,15 @@ public class HistoricalToLiveBenchmark_Halves
     //        LastIntValue);
     //}
 
-    [Benchmark]
-    public async Task HistoricalToLive2_V2_Ints()
-    {
-        await WaitFor2LastValues(
-            new(HistoricalInts, LiveInts),
-            pair => HistoricalToLive2_V2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-            NormalIntValue,
-            LastIntValue);
-    }
+    //[Benchmark]
+    //public async Task HistoricalToLive2_V2_Ints()
+    //{
+    //    await WaitFor2LastValues(
+    //        new(HistoricalInts, LiveInts),
+    //        pair => HistoricalToLive2_V2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
+    //        NormalIntValue,
+    //        LastIntValue);
+    //}
 
     [Benchmark]
     public async Task HistoricalToLive69_Ints()
@@ -142,15 +142,15 @@ public class HistoricalToLiveBenchmark_Halves
     //        LastStringValue);
     //}
 
-    [Benchmark]
-    public async Task HistoricalToLive2_V2_Strings()
-    {
-        await WaitFor2LastValues(
-            new(HistoricalStrings, LiveStrings),
-            pair => HistoricalToLive2_V2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-            NormalStringValue,
-            LastStringValue);
-    }
+    //[Benchmark]
+    //public async Task HistoricalToLive2_V2_Strings()
+    //{
+    //    await WaitFor2LastValues(
+    //        new(HistoricalStrings, LiveStrings),
+    //        pair => HistoricalToLive2_V2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
+    //        NormalStringValue,
+    //        LastStringValue);
+    //}
 
     [Benchmark]
     public async Task HistoricalToLive69_Strings()

@@ -12,8 +12,8 @@ public static class HistoricalToLive69
     {
         Live = 0,
         Historical,
-        HistoricalError,
         HistoricalCompleted,
+        HistoricalError,
     }
 
     private readonly record struct Message<TValue>(MessageType Type, TValue? Value, Exception? Exception);
@@ -47,33 +47,33 @@ public static class HistoricalToLive69
         var liveBuffer = new List<TValue>();
         return next =>
         {
-            if (next.Type is MessageType.Historical)
+            switch (next.Type)
             {
-                values.OnNext(next.Value!);
-            }
-            else if (next.Type is MessageType.Live)
-            {
-                if (isHistoryFinished)
-                {
+                case MessageType.Live:
+                    if (isHistoryFinished)
+                    {
+                        values.OnNext(next.Value!);
+                    }
+                    else
+                    {
+                        liveBuffer.Add(next.Value!);
+                    }
+                    break;
+                case MessageType.Historical:
                     values.OnNext(next.Value!);
-                }
-                else
-                {
-                    liveBuffer.Add(next.Value!);
-                }
-            }
-            else if (next.Type == MessageType.HistoricalError)
-            {
-                values.OnError(next.Exception!);
-            }
-            else
-            {
-                isHistoryFinished = true;
-                foreach (var item in liveBuffer)
-                {
-                    values.OnNext(item);
-                }
-                liveBuffer = null;
+                    break;
+                case MessageType.HistoricalCompleted:
+                    isHistoryFinished = true;
+                    foreach (var item in liveBuffer)
+                    {
+                        values.OnNext(item);
+                    }
+                    liveBuffer = null;
+                    break;
+                case MessageType.HistoricalError:
+                    values.OnError(next.Exception!);
+                    break;
+
             }
         };
     }
