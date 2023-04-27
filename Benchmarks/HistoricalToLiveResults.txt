@@ -603,3 +603,20 @@ removing unnecessary <TValue> of Message
 | HistoricalToLive2_V2_Mutable_Strings |        250000 |  29.432 ms | 0.5728 ms | 0.5883 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 |    HistoricalToLive2_V2_Mutable_Ints |       1000000 |  71.255 ms | 0.6285 ms | 0.5572 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66981.02 KB |
 | HistoricalToLive2_V2_Mutable_Strings |       1000000 | 115.966 ms | 2.1732 ms | 1.8148 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+
+69
+|                       Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|----------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive2_V2_Ints |         10000 |   1.204 ms | 0.0078 ms | 0.0072 ms |          - |         - |         - |   742.65 KB |
+|      HistoricalToLive69_Ints |         10000 |   1.320 ms | 0.0142 ms | 0.0133 ms |          - |         - |         - |    301.9 KB |
+| HistoricalToLive2_V2_Strings |         10000 |   1.948 ms | 0.0215 ms | 0.0191 ms |          - |         - |         - |   700.23 KB |
+|   HistoricalToLive69_Strings |         10000 |   2.034 ms | 0.0224 ms | 0.0199 ms |          - |         - |         - |   365.89 KB |
+|    HistoricalToLive2_V2_Ints |        250000 |  17.453 ms | 0.2360 ms | 0.2092 ms |  2000.0000 |         - |         - | 16747.84 KB |
+|      HistoricalToLive69_Ints |        250000 |  16.002 ms | 0.1172 ms | 0.1039 ms |          - |         - |         - |  6886.99 KB |
+| HistoricalToLive2_V2_Strings |        250000 |  27.967 ms | 0.2323 ms | 0.1939 ms |  2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+|   HistoricalToLive69_Strings |        250000 |  29.218 ms | 0.4837 ms | 0.4287 ms |          - |         - |         - |  7910.98 KB |
+|    HistoricalToLive2_V2_Ints |       1000000 |  69.595 ms | 0.6837 ms | 0.6395 ms | 10000.0000 | 2000.0000 | 2000.0000 | 66980.88 KB |
+|      HistoricalToLive69_Ints |       1000000 |  65.340 ms | 0.2057 ms | 0.1606 ms |  3000.0000 | 1000.0000 | 1000.0000 | 27537.49 KB |
+| HistoricalToLive2_V2_Strings |       1000000 | 112.730 ms | 1.8932 ms | 1.7709 ms |  8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+|   HistoricalToLive69_Strings |       1000000 | 118.769 ms | 1.8433 ms | 1.7242 ms |  4000.0000 | 2000.0000 | 2000.0000 | 31639.76 KB |
