@@ -1,8 +1,16 @@
 
-
+.net 6
 |                          Method | Iterations |         Mean |       Error |      StdDev |     Gen0 |    Gen1 |    Gen2 |  Allocated |
 |-------------------------------- |----------- |-------------:|------------:|------------:|---------:|--------:|--------:|-----------:|
 |  StartsAsEnumerableEmpty_ToList |      10000 | 154,261.0 us | 1,474.38 us | 1,307.00 us |        - |       - |       - |  881.49 KB |
 |       StartsAsArrayEmpty_ToList |      10000 | 154,625.0 us | 1,662.75 us | 1,555.34 us |        - |       - |       - |  743.47 KB |
 | StartsAsEnumerableEmpty_ToArray |      10000 | 308,843.7 us | 2,418.80 us | 2,262.54 us |        - |       - |       - | 1129.41 KB |
 |      StartsAsArrayEmpty_ToArray |      10000 |     511.5 us |     0.69 us |     0.58 us | 110.3516 | 73.2422 | 36.1328 |  742.23 KB |
+
+.net 7
+|                          Method | Iterations |         Mean |       Error |      StdDev |     Gen0 |     Gen1 |    Gen2 |  Allocated |
+|-------------------------------- |----------- |-------------:|------------:|------------:|---------:|---------:|--------:|-----------:|
+|  StartsAsEnumerableEmpty_ToList |      10000 | 160,630.3 us | 3,208.12 us | 4,282.75 us |        - |        - |       - |  881.48 KB |
+|       StartsAsArrayEmpty_ToList |      10000 | 156,264.2 us | 1,854.53 us | 1,643.99 us |        - |        - |       - |  742.38 KB |
+| StartsAsEnumerableEmpty_ToArray |      10000 | 313,237.2 us | 3,513.30 us | 2,933.77 us |        - |        - |       - | 1127.06 KB |
+|      StartsAsArrayEmpty_ToArray |      10000 |     531.8 us |     4.60 us |     3.84 us | 110.3516 | 109.3750 | 36.1328 |  742.22 KB |
