@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MarcinGajda.RX_IX_Tests;
 public static class HistoricalToLive_Casting
@@ -19,6 +20,7 @@ public static class HistoricalToLive_Casting
 
     //interface IHandler<TValue> { IList<TValue> Handle(Message message); } // TODO can try more OOP
     private sealed class ConcatState<TValue>
+        where TValue : class
     {
         public Func<Message, IList<TValue>> Handler { get; private set; }
 
@@ -28,16 +30,16 @@ public static class HistoricalToLive_Casting
         }
 
         private static IList<TValue> LiveHandler(Message message)
-            => new[] { (TValue)message.Value! };
+            => new[] { Unsafe.As<TValue>(message.Value)! };
 
         private Func<Message, IList<TValue>> HistoryAndLiveHandler()
         {
             List<TValue> liveBuffer = new();
             return (message) => message.Type switch
             {
-                MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
-                MessageType.Historical => (IList<TValue>)message.Value!,
-                MessageType.HistoricalError => throw (Exception)message.Value!,
+                MessageType.Live => HandleLiveMessage(liveBuffer, Unsafe.As<TValue>(message.Value)!),
+                MessageType.Historical => Unsafe.As<IList<TValue>>(message.Value)!,
+                MessageType.HistoricalError => throw Unsafe.As<Exception>(message.Value)!,
                 MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
                 _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
             };
@@ -56,11 +58,12 @@ public static class HistoricalToLive_Casting
         }
     }
 
-    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State) where TValue : class;
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
         IObservable<TValue> historical)
+        where TValue : class
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(
@@ -69,6 +72,7 @@ public static class HistoricalToLive_Casting
         .SelectMany(state => state.Return); // TODO try Maybe<T> + where 
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message message)
+        where TValue : class
         => previous with { Return = previous.State.Handler(message) };
 
     private static IObservable<Message> GetLiveMessages<TValue>(IObservable<TValue> live)

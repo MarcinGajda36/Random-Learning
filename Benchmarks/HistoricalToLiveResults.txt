@@ -690,3 +690,10 @@ casting
 | HistoricalToLive_Casting_Strings |         10000 |   2.044 ms | 0.0302 ms | 0.0236 ms |         - |         - |         - |   700.23 KB |
 | HistoricalToLive_Casting_Strings |        250000 |  29.863 ms | 0.4442 ms | 0.5776 ms | 2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 | HistoricalToLive_Casting_Strings |       1000000 | 119.695 ms | 2.3473 ms | 3.7231 ms | 8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
+
+Unsafe.As<>
+|                           Method | ElementsCount |       Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|--------------------------------- |-------------- |-----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive_Casting_Strings |         10000 |   1.975 ms | 0.0355 ms | 0.0315 ms |         - |         - |         - |   700.23 KB |
+| HistoricalToLive_Casting_Strings |        250000 |  29.979 ms | 0.5987 ms | 0.8776 ms | 2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+| HistoricalToLive_Casting_Strings |       1000000 | 117.729 ms | 2.2573 ms | 3.0134 ms | 8000.0000 | 3000.0000 | 3000.0000 | 55834.32 KB |
