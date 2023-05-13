@@ -1,0 +1,8 @@
+
+
+|                          Method | Iterations |         Mean |       Error |      StdDev |     Gen0 |    Gen1 |    Gen2 |  Allocated |
+|-------------------------------- |----------- |-------------:|------------:|------------:|---------:|--------:|--------:|-----------:|
+|  StartsAsEnumerableEmpty_ToList |      10000 | 154,261.0 us | 1,474.38 us | 1,307.00 us |        - |       - |       - |  881.49 KB |
+|       StartsAsArrayEmpty_ToList |      10000 | 154,625.0 us | 1,662.75 us | 1,555.34 us |        - |       - |       - |  743.47 KB |
+| StartsAsEnumerableEmpty_ToArray |      10000 | 308,843.7 us | 2,418.80 us | 2,262.54 us |        - |       - |       - | 1129.41 KB |
+|      StartsAsArrayEmpty_ToArray |      10000 |     511.5 us |     0.69 us |     0.58 us | 110.3516 | 73.2422 | 36.1328 |  742.23 KB |

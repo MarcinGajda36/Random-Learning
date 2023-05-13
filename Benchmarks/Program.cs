@@ -14,7 +14,7 @@ internal class Program
         //await benchmarks.HistoricalToLive2_V2_Mutable_Ints();
         //await benchmarks.HistoricalToLive2_V2_Strings();
 
-        BenchmarkRunner.Run<HistoricalToLiveBenchmark_Halves>();
+        BenchmarkRunner.Run<Concats>();
         await Task.CompletedTask;
     }
 }
