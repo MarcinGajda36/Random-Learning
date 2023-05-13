@@ -67,9 +67,7 @@ public static class HistoricalToLive_IList
         => previous with { Return = previous.State.HandleNextMessage(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live
-        .Buffer(TimeSpan.FromMilliseconds(16d), 16)
-        .Select(live => new Message<TValue>(MessageType.Live, live, null));
+        => live.Select(live => new Message<TValue>(MessageType.Live, new[] { live }, null));
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
