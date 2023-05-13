@@ -643,3 +643,13 @@ ifs -> switch
 | HistoricalToLive_IList_Strings |        250000 |  31.023 ms | 0.3908 ms | 0.3465 ms |  2000.0000 | 1000.0000 | 1000.0000 | 17866.91 KB |
 |    HistoricalToLive_IList_Ints |       1000000 |  69.357 ms | 0.8140 ms | 0.6797 ms |  9000.0000 | 2000.0000 | 2000.0000 | 59172.98 KB |
 | HistoricalToLive_IList_Strings |       1000000 | 118.507 ms | 1.4650 ms | 1.3704 ms | 10000.0000 | 3000.0000 | 3000.0000 |  71466.2 KB |
+
+history buffer 512
+|                         Method | ElementsCount |       Mean |     Error |    StdDev |     Median |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive_IList_Ints |         10000 |   1.280 ms | 0.0158 ms | 0.0140 ms |   1.276 ms |          - |         - |         - |   621.36 KB |
+| HistoricalToLive_IList_Strings |         10000 |   2.286 ms | 0.0453 ms | 0.0650 ms |   2.287 ms |          - |         - |         - |   766.83 KB |
+|    HistoricalToLive_IList_Ints |        250000 |  18.778 ms | 0.3560 ms | 0.2779 ms |  18.672 ms |  2000.0000 |         - |         - | 14830.01 KB |
+| HistoricalToLive_IList_Strings |        250000 |  30.856 ms | 0.4831 ms | 0.4282 ms |  30.716 ms |  2000.0000 |         - |         - | 17800.36 KB |
+|    HistoricalToLive_IList_Ints |       1000000 |  77.438 ms | 1.5262 ms | 2.0374 ms |  76.178 ms |  9000.0000 | 1000.0000 | 1000.0000 | 59306.75 KB |
+| HistoricalToLive_IList_Strings |       1000000 | 120.576 ms | 1.8490 ms | 1.7296 ms | 120.173 ms | 11000.0000 | 2000.0000 | 2000.0000 |  71188.4 KB |
