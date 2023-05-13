@@ -7,6 +7,15 @@
 | StartsAsEnumerableEmpty_ToArray |      10000 | 308,843.7 us | 2,418.80 us | 2,262.54 us |        - |       - |       - | 1129.41 KB |
 |      StartsAsArrayEmpty_ToArray |      10000 |     511.5 us |     0.69 us |     0.58 us | 110.3516 | 73.2422 | 36.1328 |  742.23 KB |
 
+|                          Method | Iterations |         Mean |       Error |      StdDev |     Gen0 |    Gen1 |    Gen2 |  Allocated |
+|-------------------------------- |----------- |-------------:|------------:|------------:|---------:|--------:|--------:|-----------:|
+|  StartsAsEnumerableEmpty_ToList |      10000 | 155,000.1 us | 1,271.80 us | 1,062.01 us |        - |       - |       - |  881.71 KB |
+|       StartsAsArrayEmpty_ToList |      10000 | 154,744.0 us | 2,970.51 us | 3,050.50 us |        - |       - |       - |   742.4 KB |
+|                    ListAddRange |      10000 |     225.3 us |     1.54 us |     1.29 us |  41.5039 | 41.5039 | 41.5039 |  256.36 KB |
+| StartsAsEnumerableEmpty_ToArray |      10000 | 303,501.7 us | 5,121.49 us | 4,790.64 us |        - |       - |       - | 1129.43 KB |
+|      StartsAsArrayEmpty_ToArray |      10000 |     499.4 us |     7.02 us |     5.86 us | 110.3516 | 73.2422 | 36.1328 |  742.22 KB |
+|            ListAddRange_ToArray |      10000 |     270.7 us |     3.49 us |     2.91 us |  76.6602 | 76.6602 | 76.6602 |  373.58 KB |
+
 .net 7
 |                          Method | Iterations |         Mean |       Error |      StdDev |     Gen0 |     Gen1 |    Gen2 |  Allocated |
 |-------------------------------- |----------- |-------------:|------------:|------------:|---------:|---------:|--------:|-----------:|

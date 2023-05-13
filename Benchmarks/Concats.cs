@@ -34,6 +34,16 @@ public class Concats
     }
 
     [Benchmark]
+    public void ListAddRange()
+    {
+        var accumulator = new List<int>();
+        for (int i = 0; i < Iterations; i++)
+        {
+            accumulator.AddRange(elements);
+        }
+    }
+
+    [Benchmark]
     public void StartsAsEnumerableEmpty_ToArray()
     {
         var accumulator = Enumerable.Empty<int>();
@@ -45,5 +55,16 @@ public class Concats
     {
         IEnumerable<int> accumulator = Array.Empty<int>();
         Accumulate(accumulator).ToArray();
+    }
+
+    [Benchmark]
+    public void ListAddRange_ToArray()
+    {
+        var accumulator = new List<int>();
+        for (int i = 0; i < Iterations; i++)
+        {
+            accumulator.AddRange(elements);
+        }
+        accumulator.ToArray();
     }
 }
