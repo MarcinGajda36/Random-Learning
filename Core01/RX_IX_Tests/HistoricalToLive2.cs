@@ -46,7 +46,7 @@ public static class HistoricalToLive_IList
             {
                 return values;
             }
-            liveBuffer!.Add(values[0]); // AddRange is so much less error-prone
+            liveBuffer!.AddRange(values);
             return Array.Empty<TValue>();
         }
     }
@@ -67,11 +67,13 @@ public static class HistoricalToLive_IList
         => previous with { Return = previous.State.HandleNextMessage(message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live.Select(live => new Message<TValue>(MessageType.Live, new[] { live }, null));
+        => live
+        .Buffer(TimeSpan.FromMilliseconds(16d), 16)
+        .Select(live => new Message<TValue>(MessageType.Live, live, null));
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
-        .Buffer(512)
+        .ToList()
         .Materialize()
         .Select(notification => notification.Kind switch
         {

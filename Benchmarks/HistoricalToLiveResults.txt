@@ -653,3 +653,13 @@ history buffer 512
 | HistoricalToLive_IList_Strings |        250000 |  30.856 ms | 0.4831 ms | 0.4282 ms |  30.716 ms |  2000.0000 |         - |         - | 17800.36 KB |
 |    HistoricalToLive_IList_Ints |       1000000 |  77.438 ms | 1.5262 ms | 2.0374 ms |  76.178 ms |  9000.0000 | 1000.0000 | 1000.0000 | 59306.75 KB |
 | HistoricalToLive_IList_Strings |       1000000 | 120.576 ms | 1.8490 ms | 1.7296 ms | 120.173 ms | 11000.0000 | 2000.0000 | 2000.0000 |  71188.4 KB |
+
+history .toList; live .Buffer(TimeSpan.FromMilliseconds(16d), 16)
+|                         Method | ElementsCount |      Mean |    Error |   StdDev |    Median |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------- |-------------- |----------:|---------:|---------:|----------:|----------:|----------:|----------:|------------:|
+|    HistoricalToLive_IList_Ints |         10000 |  30.49 ms | 0.581 ms | 0.571 ms |  30.70 ms |         - |         - |         - |   512.13 KB |
+| HistoricalToLive_IList_Strings |         10000 |  30.24 ms | 0.590 ms | 0.632 ms |  30.35 ms |         - |         - |         - |   772.28 KB |
+|    HistoricalToLive_IList_Ints |        250000 |  45.76 ms | 0.911 ms | 1.497 ms |  46.08 ms | 1000.0000 |         - |         - | 10950.78 KB |
+| HistoricalToLive_IList_Strings |        250000 |  45.74 ms | 0.615 ms | 1.213 ms |  45.62 ms | 1000.0000 | 1000.0000 | 1000.0000 | 15732.36 KB |
+|    HistoricalToLive_IList_Ints |       1000000 |  92.92 ms | 1.083 ms | 1.013 ms |  92.94 ms | 7000.0000 | 2000.0000 | 2000.0000 | 43796.67 KB |
+| HistoricalToLive_IList_Strings |       1000000 | 147.33 ms | 2.937 ms | 8.661 ms | 152.19 ms | 9000.0000 | 3000.0000 | 3000.0000 | 62924.15 KB |
