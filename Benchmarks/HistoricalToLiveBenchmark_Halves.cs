@@ -20,22 +20,22 @@ public class HistoricalToLiveBenchmark_Halves
     private Subject<int> LiveInts { get; set; } = new();
     private Subject<int> HistoricalInts { get; set; } = new();
 
-    [IterationSetup(Targets = new[] { nameof(HistoricalToLive_IList_Ints) })]
-    public void SetUpInts()
-    {
-        LiveInts?.Dispose();
-        LiveInts = new Subject<int>();
+    //[IterationSetup(Targets = new[] { nameof(HistoricalToLive_IList_Ints) })]
+    //public void SetUpInts()
+    //{
+    //    LiveInts?.Dispose();
+    //    LiveInts = new Subject<int>();
 
-        HistoricalInts?.Dispose();
-        HistoricalInts = new Subject<int>();
-    }
+    //    HistoricalInts?.Dispose();
+    //    HistoricalInts = new Subject<int>();
+    //}
 
     const string LastStringValue = "Last";
     const string NormalStringValue = "Normal";
     private Subject<string> LiveStrings { get; set; } = new();
     private Subject<string> HistoricalStrings { get; set; } = new();
 
-    [IterationSetup(Targets = new[] { nameof(HistoricalToLive_IList_Strings) })]
+    [IterationSetup(Targets = new[] { nameof(HistoricalToLive_Casting_Strings) })]
     public void SetUpStrings()
     {
         LiveStrings?.Dispose();
@@ -80,22 +80,22 @@ public class HistoricalToLiveBenchmark_Halves
         await task;
     }
 
-    [Benchmark]
-    public async Task HistoricalToLive_IList_Ints()
-    {
-        await WaitFor2LastValues(
-            new(HistoricalInts, LiveInts),
-            pair => HistoricalToLive_IList.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-            NormalIntValue,
-            LastIntValue);
-    }
+    //[Benchmark]
+    //public async Task HistoricalToLive_Casting_Ints()
+    //{
+    //    await WaitFor2LastValues(
+    //        new(HistoricalInts, LiveInts),
+    //        pair => HistoricalToLive_Casting.ConcatLiveAfterHistory(pair.Live, pair.Historical),
+    //        NormalIntValue,
+    //        LastIntValue);
+    //}
 
     [Benchmark]
-    public async Task HistoricalToLive_IList_Strings()
+    public async Task HistoricalToLive_Casting_Strings()
     {
         await WaitFor2LastValues(
             new(HistoricalStrings, LiveStrings),
-            pair => HistoricalToLive_IList.ConcatLiveAfterHistory(pair.Live, pair.Historical),
+            pair => HistoricalToLive_Casting.ConcatLiveAfterHistory(pair.Live, pair.Historical),
             NormalStringValue,
             LastStringValue);
     }

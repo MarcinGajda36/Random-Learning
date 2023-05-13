@@ -683,3 +683,10 @@ history .ToList; no live IOBservable buffers; liveBuffer.AddRange()
 | HistoricalToLive_IList_Strings |        250000 |  34.387 ms | 0.5497 ms | 0.4873 ms |  2000.0000 | 1000.0000 | 1000.0000 | 17866.91 KB |
 |    HistoricalToLive_IList_Ints |       1000000 |  78.832 ms | 1.5131 ms | 1.4861 ms |  9000.0000 | 2000.0000 | 2000.0000 | 59172.61 KB |
 | HistoricalToLive_IList_Strings |       1000000 | 141.402 ms | 2.7672 ms | 7.0435 ms | 10000.0000 | 3000.0000 | 3000.0000 | 71461.96 KB |
+
+casting 
+|                           Method | ElementsCount |       Mean |     Error |    StdDev |      Gen0 |      Gen1 |      Gen2 |   Allocated |
+|--------------------------------- |-------------- |-----------:|----------:|----------:|----------:|----------:|----------:|------------:|
+| HistoricalToLive_Casting_Strings |         10000 |   2.044 ms | 0.0302 ms | 0.0236 ms |         - |         - |         - |   700.23 KB |
+| HistoricalToLive_Casting_Strings |        250000 |  29.863 ms | 0.4442 ms | 0.5776 ms | 2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
+| HistoricalToLive_Casting_Strings |       1000000 | 119.695 ms | 2.3473 ms | 3.7231 ms | 8000.0000 | 3000.0000 | 3000.0000 | 55830.92 KB |
