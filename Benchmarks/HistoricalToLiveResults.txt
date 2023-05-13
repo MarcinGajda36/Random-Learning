@@ -632,3 +632,14 @@ ifs -> switch
 | HistoricalToLive69_Strings |        250000 |  30.144 ms | 0.5357 ms | 0.6169 ms |         - |         - |         - |  7910.98 KB |
 |    HistoricalToLive69_Ints |       1000000 |  68.271 ms | 1.1368 ms | 1.5176 ms | 3000.0000 | 1000.0000 | 1000.0000 | 27537.49 KB |
 | HistoricalToLive69_Strings |       1000000 | 121.480 ms | 1.2225 ms | 0.9544 ms | 4000.0000 | 2000.0000 | 2000.0000 | 31636.42 KB |
+
+
+13.05.2023 start
+|                         Method | ElementsCount |       Mean |     Error |    StdDev |       Gen0 |      Gen1 |      Gen2 |   Allocated |
+|------------------------------- |-------------- |-----------:|----------:|----------:|-----------:|----------:|----------:|------------:|
+|    HistoricalToLive_IList_Ints |         10000 |   1.205 ms | 0.0164 ms | 0.0145 ms |          - |         - |         - |   664.41 KB |
+| HistoricalToLive_IList_Strings |         10000 |   2.126 ms | 0.0187 ms | 0.0166 ms |          - |         - |         - |   856.39 KB |
+|    HistoricalToLive_IList_Ints |        250000 |  17.136 ms | 0.1064 ms | 0.1307 ms |  1000.0000 |         - |         - |  14794.6 KB |
+| HistoricalToLive_IList_Strings |        250000 |  31.023 ms | 0.3908 ms | 0.3465 ms |  2000.0000 | 1000.0000 | 1000.0000 | 17866.91 KB |
+|    HistoricalToLive_IList_Ints |       1000000 |  69.357 ms | 0.8140 ms | 0.6797 ms |  9000.0000 | 2000.0000 | 2000.0000 | 59172.98 KB |
+| HistoricalToLive_IList_Strings |       1000000 | 118.507 ms | 1.4650 ms | 1.3704 ms | 10000.0000 | 3000.0000 | 3000.0000 |  71466.2 KB |

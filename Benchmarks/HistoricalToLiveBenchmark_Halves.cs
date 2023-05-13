@@ -20,8 +20,7 @@ public class HistoricalToLiveBenchmark_Halves
     private Subject<int> LiveInts { get; set; } = new();
     private Subject<int> HistoricalInts { get; set; } = new();
 
-    //[IterationSetup(Targets = new[] { nameof(HistoricalToLive2_Mutable_Ints), nameof(HistoricalToLive2_V2_Mutable_Ints), nameof(HistoricalToLive2_Immutable_Ints) })]
-    [IterationSetup(Targets = new[] { nameof(HistoricalToLive69_Ints) })]
+    [IterationSetup(Targets = new[] { nameof(HistoricalToLive_IList_Ints) })]
     public void SetUpInts()
     {
         LiveInts?.Dispose();
@@ -36,8 +35,7 @@ public class HistoricalToLiveBenchmark_Halves
     private Subject<string> LiveStrings { get; set; } = new();
     private Subject<string> HistoricalStrings { get; set; } = new();
 
-    //[IterationSetup(Targets = new[] { nameof(HistoricalToLive2_Mutable_Strings), nameof(HistoricalToLive2_V2_Strings), nameof(HistoricalToLive2_Immutable_Strings) })]
-    [IterationSetup(Targets = new[] { nameof(HistoricalToLive69_Strings) })]
+    [IterationSetup(Targets = new[] { nameof(HistoricalToLive_IList_Strings) })]
     public void SetUpStrings()
     {
         LiveStrings?.Dispose();
@@ -48,10 +46,10 @@ public class HistoricalToLiveBenchmark_Halves
     }
 
     readonly record struct HistoricalLivePair<T>(Subject<T> Historical, Subject<T> Live);
-    async Task WaitFor2LastValues<T>(HistoricalLivePair<T> pair, Func<HistoricalLivePair<T>, IObservable<T>> subscribtion, T normal, T last)
+    async Task WaitFor2LastValues<T>(HistoricalLivePair<T> pair, Func<HistoricalLivePair<T>, IObservable<T>> subscription, T normal, T last)
     {
         var (historical, live) = pair;
-        var task = subscribtion(pair)
+        var task = subscription(pair)
             .Where(seen => EqualityComparer<T>.Default.Equals(seen, last))
             .Take(2)
             .ToTask();
@@ -82,89 +80,23 @@ public class HistoricalToLiveBenchmark_Halves
         await task;
     }
 
-    //[Benchmark]
-    //public async Task HistoricalToLive2_Immutable_Ints()
-    //{
-    //    await WaitFor2LastValues(
-    //        new(HistoricalInts, LiveInts),
-    //        pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-    //        NormalIntValue,
-    //        LastIntValue);
-    //}
-
-    //[Benchmark]
-    //public async Task HistoricalToLive2_Mutable_Ints()
-    //{
-    //    await WaitFor2LastValues(
-    //        new(HistoricalInts, LiveInts),
-    //        pair => HistoricalToLive2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-    //        NormalIntValue,
-    //        LastIntValue);
-    //}
-
-    //[Benchmark]
-    //public async Task HistoricalToLive2_V2_Ints()
-    //{
-    //    await WaitFor2LastValues(
-    //        new(HistoricalInts, LiveInts),
-    //        pair => HistoricalToLive2_V2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-    //        NormalIntValue,
-    //        LastIntValue);
-    //}
-
     [Benchmark]
-    public async Task HistoricalToLive69_Ints()
+    public async Task HistoricalToLive_IList_Ints()
     {
         await WaitFor2LastValues(
             new(HistoricalInts, LiveInts),
-            pair => HistoricalToLive69.ConcatLiveAfterHistory(pair.Live, pair.Historical),
+            pair => HistoricalToLive_IList.ConcatLiveAfterHistory(pair.Live, pair.Historical),
             NormalIntValue,
             LastIntValue);
     }
 
-    //[Benchmark]
-    //public async Task HistoricalToLive2_Immutable_Strings()
-    //{
-    //    await WaitFor2LastValues(
-    //        new(HistoricalStrings, LiveStrings),
-    //        pair => HistoricalToLive.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-    //        NormalStringValue,
-    //        LastStringValue);
-    //}
-
-    //[Benchmark]
-    //public async Task HistoricalToLive2_Mutable_Strings()
-    //{
-    //    await WaitFor2LastValues(
-    //        new(HistoricalStrings, LiveStrings),
-    //        pair => HistoricalToLive2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-    //        NormalStringValue,
-    //        LastStringValue);
-    //}
-
-    //[Benchmark]
-    //public async Task HistoricalToLive2_V2_Strings()
-    //{
-    //    await WaitFor2LastValues(
-    //        new(HistoricalStrings, LiveStrings),
-    //        pair => HistoricalToLive2_V2.ConcatLiveAfterHistory(pair.Live, pair.Historical),
-    //        NormalStringValue,
-    //        LastStringValue);
-    //}
-
     [Benchmark]
-    public async Task HistoricalToLive69_Strings()
+    public async Task HistoricalToLive_IList_Strings()
     {
         await WaitFor2LastValues(
             new(HistoricalStrings, LiveStrings),
-            pair => HistoricalToLive69.ConcatLiveAfterHistory(pair.Live, pair.Historical),
+            pair => HistoricalToLive_IList.ConcatLiveAfterHistory(pair.Live, pair.Historical),
             NormalStringValue,
             LastStringValue);
     }
-
-    //[Benchmark]
-    //public async Task HistoricalToLive3_Mutable()
-    //{
-    //    await WaitFor2LastValues(pair => HistoricalToLive3.ConcatLiveAfterHistory(pair.Live.ToAsyncEnumerable(), pair.Historical.ToAsyncEnumerable()).ToObservable());
-    //}
 }

@@ -5,7 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 
 namespace MarcinGajda.RX_IX_Tests;
-public static class HistoricalToLive2_V2
+public static class HistoricalToLive_Casting
 {
     private enum MessageType : byte
     {
