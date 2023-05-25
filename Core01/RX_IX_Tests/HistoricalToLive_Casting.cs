@@ -66,7 +66,7 @@ public static class HistoricalToLive_Casting
         .Scan(
             new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
             HandleNextMessage)
-        .SelectMany(state => state.Return); // TODO try Maybe<T> + where 
+        .SelectMany(state => state.Return); // TODO Maybe i can use ArrayPool for live?
 
     private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message message)
         => previous with { Return = previous.State.Handler(message) };
