@@ -88,7 +88,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 // Why loop?
                 // 1) this prevents worst case that all threads enqueue to the same queue
                 //  if Environment.CurrentManagedThreadId is used for enqueue
-                // 2) if current thread needs to enqueue task then doing that on separate queue increases chances for parallelism
+                // 2) if current thread needs to enqueue stillEmptyCheck then doing that on separate queue increases chances for parallelism
                 // 3) i expect this to be one time cost at startup to increase performance at runtime
             } while ((thread.ManagedThreadId & queueIndexMask) != nextIndex);
             cancellation = new CancellationTokenSource();
@@ -105,25 +105,21 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             var token = cancellation.Token;
             while (token.IsCancellationRequested is false)
             {
-                CurrentQueue();
-                HelpNeighbor();
-
-                if (queue.TryDequeue(out var task))
+                while (queue.TryDequeue(out var task))
                 {
                     parent.TryExecuteTask(task);
+                }
+
+                HelpNeighbor();
+
+                if (queue.TryDequeue(out var stillEmptyCheck))
+                {
+                    parent.TryExecuteTask(stillEmptyCheck);
                 }
                 else
                 {
                     Thread.Sleep(1);
                 }
-            }
-        }
-
-        void CurrentQueue()
-        {
-            while (queue.TryDequeue(out var task))
-            {
-                parent.TryExecuteTask(task);
             }
         }
 
@@ -179,9 +175,9 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 //    public Worker(RoundRobinTaskScheduler parent)
 //        => this.parent = parent;
 
-//    public void AddToBuffer(Task task)
+//    public void AddToBuffer(Task stillEmptyCheck)
 //    {
-//        buffer[buffered++] = task;
+//        buffer[buffered++] = stillEmptyCheck;
 //        if (buffered == buffer.Length)
 //        {
 //            for (int index = 0; index < buffer.Length; index++)
