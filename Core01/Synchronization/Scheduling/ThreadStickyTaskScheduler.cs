@@ -3,18 +3,20 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
 
+[StructLayout(LayoutKind.Sequential)]
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
     const int DefaultMaxWorkers = 4;
 
-    readonly SingleThreadScheduler[] workers;
-    readonly ConcurrentQueue<Task>[] queues;
     readonly int queueIndexMask;
+    readonly ConcurrentQueue<Task>[] queues;
+    readonly SingleThreadScheduler[] workers;
 
     public ThreadStickyTaskScheduler(int concurrencyLevel = DefaultMaxWorkers)
     {
@@ -24,8 +26,13 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         }
 
         queueIndexMask = concurrencyLevel - 1;
-        workers = new SingleThreadScheduler[concurrencyLevel];
         queues = new ConcurrentQueue<Task>[concurrencyLevel];
+        for (int index = 0; index < queues.Length; index++)
+        {
+            queues[index] = new();
+        }
+
+        workers = new SingleThreadScheduler[concurrencyLevel];
         for (int index = 0; index < workers.Length; index++)
         {
             workers[index] = new SingleThreadScheduler(index, this);
@@ -57,28 +64,23 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     public void Dispose()
         => Array.ForEach(workers, worker => worker.Dispose());
 
+    [StructLayout(LayoutKind.Sequential)]
     class SingleThreadScheduler : IDisposable
     {
-        // Tried ManualResetEventSlim and it's cool but not for this implementation
-        readonly ThreadStickyTaskScheduler parent;
-
         // How to replace ConcurrentQueue<Task>?
+        // Tried ManualResetEventSlim to replace Thread.Sleep/Yield and it's cool but not for this implementation
         // I can try something like in SpinningPool
         readonly ConcurrentQueue<Task> queue;
-        readonly Thread thread;
-        readonly CancellationTokenSource cancellation;
-        readonly int index;
-        readonly int queueIndexMask;
-        bool previousNeighbor;
+        readonly ThreadStickyTaskScheduler parent;
+        readonly ConcurrentQueue<Task> neighborsQueue;
 
-        // work stealing with neighborQueue creates possibility for same queue to be dequeued concurrently
-        ConcurrentQueue<Task>[] AllQueues => parent.queues;
+        readonly CancellationTokenSource cancellation;
+        readonly Thread thread;
 
         public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
         {
-            this.index = index;
             this.parent = parent;
-            queueIndexMask = parent.queueIndexMask;
+            var queueIndexMask = parent.queueIndexMask;
             var nextIndex = (index + 1) & queueIndexMask;
             do
             {
@@ -89,8 +91,10 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 // 2) if current thread needs to enqueue task then doing that on separate queue increases chances for parallelism
                 // 3) i expect this to be one time cost at startup to increase performance at runtime
             } while ((thread.ManagedThreadId & queueIndexMask) != nextIndex);
-            queue = parent.queues[index] = new ConcurrentQueue<Task>();
             cancellation = new CancellationTokenSource();
+            var queues = parent.queues;
+            queue = queues[index];
+            neighborsQueue = queues[nextIndex];
         }
 
         public void Start()
@@ -110,7 +114,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 }
                 else
                 {
-                    Thread.Yield();
+                    Thread.Sleep(1);
                 }
             }
         }
@@ -123,18 +127,10 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             }
         }
 
-        ConcurrentQueue<Task> GetNeighborQueue()
-        {
-            previousNeighbor = !previousNeighbor;
-            var neighbors = previousNeighbor ? (index - 1) : (index + 1);
-            return AllQueues[neighbors & queueIndexMask];
-        }
-
         void HelpNeighbor()
         {
-            var queue = GetNeighborQueue();
             int limit = 32;
-            while (limit > 0 && queue.TryDequeue(out var task))
+            while (limit > 0 && neighborsQueue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
                 --limit;
