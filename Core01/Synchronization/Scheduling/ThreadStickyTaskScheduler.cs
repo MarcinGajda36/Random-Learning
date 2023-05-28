@@ -65,7 +65,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         => Array.ForEach(workers, worker => worker.Dispose());
 
     [StructLayout(LayoutKind.Sequential)]
-    class SingleThreadScheduler : IDisposable
+    sealed class SingleThreadScheduler : IDisposable
     {
         // How to replace ConcurrentQueue<Task>?
         // Tried ManualResetEventSlim to replace Thread.Sleep/Yield and it's cool but not for this implementation
