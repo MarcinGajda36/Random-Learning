@@ -68,8 +68,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     sealed class SingleThreadScheduler : IDisposable
     {
         // How to replace ConcurrentQueue<Task>?
-        // Tried ManualResetEventSlim to replace Thread.Sleep/Yield and it's cool but not for this implementation
-        // I can try something like in SpinningPool
+        // I can try something like in 
         readonly ConcurrentQueue<Task> queue;
         readonly ThreadStickyTaskScheduler parent;
         readonly ConcurrentQueue<Task> neighborsQueue;
@@ -118,7 +117,9 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 }
                 else
                 {
-                    Thread.Sleep(1);
+                    // Tried ManualResetEventSlim to replace Thread.Sleep/Yield and it's cool but not for this implementation 
+                    // because i like that thread without it's own elements help with neighborsQueue
+                    Thread.Sleep(0);
                 }
             }
         }
