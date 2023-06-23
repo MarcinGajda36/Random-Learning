@@ -8,8 +8,8 @@ using MarcinGajda.RX_IX_Tests;
 
 namespace Benchmarks;
 
-//[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions)]
 [MemoryDiagnoser]
+[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions)]
 public class HistoricalToLiveBenchmark_Halves
 {
     [Params(10_000, 250_000, 1_000_000)]
