@@ -25,13 +25,13 @@ public static class Sort
         Span<int> prefix = stackalloc int[1 << BitsPerGroup];
 
         // number of groups 
-        int groups = TotalBits / BitsPerGroup;
+        const int GroupsCount = TotalBits / BitsPerGroup;
 
         // the mask to identify groups 
-        uint mask = (1u << BitsPerGroup) - 1u;
+        const uint Mask = (1u << BitsPerGroup) - 1u;
 
         // the algorithm: 
-        for (int c = 0, shift = 0; c < groups; c++, shift += BitsPerGroup)
+        for (int group = 0, shift = 0; group < GroupsCount; group++, shift += BitsPerGroup)
         {
             // reset count array 
             counting.Clear();
@@ -39,7 +39,7 @@ public static class Sort
             // counting elements of the c-th group 
             for (int i = 0; i < toSort.Length; i++)
             {
-                var index = (toSort[i] >> shift) & mask;
+                var index = (toSort[i] >> shift) & Mask;
                 counting[(int)index]++;
             }
 
@@ -51,7 +51,7 @@ public static class Sort
             // from a[] to t[] elements ordered by c-th group 
             for (int i = 0; i < toSort.Length; i++)
             {
-                var prefixIndex = (toSort[i] >> shift) & mask;
+                var prefixIndex = (toSort[i] >> shift) & Mask;
                 rented[prefix[(int)prefixIndex]++] = toSort[i];
             }
 
