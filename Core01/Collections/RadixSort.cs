@@ -60,8 +60,8 @@ public static class Sort
             // a[]=t[] and start again until the last group 
             temp.CopyTo(toSort);
         }
+        ArrayPool<uint>.Shared.Return(tempRent);
         ArrayPool<int>.Shared.Return(prefixRent);
         ArrayPool<int>.Shared.Return(countingRent);
-        ArrayPool<uint>.Shared.Return(tempRent);
     }
 }
