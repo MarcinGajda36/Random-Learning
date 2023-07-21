@@ -12,8 +12,7 @@ public static class Sort
         }
 
         // our helper array 
-        var tempRent = ArrayPool<uint>.Shared.Rent(toSort.Length);
-        Span<uint> temp = tempRent.AsSpan(0, toSort.Length);
+        var temp = ArrayPool<uint>.Shared.Rent(toSort.Length);
 
         // number of bits our group will be long 
         // try to set this also to 2, 8 or 16 to see if it is 
@@ -27,10 +26,10 @@ public static class Sort
         // r-bit number) 
         var elementsCount = 1 << bidsInGroup;
         var countingRent = ArrayPool<int>.Shared.Rent(elementsCount);
-        Span<int> counting = countingRent.AsSpan(0, elementsCount);
+        var counting = countingRent.AsSpan(0, elementsCount);
 
         var prefixRent = ArrayPool<int>.Shared.Rent(elementsCount);
-        Span<int> prefix = prefixRent.AsSpan(0, elementsCount);
+        var prefix = prefixRent.AsSpan(0, elementsCount);
 
         // the algorithm: 
         for (int group = 0, shift = 0; group < GroupsCount; group++, shift += bidsInGroup)
@@ -54,13 +53,13 @@ public static class Sort
             for (int i = 0; i < toSort.Length; i++)
             {
                 var prefixIndex = (toSort[i] >> shift) & Mask;
-                tempRent[prefix[(int)prefixIndex]++] = toSort[i];
+                temp[prefix[(int)prefixIndex]++] = toSort[i];
             }
 
             // a[]=t[] and start again until the last group 
-            temp.CopyTo(toSort);
+            Array.Copy(temp, toSort, toSort.Length);
         }
-        ArrayPool<uint>.Shared.Return(tempRent);
+        ArrayPool<uint>.Shared.Return(temp);
         ArrayPool<int>.Shared.Return(prefixRent);
         ArrayPool<int>.Shared.Return(countingRent);
     }
