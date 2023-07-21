@@ -4,29 +4,33 @@ using System.Buffers;
 namespace MarcinGajda.Collections;
 public static class Sort
 {
-    public static void RadixSort(this uint[] toSort, int bidsInGroup = 8)
+    public static void RadixSort(this uint[] toSort, int bidsInGroup = 8) // 11?
     {
-        if (bidsInGroup is 2 or 4 or 8 is false)
+        if (bidsInGroup is < 2 or > 11)
         {
-            throw new ArgumentOutOfRangeException(nameof(bidsInGroup), bidsInGroup, "Groups need to be between 2, 4 or 8");
+            throw new ArgumentOutOfRangeException(nameof(bidsInGroup), bidsInGroup, "Groups need to be between more then 1 and less then 12");
         }
 
         // our helper array 
-        var rented = ArrayPool<uint>.Shared.Rent(toSort.Length);
-        Span<uint> temp = rented.AsSpan(0, toSort.Length);
+        var tempRent = ArrayPool<uint>.Shared.Rent(toSort.Length);
+        Span<uint> temp = tempRent.AsSpan(0, toSort.Length);
 
         // number of bits our group will be long 
         // try to set this also to 2, 8 or 16 to see if it is 
         // quicker or not 
-        int TotalBits = 32;
-        int GroupsCount = TotalBits / bidsInGroup;
+        const double TotalBits = 32d;
+        int GroupsCount = (int)Math.Ceiling(TotalBits / bidsInGroup);
         uint Mask = (1u << bidsInGroup) - 1u;
 
         // counting and prefix arrays
         // (note dimensions 2^r which is the number of all possible values of a 
         // r-bit number) 
-        Span<int> counting = stackalloc int[1 << bidsInGroup];
-        Span<int> prefix = stackalloc int[1 << bidsInGroup];
+        var elementsCount = 1 << bidsInGroup;
+        var countingRent = ArrayPool<int>.Shared.Rent(elementsCount);
+        Span<int> counting = countingRent.AsSpan(0, elementsCount);
+
+        var prefixRent = ArrayPool<int>.Shared.Rent(elementsCount);
+        Span<int> prefix = prefixRent.AsSpan(0, elementsCount);
 
         // the algorithm: 
         for (int group = 0, shift = 0; group < GroupsCount; group++, shift += bidsInGroup)
@@ -50,12 +54,14 @@ public static class Sort
             for (int i = 0; i < toSort.Length; i++)
             {
                 var prefixIndex = (toSort[i] >> shift) & Mask;
-                rented[prefix[(int)prefixIndex]++] = toSort[i];
+                tempRent[prefix[(int)prefixIndex]++] = toSort[i];
             }
 
             // a[]=t[] and start again until the last group 
             temp.CopyTo(toSort);
         }
-        ArrayPool<uint>.Shared.Return(rented);
+        ArrayPool<int>.Shared.Return(prefixRent);
+        ArrayPool<int>.Shared.Return(countingRent);
+        ArrayPool<uint>.Shared.Return(tempRent);
     }
 }
