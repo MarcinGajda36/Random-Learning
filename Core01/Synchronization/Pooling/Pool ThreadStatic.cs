@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace MarcinGajda.Synchronization.Pooling;
 public class ThreadStaticPool<TValue>
@@ -8,13 +6,12 @@ public class ThreadStaticPool<TValue>
     public struct Lease : IDisposable
     {
         readonly TValue value;
-        public TValue Value => isDisposed == AfterDispose
+        readonly ThreadStaticPool<TValue> parent;
+        bool isDisposed;
+
+        public readonly TValue Value => isDisposed
             ? throw new ObjectDisposedException(nameof(Lease))
             : value;
-
-        readonly ThreadStaticPool<TValue> parent;
-        const int AfterDispose = 1;
-        int isDisposed;
 
         public Lease(TValue value, ThreadStaticPool<TValue> parent)
         {
@@ -24,9 +21,10 @@ public class ThreadStaticPool<TValue>
 
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref isDisposed, AfterDispose) != AfterDispose)
+            if (isDisposed is false)
             {
                 parent.Return(value);
+                isDisposed = true;
             }
         }
     }
@@ -47,14 +45,10 @@ public class ThreadStaticPool<TValue>
         {
             if (available > 0)
             {
-                if (RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
-                {
-                    ref var toRent = ref values[--available];
-                    var value = toRent;
-                    toRent = default;
-                    return value!;
-                }
-                return values[--available]!;
+                ref var toRent = ref values[--available];
+                var value = toRent;
+                toRent = default;
+                return value!;
             }
             return factory();
         }
@@ -72,18 +66,21 @@ public class ThreadStaticPool<TValue>
     readonly int sizePerThread;
     readonly Func<TValue> factory;
 
-    public ThreadStaticPool(int sizePerThread, Func<TValue> factory)
+    public ThreadStaticPool(Func<TValue> factory, int sizePerThread = 4) // i feel like putting 7 here idk why.
     {
         this.sizePerThread = sizePerThread;
         this.factory = factory;
     }
 
-    public Lease Rent()
+    public TValue Rent()
         => pool is null
-        ? new Lease(factory(), this)
-        : new Lease(pool.GetOrCreate(), this);
+        ? factory()
+        : pool.GetOrCreate();
 
-    void Return(TValue value)
+    public Lease RentLease()
+        => new(Rent(), this);
+
+    public void Return(TValue value)
     {
         pool ??= new Pool(this);
         pool.Return(value);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 namespace MarcinGajda.Synchronization.Pooling;
 public class LockingPool<TValue>
@@ -7,13 +6,12 @@ public class LockingPool<TValue>
     public struct Lease : IDisposable
     {
         readonly TValue value;
-        public TValue Value => isDisposed == AfterDispose
+        readonly LockingPool<TValue> parent;
+        bool isDisposed;
+
+        public readonly TValue Value => isDisposed
             ? throw new ObjectDisposedException(nameof(Lease))
             : value;
-
-        readonly LockingPool<TValue> parent;
-        const int AfterDispose = 1;
-        int isDisposed;
 
         public Lease(TValue value, LockingPool<TValue> parent)
         {
@@ -23,9 +21,10 @@ public class LockingPool<TValue>
 
         public void Dispose()
         {
-            if (Interlocked.Exchange(ref isDisposed, AfterDispose) != AfterDispose)
+            if (isDisposed is false)
             {
                 parent.Return(value);
+                isDisposed = true;
             }
         }
     }
@@ -34,51 +33,49 @@ public class LockingPool<TValue>
     readonly TValue?[] pool;
     volatile int available;
 
-    public LockingPool(int size, Func<TValue> factory)
+    bool IsEmpty => available == 0;
+    bool IsFull => available == pool.Length;
+
+    public LockingPool(Func<TValue> factory, int size = 32)
     {
         this.factory = factory;
         pool = new TValue?[size];
     }
 
-    bool IsPoolEmpty()
-        => available == 0;
-
-    public Lease Rent()
+    public TValue Rent()
     {
-        if (IsPoolEmpty())
+        if (IsEmpty)
         {
-            return new(factory(), this);
+            return factory();
         }
         lock (pool)
         {
-            if (IsPoolEmpty())
+            if (IsEmpty)
             {
-                return new(factory(), this);
+                return factory();
             }
-            available--;
-            var toRent = pool[available];
-            pool[available] = default;
-            return new(toRent!, this);
+            ref var toRent = ref pool[--available];
+            var value = toRent;
+            toRent = default;
+            return value!;
         }
     }
 
-    bool IsPoolFull()
-        => available == pool.Length;
+    public Lease RentLease()
+        => new(Rent(), this);
 
-    void Return(TValue toReturn)
+    public void Return(TValue toReturn)
     {
-        if (IsPoolFull())
+        if (IsFull)
         {
             return;
         }
         lock (pool)
         {
-            if (IsPoolFull())
+            if (IsFull is false)
             {
-                return;
+                pool[available++] = toReturn;
             }
-            pool[available] = toReturn;
-            available++;
         }
     }
 }
