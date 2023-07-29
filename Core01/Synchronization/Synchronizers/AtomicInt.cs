@@ -67,21 +67,20 @@ public static class AtomicInt
         => Volatile.Read(ref value);
 }
 
-public sealed class PesimisticAtomicInt : IDisposable
+public sealed class AtomPessimistic<TValue> : IDisposable
 {
     private readonly SemaphoreSlim semaphore = new(1, 1);
-    public int Value { get; private set; }
+    public TValue Value { get; private set; }
 
-    public PesimisticAtomicInt(int initial = 0)
+    public AtomPessimistic(TValue initial)
         => Value = initial;
 
-    public int Swap<TArgument>(TArgument argument, Func<int, TArgument, int> swapper)
+    public TValue Map<TArgument>(TArgument argument, Func<TValue, TArgument, TValue> mapper)
     {
         semaphore.Wait();
         try
         {
-            Value = swapper(Value, argument);
-            return Value;
+            return Value = mapper(Value, argument);
         }
         finally
         {
@@ -89,8 +88,40 @@ public sealed class PesimisticAtomicInt : IDisposable
         }
     }
 
-    public int Swap(Func<int, int> swapper)
-        => Swap(swapper, static (initial, func) => func(initial));
+    public TValue Map(Func<TValue, TValue> mapper)
+        => Map(mapper, static (initial, func) => func(initial));
+
+    public async Task<TValue> MapAsync<TArgument>(
+        TArgument argument,
+        Func<TValue, TArgument, Task<TValue>> mapper,
+        CancellationToken cancellation = default)
+    {
+        await semaphore.WaitAsync(cancellation);
+        try
+        {
+            return Value = await mapper(Value, argument);
+        }
+        finally
+        {
+            _ = semaphore.Release();
+        }
+    }
+
+    public async ValueTask<TValue> MapValueAsync<TArgument>(
+        TArgument argument,
+        Func<TValue, TArgument, ValueTask<TValue>> mapper,
+        CancellationToken cancellation = default)
+    {
+        await semaphore.WaitAsync(cancellation);
+        try
+        {
+            return Value = await mapper(Value, argument);
+        }
+        finally
+        {
+            _ = semaphore.Release();
+        }
+    }
 
     public void Dispose()
         => semaphore.Dispose();
