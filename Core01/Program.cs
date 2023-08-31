@@ -105,11 +105,11 @@ internal class Program
 
     private static void PoolTest()
     {
-        var pool = new ThreadStaticPool<object>(10, () => new object());
-        var lease1 = pool.Rent();
-        var lease2 = pool.Rent();
+        var pool = new ThreadStaticPool<object>(() => new object());
+        var lease1 = pool.RentLease();
+        var lease2 = pool.RentLease();
         lease1.Dispose();
-        var lease3 = pool.Rent();
+        var lease3 = pool.RentLease();
         lease2.Dispose();
         lease3.Dispose();
     }

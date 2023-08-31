@@ -94,7 +94,7 @@ public class PoolsBenchmarks
     [Benchmark]
     public void ThreadStatic()
     {
-        var pool = new ThreadStaticPool<RandomType>(PoolSize, createRandomType);
-        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
+        var pool = new ThreadStaticPool<RandomType>(createRandomType, PoolSize);
+        Test(pool, static pool => pool.RentLease(), static type => type.Value.X += 1);
     }
 }
