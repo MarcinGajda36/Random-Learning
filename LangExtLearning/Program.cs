@@ -52,11 +52,11 @@ internal class Program
         var result2 = new Result<int>(1);
     }
     // you can use C# pattern matching like F#
-    public static double GetArea(Shape shape)
-        => shape switch
-        {
-            Rectangle rec => rec.Length * rec.Width,
-            Circle circle => 2 * Math.PI * circle.Radius,
-            _ => throw new NotImplementedException()
-        };
+    //public static double GetArea(Shape shape)
+    //    => shape switch
+    //    {
+    //        Rectangle rec => rec.Length * rec.Width,
+    //        Circle circle => 2 * Math.PI * circle.Radius,
+    //        _ => throw new NotImplementedException()
+    //    };
 }

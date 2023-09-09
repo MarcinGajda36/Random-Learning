@@ -65,8 +65,6 @@ internal class Program
         Observables.SubjectTest();
         Observables.ReplaySubjectTest();
 
-        await FTypesSharing.SameSlnShare();
-
         SortedSetTst.Test();
         _ = ContractsTests.Test(-1);
 
@@ -85,7 +83,6 @@ internal class Program
         _ = new int[] { 1 }.Any();
         _ = ((int[])null).Any();
 
-        FTypesSharing.Test();
         _ = string.Equals("111", "asd", StringComparison.OrdinalIgnoreCase);
         FizzBuzzKata.Print();
         FizzBuzzKata.FizzBuzzMy();

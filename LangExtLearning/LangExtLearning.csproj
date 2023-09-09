@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CodeGeneration.Roslyn.Tool" Version="0.7.63">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="LanguageExt.Core" Version="4.4.2" />
 
     <PackageReference Include="LanguageExt.CodeGen" Version="4.4.2" PrivateAssets="all" />
