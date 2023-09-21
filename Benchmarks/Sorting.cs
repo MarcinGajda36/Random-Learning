@@ -1,10 +1,12 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using MarcinGajda.Collections;
 
 namespace Benchmarks;
 
 [MemoryDiagnoser]
 [RankColumn]
+[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions)]
 public class Sorting
 {
     //[Params(2, 3, 4, 5, 6, 7, 8, 9, 10, 11)]

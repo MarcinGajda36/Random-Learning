@@ -13,6 +13,9 @@ namespace SpansAndStuff
         {
             RefTestArray();
             Vectors.EqualsAny();
+            
+
+            AsyncTaskMethodBuilder<int> asyncTaskMethodBuilder = default;
 
             await Task.Delay(-1);
         }
