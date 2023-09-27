@@ -32,8 +32,8 @@ public static class Sort
         // try to set this also to 2, 8 or 16 to see if it is 
         // quicker or not 
         const double TotalBits = 32d;
-        int GroupsCount = (int)Math.Ceiling(TotalBits / bidsInGroup);
-        uint Mask = (1u << bidsInGroup) - 1u;
+        int groupsCount = (int)Math.Ceiling(TotalBits / bidsInGroup);
+        uint mask = (1u << bidsInGroup) - 1u;
 
         // counting and prefix arrays
         // (note dimensions 2^r which is the number of all possible values of a 
@@ -46,7 +46,7 @@ public static class Sort
         var prefix = prefixRent.AsSpan(0, elementsCount);
 
         // the algorithm: 
-        for (int group = 0, shift = 0; group < GroupsCount; group++, shift += bidsInGroup)
+        for (int group = 0, shift = 0; group < groupsCount; group++, shift += bidsInGroup)
         {
             // reset count array 
             counting.Clear();
@@ -54,7 +54,7 @@ public static class Sort
             // counting elements of the c-th group 
             for (int i = 0; i < toSort.Length; i++)
             {
-                var index = (toSort[i] >> shift) & Mask;
+                var index = (toSort[i] >> shift) & mask;
                 counting[(int)index]++;
             }
 
@@ -66,7 +66,7 @@ public static class Sort
             // from a[] to t[] elements ordered by c-th group 
             for (int i = 0; i < toSort.Length; i++)
             {
-                var prefixIndex = (toSort[i] >> shift) & Mask;
+                var prefixIndex = (toSort[i] >> shift) & mask;
                 temp[prefix[(int)prefixIndex]++] = toSort[i];
             }
 
