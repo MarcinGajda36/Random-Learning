@@ -4,6 +4,20 @@ using System.Buffers;
 namespace MarcinGajda.Collections;
 public static class Sort
 {
+    //  3   4   4   4   5   6   7   8   11
+
+    //  11	10	9	8	7	6	5	4	3
+    //  22	20	18	16	14	12	10	8	6
+    //  33	30	27	24	21	18	15	12	9
+    //  	40	36	32	28	24	20	16	12
+    //  				35	30	25	20	15
+    //  					36	30	24	18
+    //  						35	28	21
+    //  							32	24
+    //  								27
+    //  								30
+    //  								33
+    //
     public static void RadixSort(this uint[] toSort, int bidsInGroup = 8) // 11?
     {
         if (bidsInGroup is < 2 or > 11)
