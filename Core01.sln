@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functional_CS_V2", "Functio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DITesting", "WebApplication2\DITesting.csproj", "{0D62DB22-E020-47C7-8B23-2111F4622C8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{F986403F-0479-4683-AC0F-45471F8CEE0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{F986403F-0479-4683-AC0F-45471F8CEE0C}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AdventOfCode2023FS", "AdventOfCodeFS\AdventOfCode2023FS.fsproj", "{18423F99-DD09-46BF-B200-1970F795656A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{F986403F-0479-4683-AC0F-45471F8CEE0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F986403F-0479-4683-AC0F-45471F8CEE0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F986403F-0479-4683-AC0F-45471F8CEE0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18423F99-DD09-46BF-B200-1970F795656A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18423F99-DD09-46BF-B200-1970F795656A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18423F99-DD09-46BF-B200-1970F795656A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18423F99-DD09-46BF-B200-1970F795656A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
