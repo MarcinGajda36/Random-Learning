@@ -33,7 +33,7 @@ let getAllWordIndexes (word: string) (text: string) =
         let index = text.IndexOf (word, startIndex)
         if index = -1 
         then soFar
-        else loop (index + word.Length) (soFar |> List.append [index])
+        else loop (index + 1) (soFar |> List.append [index])
     loop 0 []
 
 let findAllDigits text = 
@@ -49,7 +49,7 @@ let findAllDigits text =
 let fullNumber indexedDigits = 
     let ordered = 
         indexedDigits 
-        |> Seq.sortBy (fun (index, _) -> index)
+        |> Seq.sortBy fst
         |> Seq.map snd
         |> Seq.toArray
     let first = Array.head ordered
