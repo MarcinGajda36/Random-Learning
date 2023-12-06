@@ -15,7 +15,7 @@ let shortInput = [|
     "7pqrstsixteen";
 |]
 
-let textToNumer = [|
+let wordToNumer = [|
     ("one", 1); 
     ("two", 2); 
     ("three", 3); 
@@ -28,22 +28,30 @@ let textToNumer = [|
 |]
 
 
-let findAllDigits (text: string) = 
+let getAllWordIndexes (word: string) (text: string) =
+    let rec loop (startIndex: int) soFar =
+        let index = text.IndexOf (word, startIndex)
+        if index = -1 
+        then soFar
+        else loop (index + word.Length) (soFar |> List.append [index])
+    loop 0 []
+
+let findAllDigits text = 
     let getIndexAndValue index c = 
         if Char.IsDigit c then (index, Char.GetNumericValue c |> int) else (-1, 0)
-    // First and last index are enought, but i still don't like it, i want to find all.
-    let fromWordsFirsts = textToNumer |> Seq.map (fun (word, digit) -> (text.IndexOf word, digit))
-    let fromWordsLats = textToNumer |> Seq.map (fun (word, digit) -> (text.LastIndexOf word, digit))
-    let fromDigits = text |> Seq.mapi getIndexAndValue
-    fromDigits 
-    |> Seq.append fromWordsFirsts
-    |> Seq.append fromWordsLats
+    let words = 
+        wordToNumer |> Seq.collect (fun (word, digit) -> getAllWordIndexes word text |> Seq.map (fun index -> (index, digit)))
+    let digits = text |> Seq.mapi getIndexAndValue
+    digits 
+    |> Seq.append words
     |> Seq.filter (fun (index, _) -> index <> -1)
-    |> Seq.sortBy (fun (index, _) -> index)
-    |> Seq.toArray
 
 let fullNumber indexedDigits = 
-    let ordered = indexedDigits |> Array.map snd
+    let ordered = 
+        indexedDigits 
+        |> Seq.sortBy (fun (index, _) -> index)
+        |> Seq.map snd
+        |> Seq.toArray
     let first = Array.head ordered
     let last = Array.last ordered
     (string first) + (string last) |> int
@@ -53,7 +61,7 @@ let numbers =
     |> Array.map findAllDigits
     |> Array.map fullNumber
 
-Array.iter (printfn "%A") numbers
+// Array.iter (printfn "%A") numbers
 
 Array.sum numbers
 // Correct: 57345

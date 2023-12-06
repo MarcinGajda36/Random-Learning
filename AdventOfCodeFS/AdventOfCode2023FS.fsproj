@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="D1Input.txt">
+    <Content Include="d2\D2Input.txt" />
+    <Compile Include="D2\D2.fs" />
+    <Content Include="D1\D1Input.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="D1.fs" />
+    <Compile Include="D1\D1.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>
