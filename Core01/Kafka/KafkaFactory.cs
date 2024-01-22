@@ -98,7 +98,7 @@ public sealed partial class KafkaFactory
         int maxDegreeOfParallelism,
         CancellationToken cancellationToken)
     {
-        var kafkaProcessor = new ProcessAndOffsetProcessor<TKey, TValue>(
+        var kafkaProcessor = new ProcessAndOffsetProcessorV1<TKey, TValue>(
             consumer,
             processor,
             maxDegreeOfParallelism,
@@ -115,7 +115,7 @@ public sealed partial class KafkaFactory
 
     private static void ConsumeAndProcessAsync<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
-        ProcessAndOffsetProcessor<TKey, TValue> kafkaProcessor,
+        ProcessAndOffsetProcessorV1<TKey, TValue> kafkaProcessor,
         CancellationToken cancellationToken)
     {
         while (cancellationToken.IsCancellationRequested is false)
