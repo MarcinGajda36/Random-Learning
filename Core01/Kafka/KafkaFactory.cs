@@ -2,7 +2,6 @@
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
 
 namespace MarcinGajda.Kafka;
@@ -18,7 +17,7 @@ public sealed partial class KafkaFactory
         => AtLeastOnceClient(
             kafkaSettings,
             processor,
-            DataflowBlockOptions.Unbounded,
+            int.MaxValue,
             cancellationToken);
 
     public static async Task AtLeastOnceClient<TKey, TValue>(
@@ -124,10 +123,7 @@ public sealed partial class KafkaFactory
             try
             {
                 var kafkaMessage = consumer.Consume(cancellationToken);
-                if (kafkaProcessor.Enqueue(kafkaMessage) is false)
-                {
-                    return;
-                }
+                kafkaProcessor.Enqueue(kafkaMessage);
             }
             catch (ConsumeException ex)
             {

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
 
 namespace MarcinGajda.Kafka;
@@ -9,18 +12,9 @@ public partial class KafkaFactory
 {
     private sealed class ProcessAndOffsetProcessor<TKey, TValue> : IDisposable
     {
-        private readonly record struct ThisResultPair(
-            ProcessAndOffsetProcessor<TKey, TValue> This,
-            ConsumeResult<TKey, TValue> Result);
+        private readonly Subject<ConsumeResult<TKey, TValue>> queue = new();
 
-        private readonly IConsumer<TKey, TValue> consumer;
-        private readonly Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor;
-        private readonly CancellationToken cancellationToken;
-        private readonly TransformBlock<ThisResultPair, ThisResultPair> processingBlock;
-        private readonly ActionBlock<ThisResultPair> offsetBlock;
-        private readonly IDisposable processingOffsetLink;
-
-        public Task Completion => offsetBlock.Completion;
+        public Task Completion { get; }
 
         public ProcessAndOffsetProcessor(
             IConsumer<TKey, TValue> consumer,
@@ -28,52 +22,34 @@ public partial class KafkaFactory
             int maxDegreeOfParallelism,
             CancellationToken cancellationToken)
         {
-            this.consumer = consumer;
-            this.processor = processor;
-            this.cancellationToken = cancellationToken;
-            processingBlock = CreateProcessingBlock(maxDegreeOfParallelism, cancellationToken);
-            offsetBlock = CreateOffsetBlock();
-            processingOffsetLink = processingBlock.LinkTo(
-                offsetBlock,
-                new DataflowLinkOptions { PropagateCompletion = true });
-        }
-
-        public bool Enqueue(ConsumeResult<TKey, TValue> kafkaMessage)
-            => processingBlock.Post(new(this, kafkaMessage));
-
-        public void Complete()
-            => processingBlock.Complete();
-
-        private static TransformBlock<ThisResultPair, ThisResultPair> CreateProcessingBlock(
-            int maxDegreeOfParallelism,
-            CancellationToken cancellationToken)
-            => new(
-                static async thisResultPair =>
+            Completion = queue
+                .Select(result => Observable.FromAsync(async token =>
                 {
-                    var (@this, result) = thisResultPair;
-                    await @this.processor(result, @this.cancellationToken);
-                    return thisResultPair;
-                },
-                new ExecutionDataflowBlockOptions
-                {
-                    MaxDegreeOfParallelism = maxDegreeOfParallelism,
-                    CancellationToken = cancellationToken,
-                });
-
-        private static ActionBlock<ThisResultPair> CreateOffsetBlock()
-            => new(
-                static thisResultPair =>
+                    await processor(result, token);
+                    return result;
+                }))
+                .Merge(maxDegreeOfParallelism)
+                .Select(result =>
                 {
                     try
                     {
-                        var (@this, result) = thisResultPair;
-                        @this.consumer.StoreOffset(result);
+                        consumer.StoreOffset(result);
                     }
                     catch (KafkaException) { /*maybe log*/ }
-                },
-                new ExecutionDataflowBlockOptions { SingleProducerConstrained = true });
+                    return Unit.Default;
+                })
+                .ToTask(cancellationToken);
+        }
+
+        public void Enqueue(ConsumeResult<TKey, TValue> kafkaMessage)
+            => queue.OnNext(kafkaMessage);
+
+        public void Complete()
+            => queue.OnCompleted();
 
         public void Dispose()
-            => processingOffsetLink.Dispose();
+        {
+            queue.Dispose();
+        }
     }
 }
