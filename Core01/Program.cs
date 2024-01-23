@@ -6,13 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using MarcinGajda.AsyncDispose_;
 using MarcinGajda.Collections;
 using MarcinGajda.ContractsT;
 using MarcinGajda.Copy;
 using MarcinGajda.DataflowTests;
-using MarcinGajda.Fs;
 using MarcinGajda.PeriodicCheckers;
 using MarcinGajda.RX_IX_Tests;
 using MarcinGajda.Structs;
@@ -36,8 +36,22 @@ internal class Program
         return (TimeSpan.FromTicks(elapsed), result);
     }
 
+    public static Span<int> ReturnsSpan()
+    {
+        return new int[] { 1, 2, 3, 4, 5 };
+    }
+
+    public static void TestSpanAfterGC()
+    {
+        Span<int> spanIntoArr = ReturnsSpan();
+        GC.Collect();
+        Thread.Sleep(1000);
+        Thread.Sleep(1000);
+    }
+
     public static async Task Main()
     {
+        TestSpanAfterGC();
         PoolTest();
         await Task.Delay(-1);
         _ = TestClosure();
