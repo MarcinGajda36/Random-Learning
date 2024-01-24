@@ -15,7 +15,7 @@ public static class Vectors
         {
             haystackSpan[i] = i;
         }
-
+        //System.Runtime.Intrinsics.X86.Aes.X64.ConvertToInt64(
         var haystack = new Vector<int>(haystackSpan);
         var equalsAny = Vector.EqualsAny(needle, haystack);
 
