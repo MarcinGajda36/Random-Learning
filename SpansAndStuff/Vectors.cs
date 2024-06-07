@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Buffers;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Security;
 using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace SpansAndStuff;
 public static class Vectors
@@ -31,5 +34,7 @@ public static class Vectors
             PooledConnectionLifetime = TimeSpan.FromMinutes(15) // Recreate every 15 minutes
         };
         var client = new HttpClient(handler);
+
+
     }
 }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SpansAndStuff
@@ -11,13 +13,24 @@ namespace SpansAndStuff
     {
         private static async Task Main()
         {
+            Net8Tests();
+            ;
             RefTestArray();
             Vectors.EqualsAny();
-            
+
 
             AsyncTaskMethodBuilder<int> asyncTaskMethodBuilder = default;
 
             await Task.Delay(-1);
+        }
+
+        private static void Net8Tests()
+        {
+            var format = CompositeFormat.Parse("Composite {0}");
+            var formatted = string.Format(CultureInfo.InvariantCulture, format, "Text");
+
+            var searchValue = SearchValues.Create([2, 3]);
+            var found = (new byte[] { 1, 2, 3 }).AsSpan().IndexOfAny(searchValue);
         }
 
         private static void RefTestDict()
