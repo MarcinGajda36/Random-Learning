@@ -37,7 +37,7 @@ namespace SpansAndStuff
         {
             var d = new Dictionary<int, int>();
             ref var value = ref CollectionsMarshal.GetValueRefOrNullRef(d, 1);
-            if (Unsafe.IsNullRef(ref value))
+            if (Unsafe.IsNullRef(ref value) is false)
             {
                 // Here i can use value
                 return;
@@ -66,7 +66,7 @@ namespace SpansAndStuff
                 int value = int.Parse(Console.ReadLine());
                 Memory<char> memory = owner.Memory;
                 WriteInt32ToBuffer(value, memory);
-                DisplayBufferToConsole(memory.Slice(0, value.ToString().Length));
+                DisplayBufferToConsole(memory[..value.ToString().Length]);
                 var list = new List<int>();
                 var listSpan = CollectionsMarshal.AsSpan(list);
             }
