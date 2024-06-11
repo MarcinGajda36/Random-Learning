@@ -7,6 +7,6 @@ internal class Program
     //PS C:\Users\kirgo\source\repos\Random-Learning\Benchmarks> dotnet run -c Release
     public static void Main(string[] args)
     {
-        BenchmarkRunner.Run<Sorting>();
+        BenchmarkRunner.Run<PoolsBenchmarks>();
     }
 }
