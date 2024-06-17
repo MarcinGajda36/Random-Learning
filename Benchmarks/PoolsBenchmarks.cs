@@ -5,10 +5,10 @@ using MarcinGajda.Synchronization.Pooling;
 
 namespace Benchmarks;
 
-[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.CacheMisses)]
+[RankColumn]
 [MemoryDiagnoser]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-[RankColumn]
+[HardwareCounters(HardwareCounter.BranchMispredictions, HardwareCounter.CacheMisses)]
 public class PoolsBenchmarks
 {
     class RandomType { public int X { get; set; } }
@@ -23,7 +23,8 @@ public class PoolsBenchmarks
     [Params(1, 16)]
     public int Threads { get; set; }
 
-    [Params(8, 32, 512)]
+    //[Params(8, 32, 512)]
+    [Params(6)]
     public int PoolSize { get; set; }
 
     Thread[]? threads;
@@ -34,17 +35,17 @@ public class PoolsBenchmarks
         Setup<ThreadStaticPool<RandomType>, ThreadStaticPool<RandomType>.Lease>();
     }
 
-    [IterationSetup(Target = nameof(Locking))]
-    public void SetupLocking()
-    {
-        Setup<LockingPool<RandomType>, LockingPool<RandomType>.Lease>();
-    }
+    //[IterationSetup(Target = nameof(Locking))]
+    //public void SetupLocking()
+    //{
+    //    Setup<LockingPool<RandomType>, LockingPool<RandomType>.Lease>();
+    //}
 
-    [IterationSetup(Target = nameof(Spinning))]
-    public void SetupSpinning()
-    {
-        Setup<SpinningPool<RandomType>, SpinningPool<RandomType>.Lease>();
-    }
+    //[IterationSetup(Target = nameof(Spinning))]
+    //public void SetupSpinning()
+    //{
+    //    Setup<SpinningPool<RandomType>, SpinningPool<RandomType>.Lease>();
+    //}
 
     public void Setup<TPool, TLease>()
         where TLease : struct, IDisposable
@@ -77,24 +78,24 @@ public class PoolsBenchmarks
         Array.ForEach(threads, thread => thread.Join());
     }
 
-    [Benchmark]
-    public void Spinning()
-    {
-        var pool = new SpinningPool<RandomType>(PoolSize, createRandomType);
-        Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
-    }
+    //[Benchmark]
+    //public void Spinning()
+    //{
+    //    var pool = new SpinningPool<RandomType>(PoolSize, createRandomType);
+    //    Test(pool, static pool => pool.Rent(), static type => type.Value.X += 1);
+    //}
 
-    [Benchmark]
-    public void Locking()
-    {
-        var pool = new LockingPool<RandomType>(createRandomType, PoolSize);
-        Test(pool, static pool => pool.RentLease(), static type => type.Value.X += 1);
-    }
+    //[Benchmark]
+    //public void Locking()
+    //{
+    //    var pool = new LockingPool<RandomType>(createRandomType, PoolSize);
+    //    Test(pool, static pool => pool.RentLease(), static type => type.Value.X += 1);
+    //}
 
     [Benchmark]
     public void ThreadStatic()
     {
-        var pool = new ThreadStaticPool<RandomType>(createRandomType, PoolSize);
+        var pool = new ThreadStaticPool<RandomType>(createRandomType);
         Test(pool, static pool => pool.RentLease(), static type => type.Value.X += 1);
     }
 }

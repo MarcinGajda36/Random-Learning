@@ -248,6 +248,12 @@ class pool
 | ThreadStatic | 500000 |      16 |        8 | 50.01 ms | 2.146 ms | 6.327 ms | 47.79 ms |    2 |    3664 B |
 | ThreadStatic | 500000 |      16 |      512 | 51.33 ms | 2.247 ms | 6.625 ms | 49.42 ms |    2 |   68176 B |
 
+//17.06.2024 inline 6 elements arr
+| Method       | Rents  | Threads | PoolSize | Mean     | Error    | StdDev   | Median   | Rank | Allocated |
+|------------- |------- |-------- |--------- |---------:|---------:|---------:|---------:|-----:|----------:|
+| ThreadStatic | 500000 | 1       | 6        | 11.63 ms | 0.249 ms | 0.698 ms | 11.32 ms |    1 |     608 B |
+| ThreadStatic | 500000 | 16      | 6        | 35.33 ms | 1.989 ms | 5.864 ms | 32.64 ms |    2 |    2648 B |
+
 // 11.06.2024 + net8
 | Method       | Rents  | Threads | PoolSize | Mean        | Error     | StdDev    | Median    | Rank | Allocated |
 |------------- |------- |-------- |--------- |------------:|----------:|----------:|----------:|-----:|----------:|

@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace MarcinGajda.Synchronization.Pooling;
 public class ThreadStaticPool<TValue>
 {
-    public struct Lease : IDisposable
+    public struct Lease : IDisposable // This being struct is dangerous right?
     {
         readonly TValue value;
         readonly ThreadStaticPool<TValue> parent;
@@ -31,13 +32,16 @@ public class ThreadStaticPool<TValue>
 
     class Pool
     {
-        readonly TValue?[] values;
+        const int ArraySize = 6;
+        [InlineArray(ArraySize)] struct TValues { private TValue first; };
+
         readonly Func<TValue> factory;
         int available;
+        TValues values;
 
         public Pool(ThreadStaticPool<TValue> parent)
         {
-            values = new TValue?[parent.sizePerThread];
+            values = new();
             factory = parent.factory;
         }
 
@@ -55,7 +59,7 @@ public class ThreadStaticPool<TValue>
 
         public void Return(TValue value)
         {
-            if (available != values.Length)
+            if (available != ArraySize)
             {
                 values[available++] = value;
             }
@@ -63,12 +67,10 @@ public class ThreadStaticPool<TValue>
     }
 
     [ThreadStatic] static Pool? pool;
-    readonly int sizePerThread;
     readonly Func<TValue> factory;
 
-    public ThreadStaticPool(Func<TValue> factory, int sizePerThread = 4) // i feel like putting 7 here idk why.
+    public ThreadStaticPool(Func<TValue> factory)
     {
-        this.sizePerThread = sizePerThread;
         this.factory = factory;
     }
 
