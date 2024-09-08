@@ -48,10 +48,10 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
 
 }
 
-public sealed class StatefulTwoWayActor<TState, TInput, TOutput>
+public sealed class StatefulTwoWayActor<TState, TInput, TOutput>(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
     : IPropagatorBlock<TInput, TOutput>
 {
-    private struct FuncInStateOperation : IOperationWithOutput<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput>
+    private readonly struct FuncInStateOperation : IOperationWithOutput<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput>
     {
         public ((TState, Func<TState, TInput, (TState, TOutput)>), TOutput) Execute(
             (TState, Func<TState, TInput, (TState, TOutput)>) state,
@@ -63,12 +63,9 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput>
         }
     }
 
-    private readonly StatefulTwoWayActor<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput, FuncInStateOperation> @operator;
+    private readonly StatefulTwoWayActor<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput, FuncInStateOperation> @operator = new((startingState, operation));
 
     public Task Completion => @operator.Completion;
-
-    public StatefulTwoWayActor(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
-        => @operator = new((startingState, operation));
 
     public bool Post(TInput input)
         => @operator.Post(input);
