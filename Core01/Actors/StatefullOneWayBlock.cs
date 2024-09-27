@@ -4,13 +4,13 @@ using System.Threading.Tasks.Dataflow;
 
 namespace MarcinGajda.Actors;
 
-public abstract class StatefullOneWayBlockBase<TState, TInput>
+public abstract class StatefulOneWayBlockBase<TState, TInput>
     : ITargetBlock<TInput>
 {
     private readonly ActionBlock<TInput> block;
     private TState state;
 
-    public StatefullOneWayBlockBase(
+    public StatefulOneWayBlockBase(
         TState startingState,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
     {
@@ -37,12 +37,12 @@ public abstract class StatefullOneWayBlockBase<TState, TInput>
         => ((IDataflowBlock)block).Fault(exception);
 }
 
-public sealed class StatefullOneWayBlock<TState, TInput>
-    : StatefullOneWayBlockBase<TState, TInput>
+public class StatefulOneWayBlock<TState, TInput>
+    : StatefulOneWayBlockBase<TState, TInput>
 {
     private readonly Func<TState, TInput, Task<TState>> operation;
 
-    public StatefullOneWayBlock(
+    public StatefulOneWayBlock(
         TState startingState,
         Func<TState, TInput, Task<TState>> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
@@ -53,15 +53,15 @@ public sealed class StatefullOneWayBlock<TState, TInput>
         => operation(state, input);
 }
 
-public static class StatefullOneWayBlock
+public static class StatefulOneWayBlock
 {
-    public static StatefullOneWayBlock<TState, TInput> Create<TState, TInput>(
+    public static StatefulOneWayBlock<TState, TInput> Create<TState, TInput>(
         TState startingState,
         Func<TState, TInput, Task<TState>> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
         => new(startingState, operation, executionDataflowBlockOptions);
 
-    public static StatefullOneWayBlock<TState, TInput> Create<TState, TInput>(
+    public static StatefulOneWayBlock<TState, TInput> Create<TState, TInput>(
         TState startingState,
         Func<TState, TInput, TState> operation,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
