@@ -66,7 +66,10 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     public async Task<TResult> SynchronizeAsync<TArgument, TResult>(
         TKey key,
         TArgument argument,
-        Func<TArgument, CancellationToken, Task<TResult>> resultFactory, // TKey is never needed as you can pass it in args 
+        // resultFactory:
+        //  TKey is never needed as you can pass it in args 
+        //  Returning getting ValueTask for resultFactory has no downside as user gets Task<> returned by SynchronizeAsync
+        Func<TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
     {
         var semaphore = pool[GetIndex(key)];
@@ -84,7 +87,7 @@ public sealed partial class PoolPerKeySynchronizerPerf<TKey>
     public async Task<TResult> SynchronizeManyAsync<TArgument, TResult>(
         IEnumerable<TKey> keys,
         TArgument argument,
-        Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
+        Func<TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
     {
         static void ReleaseLocked(SemaphoreSlim[] pool, Span<int> locked)
@@ -204,7 +207,7 @@ public static class PerKey<TKey>
     public static Task<TResult> SynchronizeAsync<TArgument, TResult>(
         TKey key,
         TArgument argument,
-        Func<TArgument, CancellationToken, Task<TResult>> resultFactory,
+        Func<TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
         => synchronizer.SynchronizeAsync(key, argument, resultFactory, cancellationToken);
 }
