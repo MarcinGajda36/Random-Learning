@@ -24,6 +24,18 @@ namespace SpansAndStuff
             await Task.Delay(-1);
         }
 
+        private static void Switches()
+        {
+            var array = new[] { 1, 2, 3 };
+            var r = array.AsSpan() switch
+            { // I hate this auto-format, is this default or some of my settings? 
+            [] => 0,
+            [var a] => 1,
+            [var a, .. var b] => 1 + b.Length,
+            };
+            HashSet<int> set = [123, 234, 345];
+        }
+
         private static void Net8Tests()
         {
             var format = CompositeFormat.Parse("Composite {0}");
