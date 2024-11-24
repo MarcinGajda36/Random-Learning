@@ -31,7 +31,7 @@ namespace SpansAndStuff
             var one = 1;
             var two = await perKey.SynchronizeAsync(1, "", async (argument, token) => one += 1);
             await perKey.SynchronizeAllAsync("", async (argument, token) => one += 1);
-            ^;
+            ;
         }
 
         private static void Switches()
