@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using PerKeySynchronizers;
 
 namespace SpansAndStuff
 {
@@ -13,15 +14,24 @@ namespace SpansAndStuff
     {
         private static async Task Main()
         {
-            Net8Tests();
+            await Synchronization();
             ;
+            Net8Tests();
             RefTestArray();
             Vectors.EqualsAny();
-
 
             AsyncTaskMethodBuilder<int> asyncTaskMethodBuilder = default;
 
             await Task.Delay(-1);
+        }
+
+        public static async Task Synchronization()
+        {
+            var perKey = new ModuloSemaphorePool();
+            var one = 1;
+            var two = await perKey.SynchronizeAsync(1, "", async (argument, token) => one += 1);
+            await perKey.SynchronizeAllAsync("", async (argument, token) => one += 1);
+            ^;
         }
 
         private static void Switches()
