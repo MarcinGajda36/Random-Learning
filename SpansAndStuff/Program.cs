@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using PerKeySynchronizers;
+using PerKeySynchronizers.BoundedParallelism;
 
 namespace SpansAndStuff
 {
@@ -27,7 +28,7 @@ namespace SpansAndStuff
 
         public static async Task Synchronization()
         {
-            var perKey = new ModuloSemaphorePool();
+            var perKey = new PerKeySynchronizer();
             var one = 1;
             var two = await perKey.SynchronizeAsync(1, "", async (argument, token) => one += 1);
             await perKey.SynchronizeAllAsync("", async (argument, token) => one += 1);
