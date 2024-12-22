@@ -6,8 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using PerKeySynchronizers;
 using PerKeySynchronizers.BoundedParallelism;
+using PerKeySynchronizers.UnboundedParallelism;
 
 namespace SpansAndStuff
 {
@@ -30,9 +30,12 @@ namespace SpansAndStuff
         {
             var perKey = new PerKeySynchronizer();
             var one = 1;
-            var two = await perKey.SynchronizeAsync(1, "", async (argument, token) => one += 1);
-            await perKey.SynchronizeAllAsync("", async (argument, token) => one += 1);
+            var two = await perKey.SynchronizeAsync(1, async token => one += 1);
+            await perKey.SynchronizeAllAsync(async token => one += 1);
             ;
+            var perKeyGuid = new PerKeySynchronizer<Guid>();
+            var four = await perKeyGuid.SynchronizeAsync(Guid.Empty, async token => one += 1);
+
         }
 
         private static void Switches()
