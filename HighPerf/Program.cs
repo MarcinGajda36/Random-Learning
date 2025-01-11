@@ -20,7 +20,7 @@ internal class Program
         _ = own.Memory;
         using var ownSpan = SpanOwner<int>.Allocate(1);
         _ = ownSpan.Span;
-
+        HashCode<int>.Combine([1, 2, 3]);
         // Create an array and run the callback
         float[] array = new float[10_000];
         ParallelHelper.ForEach<float, ByTwoMultiplier>(array);
