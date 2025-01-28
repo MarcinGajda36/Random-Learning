@@ -1,27 +1,26 @@
-﻿using System;
-using System.Threading;
+﻿namespace MarcinGajda.Actors.Perf;
+using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-
-namespace MarcinGajda.Actors.Perf;
 
 public sealed class StatefulOneWayActor<TState, TInput, TOperation>
     : ITargetBlock<TInput>
     where TOperation : struct, IOperationWithoutOutput<TState, TInput>
 {
     private readonly ActionBlock<TInput> @operator;
-    private TState state;
+    public TState State { get; private set; }
 
-    public Task Completion => @operator.Completion;
+    public Task Completion
+        => @operator.Completion;
 
     public StatefulOneWayActor(TState startingState)
     {
-        state = startingState;
+        State = startingState;
         @operator = CreateOperator();
     }
 
     private ActionBlock<TInput> CreateOperator()
-        => new(input => state = default(TOperation).Execute(state, input));
+        => new(input => State = default(TOperation).Execute(State, input));
 
     public bool Post(TInput input)
         => @operator.Post(input);

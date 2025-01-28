@@ -1,28 +1,28 @@
-﻿using System;
+﻿namespace MarcinGajda.Actors.Perf;
+using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-
-namespace MarcinGajda.Actors.Perf;
 
 public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
     : IPropagatorBlock<TInput, TOutput>
     where TOperation : struct, IOperationWithOutput<TState, TInput, TOutput>
 {
     private readonly TransformBlock<TInput, TOutput> @operator;
-    private TState state;
+    public TState State { get; private set; }
 
-    public Task Completion => @operator.Completion;
+    public Task Completion
+        => @operator.Completion;
 
     public StatefulTwoWayActor(TState startingState)
     {
-        state = startingState;
+        State = startingState;
         @operator = CreateOperator();
     }
 
     private TransformBlock<TInput, TOutput> CreateOperator()
         => new(input =>
         {
-            (state, var output) = default(TOperation).Execute(state, input);
+            (State, var output) = default(TOperation).Execute(State, input);
             return output;
         });
 
@@ -45,13 +45,15 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
         => ((ISourceBlock<TOutput>)@operator).ReleaseReservation(messageHeader, target);
     bool ISourceBlock<TOutput>.ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<TOutput> target)
         => ((ISourceBlock<TOutput>)@operator).ReserveMessage(messageHeader, target);
-
 }
 
-public sealed class StatefulTwoWayActor<TState, TInput, TOutput>(TState startingState, Func<TState, TInput, (TState, TOutput)> operation)
+public sealed class StatefulTwoWayActor<TState, TInput, TOutput>(
+    TState startingState,
+    Func<TState, TInput, (TState, TOutput)> operation)
     : IPropagatorBlock<TInput, TOutput>
 {
-    private readonly struct FuncInStateOperation : IOperationWithOutput<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput>
+    private readonly struct FuncInStateOperation
+        : IOperationWithOutput<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput>
     {
         public ((TState, Func<TState, TInput, (TState, TOutput)>), TOutput) Execute(
             (TState, Func<TState, TInput, (TState, TOutput)>) state,
@@ -63,9 +65,11 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput>(TState starting
         }
     }
 
-    private readonly StatefulTwoWayActor<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput, FuncInStateOperation> @operator = new((startingState, operation));
+    private readonly StatefulTwoWayActor<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput, FuncInStateOperation> @operator
+        = new((startingState, operation));
 
-    public Task Completion => @operator.Completion;
+    public Task Completion
+        => @operator.Completion;
 
     public bool Post(TInput input)
         => @operator.Post(input);
