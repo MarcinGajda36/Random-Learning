@@ -144,3 +144,17 @@ let myMethodV1 (x: #IInterfaceV1) =
 let myMethodV1Invoke =
     let instance = InterfaceV1Impl(5)
     myMethodV1 instance
+
+let myFirstAsyncMethod x = async {
+    return x + 5
+}
+
+let myTaskMethod x = task {
+    let! asyncAwait = myFirstAsyncMethod 5 // This works, cool
+    return x + asyncAwait
+}
+
+let mySecondAsyncMethod x = async {
+    let! taskAwait = myTaskMethod 5 |> Async.AwaitTask // This needs mapping to work
+    return x + taskAwait
+}

@@ -51,6 +51,8 @@ internal class Program
 
     public static async Task Main()
     {
+        await using var file = new FileStream("", FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough);
+
         TestSpanAfterGC();
         PoolTest();
         await Task.Delay(-1);

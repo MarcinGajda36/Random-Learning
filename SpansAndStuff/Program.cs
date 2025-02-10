@@ -15,11 +15,11 @@ namespace SpansAndStuff
     {
         private static async Task Main()
         {
-            await Synchronization();
+            Vectors.EqualsAny();
             ;
+            await Synchronization();
             Net8Tests();
             RefTestArray();
-            Vectors.EqualsAny();
 
             AsyncTaskMethodBuilder<int> asyncTaskMethodBuilder = default;
 
