@@ -3,6 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="LeetCode\ConvertStringToCamelCase.fs" />
     <Compile Include="TypeProvidersTst.fs" />
     <Compile Include="cheatsheet.fs" />
     <Compile Include="OptionBuilderTests.fs" />
