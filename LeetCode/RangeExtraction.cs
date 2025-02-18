@@ -7,7 +7,7 @@ public class RangeExtraction
 {
     public static string Extract(int[] args)
     {
-        if (args.Length == 0)
+        if (args is [])
         {
             return string.Empty;
         }
@@ -41,7 +41,7 @@ public class RangeExtraction
 
     private static StringBuilder AppendRange(StringBuilder destination, List<int> range)
     {
-        if (range.Count == 0)
+        if (range is [])
         {
             return destination;
         }
@@ -53,6 +53,7 @@ public class RangeExtraction
 
         return range switch
         {
+            [] => destination,
             [var one] => destination.Append(one),
             [var one, var two] => destination.Append($"{one},{two}"),
             [var first, .., var last] => destination.Append($"{first}-{last}"),
