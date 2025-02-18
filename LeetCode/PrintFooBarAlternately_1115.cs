@@ -12,7 +12,7 @@ public class FooBar
 
     public void Foo(Action printFoo)
     {
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
             // printFoo() outputs "foo". Do not change or remove this line.
             while (Interlocked.CompareExchange(ref foo, 1, 0) != 0)
@@ -21,13 +21,13 @@ public class FooBar
             }
 
             printFoo();
-            Interlocked.Exchange(ref bar, 0);
+            _ = Interlocked.Exchange(ref bar, 0);
         }
     }
 
     public void Bar(Action printBar)
     {
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
             // printBar() outputs "bar". Do not change or remove this line.
             while (Interlocked.CompareExchange(ref bar, 1, 0) != 0)
@@ -36,7 +36,7 @@ public class FooBar
             }
 
             printBar();
-            Interlocked.Exchange(ref foo, 0);
+            _ = Interlocked.Exchange(ref foo, 0);
         }
     }
 }
@@ -44,30 +44,30 @@ public class FooBar
 public class FooBar2
 {
     private readonly int n;
-    private readonly SemaphoreSlim foo = new SemaphoreSlim(1, 1);
-    private readonly SemaphoreSlim bar = new SemaphoreSlim(0, 1);
+    private readonly SemaphoreSlim foo = new(1, 1);
+    private readonly SemaphoreSlim bar = new(0, 1);
 
     public FooBar2(int n) => this.n = n;
 
     public void Foo(Action printFoo)
     {
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
             // printFoo() outputs "foo". Do not change or remove this line.
             foo.Wait();
             printFoo();
-            bar.Release();
+            _ = bar.Release();
         }
     }
 
     public void Bar(Action printBar)
     {
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
             // printBar() outputs "bar". Do not change or remove this line.
             bar.Wait();
             printBar();
-            foo.Release();
+            _ = foo.Release();
         }
     }
 }
@@ -102,7 +102,7 @@ public class FooBar1
 
     public void Foo(Action printFoo)
     {
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
             // printFoo() outputs "foo". Do not change or remove this line.
             printFoo();
@@ -111,7 +111,7 @@ public class FooBar1
 
     public void Bar(Action printBar)
     {
-        for (int i = 0; i < n; i++)
+        for (var i = 0; i < n; i++)
         {
             // printBar() outputs "bar". Do not change or remove this line.
             printBar();

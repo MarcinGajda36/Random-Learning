@@ -8,9 +8,9 @@ public class Kata
     {
         var length = firstArray.Length;
         var squares = new double[length];
-        for (int i = 0; i < length; ++i)
+        for (var i = 0; i < length; ++i)
         {
-            int difference = Math.Abs(firstArray[i] - secondArray[i]);
+            var difference = Math.Abs(firstArray[i] - secondArray[i]);
             squares[i] = Math.Pow(difference, 2);
         }
 

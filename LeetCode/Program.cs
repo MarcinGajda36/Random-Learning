@@ -1,13 +1,12 @@
-﻿using System;
+﻿namespace LeetCode;
 
-namespace LeetCode
+using System;
+
+internal class Program
 {
-    internal class Program
+    private static void Main(string[] args)
     {
-        private static void Main(string[] args)
-        {
-            Kata1.ToCamelCase("_-__the_-_stealth_warrior_-__");
-            Console.WriteLine("Hello World!");
-        }
+        _ = Kata1.ToCamelCase("_-__the_-_stealth_warrior_-__");
+        Console.WriteLine("Hello World!");
     }
 }

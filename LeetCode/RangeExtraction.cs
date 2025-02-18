@@ -20,7 +20,7 @@ public class RangeExtraction
             var currentElement = leftToExtract[0];
             if (IsNextInRange(currentRange, currentElement) is false)
             {
-                AppendRange(extracted, currentRange);
+                _ = AppendRange(extracted, currentRange);
                 currentRange.Clear();
             }
 
@@ -28,7 +28,7 @@ public class RangeExtraction
             leftToExtract = leftToExtract[1..];
         }
 
-        AppendRange(extracted, currentRange);
+        _ = AppendRange(extracted, currentRange);
         return extracted.ToString();
     }
 
@@ -48,7 +48,7 @@ public class RangeExtraction
 
         if (destination.Length > 0)
         {
-            destination.Append(',');
+            _ = destination.Append(',');
         }
 
         return range switch

@@ -2,8 +2,8 @@
 using System.Threading;
 public class PrintInOrder_1114
 {
-    private readonly SemaphoreSlim afterFirst = new SemaphoreSlim(0, 1);
-    private readonly SemaphoreSlim afterSecond = new SemaphoreSlim(0, 1);
+    private readonly SemaphoreSlim afterFirst = new(0, 1);
+    private readonly SemaphoreSlim afterSecond = new(0, 1);
 
     public PrintInOrder_1114()
     {
@@ -13,7 +13,7 @@ public class PrintInOrder_1114
     {
         // printFirst() outputs "first". Do not change or remove this line.
         printFirst();
-        afterFirst.Release();
+        _ = afterFirst.Release();
     }
 
     public void Second(Action printSecond)
@@ -21,7 +21,7 @@ public class PrintInOrder_1114
         // printSecond() outputs "second". Do not change or remove this line.
         afterFirst.Wait();
         printSecond();
-        afterSecond.Release();
+        _ = afterSecond.Release();
     }
 
     public void Third(Action printThird)
@@ -45,7 +45,7 @@ public class PrintInOrder_1114_v2
     {
         // printFirst() outputs "first". Do not change or remove this line.
         printFirst();
-        Interlocked.Exchange(ref first, 1);
+        _ = Interlocked.Exchange(ref first, 1);
     }
 
     public void Second(Action printSecond)
@@ -57,7 +57,7 @@ public class PrintInOrder_1114_v2
         }
 
         printSecond();
-        Interlocked.Exchange(ref second, 1);
+        _ = Interlocked.Exchange(ref second, 1);
     }
 
     public void Third(Action printThird)
