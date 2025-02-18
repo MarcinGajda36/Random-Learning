@@ -42,10 +42,10 @@ namespace SpansAndStuff
         {
             var array = new[] { 1, 2, 3 };
             var r = array.AsSpan() switch
-            { // I hate this auto-format, is this default or some of my settings? 
-            [] => 0,
-            [var a] => 1,
-            [var a, .. var b] => 1 + b.Length,
+            {
+                [] => 0,
+                [var a] => 1,
+                [var a, .. var b] => 1 + b.Length,
             };
             HashSet<int> set = [123, 234, 345];
         }

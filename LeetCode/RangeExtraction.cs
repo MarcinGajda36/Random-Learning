@@ -35,8 +35,8 @@ public class RangeExtraction
     private static bool IsNextInRange(List<int> range, int candidate)
         => range switch
         {
-        [] => true,
-        [.., var last] => (last + 1) == candidate,
+            [] => true,
+            [.., var last] => (last + 1) == candidate,
         };
 
     private static StringBuilder AppendRange(StringBuilder destination, List<int> range)
@@ -53,9 +53,9 @@ public class RangeExtraction
 
         return range switch
         {
-        [var one] => destination.Append(one),
-        [var one, var two] => destination.Append($"{one},{two}"),
-        [var first, .., var last] => destination.Append($"{first}-{last}"),
+            [var one] => destination.Append(one),
+            [var one, var two] => destination.Append($"{one},{two}"),
+            [var first, .., var last] => destination.Append($"{first}-{last}"),
         };
     }
 }
