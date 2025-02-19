@@ -11,5 +11,8 @@ namespace MarcinGajda
             { } => 1,
             _ => 0
         };
+
+        public static bool IsLowerLetter(char c)
+            => c is >= 'a' and <= 'z';
     }
 }
