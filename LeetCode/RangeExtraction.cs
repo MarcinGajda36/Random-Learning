@@ -8,7 +8,7 @@ public class RangeExtraction
 {
     public static string Extract(int[] args)
     {
-        if (args is [])
+        if (args is null or [])
         {
             return string.Empty;
         }
