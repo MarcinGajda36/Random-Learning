@@ -62,10 +62,10 @@ public class RangeExtraction
     }
 
     private const char Semicolon = ',';
-    private readonly static CompositeFormat RangeOfOne = CompositeFormat.Parse("{0}");
-    private readonly static CompositeFormat RangeOfTwo = CompositeFormat.Parse("{0},{1}");
-    private readonly static CompositeFormat RangeOfThreeOrMore = CompositeFormat.Parse("{0}-{1}");
-    private readonly static CultureInfo Invariant = CultureInfo.InvariantCulture;
+    private static readonly CompositeFormat RangeOfOne = CompositeFormat.Parse("{0}");
+    private static readonly CompositeFormat RangeOfTwo = CompositeFormat.Parse("{0},{1}");
+    private static readonly CompositeFormat RangeOfThreeOrMore = CompositeFormat.Parse("{0}-{1}");
+    private static readonly CultureInfo Invariant = CultureInfo.InvariantCulture;
     private static StringBuilder AppendRangeV2(StringBuilder destination, List<int> range)
     {
         // Feels like the worst of all worlds, but it was cool as exercise
