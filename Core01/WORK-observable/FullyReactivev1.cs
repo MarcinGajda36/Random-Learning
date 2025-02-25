@@ -7,73 +7,72 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using LanguageExt;
 
-namespace MarcinGajda.WORK_observable
+namespace MarcinGajda.WORK_observable;
+
+public class NotifierHub1
 {
-    public class NotifierHub1
+    private readonly NotifierHubContext1 _notifierHubContext1;
+    private static readonly ConcurrentDictionary<string, IDisposable> _idNofier =
+        new ConcurrentDictionary<string, IDisposable>();
+
+    private readonly string contextId = "";
+
+    public NotifierHub1(NotifierHubContext1 notifierHubContext1)
+        => _notifierHubContext1 = notifierHubContext1;
+
+    public void OnExit()
     {
-        private readonly NotifierHubContext1 _notifierHubContext1;
-        private static readonly ConcurrentDictionary<string, IDisposable> _idNofier =
-            new ConcurrentDictionary<string, IDisposable>();
-
-        private readonly string contextId = "";
-
-        public NotifierHub1(NotifierHubContext1 notifierHubContext1)
-            => _notifierHubContext1 = notifierHubContext1;
-
-        public void OnExit()
+        if (_idNofier.TryRemove(contextId, out var disposable))
         {
-            if (_idNofier.TryRemove(contextId, out var disposable))
-            {
-                disposable.Dispose();
-            }
-        }
-        public void Observe(string path)
-        {
-            var sub = _notifierHubContext1.Sub(path);
-            _ = _idNofier.TryAdd(contextId, sub);
+            disposable.Dispose();
         }
     }
-
-    public class NotifierHubContext1
+    public void Observe(string path)
     {
-        public NotifierHubContext1(/*Hub*/)
-        {
-        }
+        var sub = _notifierHubContext1.Sub(path);
+        _ = _idNofier.TryAdd(contextId, sub);
+    }
+}
 
-        public IDisposable Sub(string path) =>
-            NotifierFactory2.GetOrAdd(path).Observable
-                .Window(TimeSpan.FromSeconds(300))//can get Notifier2.TimeOut
-                .SelectMany(Observable.LastOrDefaultAsync)
-                .Where(notif => notif != null)
-                .SelectMany(notif => /*send notif to Hub*/ Task.CompletedTask.ToObservable())
-                .Subscribe();
+public class NotifierHubContext1
+{
+    public NotifierHubContext1(/*Hub*/)
+    {
     }
 
-    public static class NotifierFactory2
-    {
-        private static readonly ConcurrentDictionary<string, Notifier2> _pathNotifier =
-            new ConcurrentDictionary<string, Notifier2>();
+    public IDisposable Sub(string path) =>
+        NotifierFactory2.GetOrAdd(path).Observable
+            .Window(TimeSpan.FromSeconds(300))//can get Notifier2.TimeOut
+            .SelectMany(Observable.LastOrDefaultAsync)
+            .Where(notif => notif != null)
+            .SelectMany(notif => /*send notif to Hub*/ Task.CompletedTask.ToObservable())
+            .Subscribe();
+}
 
-        public static Notifier2 GetOrAdd(string path) =>
-            _pathNotifier.GetOrAdd(path, newPath => new Notifier2(newPath));
-    }
+public static class NotifierFactory2
+{
+    private static readonly ConcurrentDictionary<string, Notifier2> _pathNotifier =
+        new ConcurrentDictionary<string, Notifier2>();
 
-    public class Notifier2
-    {
-        public string Path { get; }
-        private static readonly int Empty = 0;
-        public IObservable<int> Observable =>
-            _notifications;
+    public static Notifier2 GetOrAdd(string path) =>
+        _pathNotifier.GetOrAdd(path, newPath => new Notifier2(newPath));
+}
 
-        private readonly ISubject<int> _notifications =
-            Subject.Synchronize(new BehaviorSubject<int>(Empty), TaskPoolScheduler.Default);
+public class Notifier2
+{
+    public string Path { get; }
+    private static readonly int Empty = 0;
+    public IObservable<int> Observable =>
+        _notifications;
 
-        public Notifier2(string path) => Path = path;
+    private readonly ISubject<int> _notifications =
+        Subject.Synchronize(new BehaviorSubject<int>(Empty), TaskPoolScheduler.Default);
 
-        public void Notify(int notif) =>
-            _notifications.OnNext(notif);
+    public Notifier2(string path) => Path = path;
 
-        public void NotifyEnd() =>
-            _notifications.OnNext(Empty);
-    }
+    public void Notify(int notif) =>
+        _notifications.OnNext(notif);
+
+    public void NotifyEnd() =>
+        _notifications.OnNext(Empty);
 }

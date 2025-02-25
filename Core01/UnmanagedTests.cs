@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace MarcinGajda
+namespace MarcinGajda;
+
+public class UnmanagedTests : SafeHandle
 {
-    public class UnmanagedTests : SafeHandle
+    public UnmanagedTests(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
     {
-        public UnmanagedTests(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
-        {
-        }
-
-        public override bool IsInvalid => throw new NotImplementedException();
-
-        protected override bool ReleaseHandle() => throw new NotImplementedException();
     }
+
+    public override bool IsInvalid => throw new NotImplementedException();
+
+    protected override bool ReleaseHandle() => throw new NotImplementedException();
 }

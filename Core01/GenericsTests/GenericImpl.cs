@@ -1,7 +1,6 @@
-﻿namespace MarcinGajda.GenericsTests
+﻿namespace MarcinGajda.GenericsTests;
+
+public class GenericImpl : IGeneric
 {
-    public class GenericImpl : IGeneric
-    {
-        public int Prop { get; set; } = 0;
-    }
+    public int Prop { get; set; } = 0;
 }

@@ -1,16 +1,15 @@
 ﻿using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace MarcinGajda.channels
+namespace MarcinGajda.channels;
+
+public class ProducerConsumer
 {
-    public class ProducerConsumer
-    {
-        private readonly Channel<int> channel = Channel.CreateBounded<int>(new BoundedChannelOptions(4096) { });
-        private ChannelWriter<int> Writer => channel.Writer;
+    private readonly Channel<int> channel = Channel.CreateBounded<int>(new BoundedChannelOptions(4096) { });
+    private ChannelWriter<int> Writer => channel.Writer;
 
-        public ChannelReader<int> Reader => channel.Reader;
+    public ChannelReader<int> Reader => channel.Reader;
 
-        public ValueTask Produce(int toProduce) => Writer.WriteAsync(toProduce);
+    public ValueTask Produce(int toProduce) => Writer.WriteAsync(toProduce);
 
-    }
 }
