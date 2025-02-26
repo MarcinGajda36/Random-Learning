@@ -1,6 +1,5 @@
 ﻿//https://leetcode.com/problems/number-of-sub-arrays-with-odd-sum/description/?envType=daily-question&envId=2025-02-25
 namespace LeetCode;
-
 using System;
 using System.Linq;
 
@@ -13,7 +12,8 @@ public class Solution
         All sub-arrays sum are [1,4,9,3,8,5].
         Odd sums are [1,9,3,5] so the answer is 4.
     */
-    // old
+
+    // This works correctly but is too slow
     public int NumOfSubarrays(int[] arr)
     {
         var count = 0;
@@ -45,6 +45,25 @@ public class Solution
             sum += number;
         }
         return sum;
+    }
+
+    // This seems like a good start but something is wrong, for [1,2,3,4,5,6,7] should be 16 and this returns 10
+    public int NumOfSubarrays1(int[] arr)
+    {
+        var oddCount = 0;
+        for (var index = 0; index < arr.Length; ++index)
+        {
+            var sum = 0;
+            for (var next = index; next < arr.Length; ++next)
+            {
+                sum += arr[index];
+                if (IsOdd(sum))
+                {
+                    ++oddCount;
+                }
+            }
+        }
+        return oddCount;
     }
 
     private static bool IsOdd(int candidate)
