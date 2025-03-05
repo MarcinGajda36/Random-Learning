@@ -146,3 +146,83 @@ public class SnailSolution
         return (visited, totalLength);
     }
 }
+
+/*
+GPT refactor:
+namespace LeetCode;
+
+using System.Collections.Generic;
+
+public class SnailSolution
+{
+    private enum Direction
+    {
+        Right,
+        Down,
+        Left,
+        Up,
+    }
+
+    private record PathResult(int LastX, int LastY, Direction NextDirection, int LengthLeft);
+
+    public static int[] Snail(int[][] array)
+    {
+        var (visited, lengthLeft) = InitializeSameSizes<bool>(array);
+        var snail = new List<int>(lengthLeft);
+        var lastResult = new PathResult(0, 0, Direction.Right, lengthLeft);
+        while (lastResult.LengthLeft > 0)
+        {
+            lastResult = Traverse(snail, visited, array, lastResult);
+        }
+        return [.. snail];
+    }
+
+    private static PathResult Traverse(List<int> destination, bool[][] visited, int[][] source, PathResult lastResult)
+    {
+        int dx = 0, dy = 0;
+        Direction nextDirection;
+        switch (lastResult.NextDirection)
+        {
+            case Direction.Right: dx = 1; nextDirection = Direction.Down; break;
+            case Direction.Down: dy = 1; nextDirection = Direction.Left; break;
+            case Direction.Left: dx = -1; nextDirection = Direction.Up; break;
+            case Direction.Up: dy = -1; nextDirection = Direction.Right; break;
+            default: throw new System.NotSupportedException($"Unknown direction: {lastResult.NextDirection}");
+        }
+        
+        var (x, y, _, lengthLeft) = lastResult;
+        int startX = x, startY = y;
+        if (visited[y][x])
+        {
+            startX += dx;
+            startY += dy;
+        }
+        
+        while (startX >= 0 && startX < source[0].Length && startY >= 0 && startY < source.Length && !visited[startY][startX])
+        {
+            destination.Add(source[startY][startX]);
+            visited[startY][startX] = true;
+            lengthLeft--;
+            x = startX;
+            y = startY;
+            startX += dx;
+            startY += dy;
+        }
+        
+        return new PathResult(x, y, nextDirection, lengthLeft);
+    }
+
+    private static (TType[][], int TotalLength) InitializeSameSizes<TType>(int[][] array)
+    {
+        var visited = new TType[array.Length][];
+        var totalLength = 0;
+        for (var i = 0; i < visited.Length; ++i)
+        {
+            var innerLength = array[i].Length;
+            visited[i] = new TType[innerLength];
+            totalLength += innerLength;
+        }
+        return (visited, totalLength);
+    }
+}
+*/
