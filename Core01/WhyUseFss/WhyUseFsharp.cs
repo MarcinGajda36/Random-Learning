@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace MarcinGajda.WhyUseFss;
 
-
 public class ShoppingCart<TItem>
 {
     #region ShoppingCart State classes
@@ -60,7 +59,6 @@ public class ShoppingCart<TItem>
             var newState = new PaidForState(Items, amount);
             return FromState(newState);
         }
-
     }
 
     /// <summary>         
@@ -141,9 +139,21 @@ public class ShoppingCart<TItem>
         =>
         //convert the Actions into Funcs by returning a dummy value
         Do(
-            state => { emptyFn(state); return 0; },
-            state => { activeFn(state); return 0; },
-            state => { paidForyFn(state); return 0; });
+            state =>
+            {
+                emptyFn(state);
+                return 0;
+            },
+            state =>
+            {
+                activeFn(state);
+                return 0;
+            },
+            state =>
+            {
+                paidForyFn(state);
+                return 0;
+            });
 
 }
 
@@ -159,16 +169,28 @@ public static class ShoppingCartExtension
         => cart.Do(
             empty => empty.Add(item), //empty case                 
             active => active.Add(item), //active case                 
-            paid => { Console.WriteLine("ERROR: The cart is paid for and items cannot be added"); return cart; }); //paid for case             
+            paid =>
+            {
+                Console.WriteLine("ERROR: The cart is paid for and items cannot be added");
+                return cart;
+            }); //paid for case             
 
     /// <summary>         
     /// Helper method to Remove         
     /// </summary>         
     public static ShoppingCart<TItem> Remove<TItem>(this ShoppingCart<TItem> cart, TItem item)
         => cart.Do(
-            empty => { Console.WriteLine("ERROR: The cart is empty and items cannot be removed"); return cart; }, //empty case                 
+            empty =>
+            {
+                Console.WriteLine("ERROR: The cart is empty and items cannot be removed");
+                return cart;
+            }, //empty case                 
             active => active.Remove(item), //active case                 
-            paid => { Console.WriteLine("ERROR: The cart is paid for and items cannot be removed"); return cart; }); //paid for case             
+            paid =>
+            {
+                Console.WriteLine("ERROR: The cart is paid for and items cannot be removed");
+                return cart;
+            }); //paid for case             
 
     /// <summary>         
     /// Helper method to Display         

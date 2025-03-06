@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 
 namespace MarcinGajda.Collections
 {
@@ -20,7 +21,6 @@ namespace MarcinGajda.Collections
                 where number % 2 == 1
                 join text in stringList on number.ToString() equals text into textGroups
                 select new { number, textGroups, /* can't return 'text' here */ };
-
         }
     }
 }

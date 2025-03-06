@@ -47,7 +47,10 @@ public class DataflowLogger : IAsyncDisposable
                 await IntervalChecker;
             }
             catch { /*taskCanceledException*/ }
-            finally { intervalCancelation.Dispose(); }
+            finally
+            {
+                intervalCancelation.Dispose();
+            }
         };
 
     private Task CreateIntervalCheckerTask(TimeSpan logInterval, CancellationTokenSource intervalCancelation) => Task.Factory.StartNew(async () =>

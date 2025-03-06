@@ -14,5 +14,4 @@ internal class RefOfT
         public Ref<int> GetRef1()
             => new(ref someInt);
     }
-
 }

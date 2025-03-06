@@ -37,5 +37,4 @@ public class GenericsDerivedBaseProblem
         var refLambda = (in int x) => x + 5;
         Func<int, int>? lambda = (int x) => x + 5;
     }
-
 }

@@ -13,7 +13,6 @@ public class AsyncDisposableTests
         }
         await Task.Delay(100);
     }
-
 }
 public class AsyncDisposableObject : IAsyncDisposable
 {

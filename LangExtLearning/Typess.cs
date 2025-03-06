@@ -2,7 +2,6 @@
 
 namespace LangExtLearning;
 
-
 [Union]
 public interface Shape
 {

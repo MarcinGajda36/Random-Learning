@@ -2,7 +2,6 @@
 
 namespace MarcinGajda.ContractsT;
 
-
 public interface ITest<T>
 {
     public T Value { get; }

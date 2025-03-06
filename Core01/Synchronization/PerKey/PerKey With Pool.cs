@@ -7,7 +7,7 @@ using MarcinGajda.Synchronization.Pooling;
 namespace MarcinGajda.Synchronization.PerKey;
 internal class PerKeyWithPool
 {
-    private readonly static PowerOfTwo PoolSize = new(32);
+    private static readonly PowerOfTwo PoolSize = new(32);
     // Index per pool could be calculated once hmm
     // Alternative is 1 shared pool with everything
     // V1

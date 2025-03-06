@@ -90,5 +90,4 @@ public class DataflowTests
         IEnumerable<int> results = results1.Concat(results2).Concat(results3);
         Assert.IsTrue(results.OrderBy(x => x).SequenceEqual(Enumerable.Range(0, 30)));
     }
-
 }
