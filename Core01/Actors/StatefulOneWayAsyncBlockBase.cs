@@ -1,16 +1,16 @@
-﻿using System;
+﻿namespace MarcinGajda.Actors;
+
+using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MarcinGajda.Actors;
-
-public abstract class StatefulOneWayBlockBase<TState, TInput>
+public abstract class StatefulOneWayAsyncBlockBase<TState, TInput>
     : ITargetBlock<TInput>
 {
     private readonly ActionBlock<TInput> block;
     protected TState State { get; private set; }
 
-    public StatefulOneWayBlockBase(
+    public StatefulOneWayAsyncBlockBase(
         TState startingState,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
     {
@@ -18,11 +18,11 @@ public abstract class StatefulOneWayBlockBase<TState, TInput>
         block = CreateBlock(executionDataflowBlockOptions);
     }
 
-    protected abstract ValueTask<TState> Operation(TState state, TInput input);
+    protected abstract ValueTask<TState> OperationAsync(TState state, TInput input);
 
     private ActionBlock<TInput> CreateBlock(ExecutionDataflowBlockOptions? executionDataflowBlockOptions)
         => new(
-            async input => State = await Operation(State, input),
+            async input => State = await OperationAsync(State, input),
             executionDataflowBlockOptions ?? new());
 
     public Task Completion
@@ -37,30 +37,21 @@ public abstract class StatefulOneWayBlockBase<TState, TInput>
         => ((IDataflowBlock)block).Fault(exception);
 }
 
-public class StatefulOneWayBlock<TState, TInput>(
+public class StatefulOneWayAsyncBlock<TState, TInput>(
     TState startingState,
-    Func<TState, TInput, ValueTask<TState>> operation,
+    Func<TState, TInput, ValueTask<TState>> operationAsync,
     ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
-    : StatefulOneWayBlockBase<TState, TInput>(startingState, executionDataflowBlockOptions)
+    : StatefulOneWayAsyncBlockBase<TState, TInput>(startingState, executionDataflowBlockOptions)
 {
-    protected override ValueTask<TState> Operation(TState state, TInput input)
-        => operation(state, input);
+    protected override ValueTask<TState> OperationAsync(TState state, TInput input)
+        => operationAsync(state, input);
 }
 
-public static class StatefulOneWayBlock
+public static class StatefulOneWayBlockBase
 {
-    public static StatefulOneWayBlock<TState, TInput> Create<TState, TInput>(
+    public static StatefulOneWayAsyncBlock<TState, TInput> Create<TState, TInput>(
         TState startingState,
-        Func<TState, TInput, ValueTask<TState>> operation,
+        Func<TState, TInput, ValueTask<TState>> operationAsync,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
-        => new(startingState, operation, executionDataflowBlockOptions);
-
-    public static StatefulOneWayBlock<TState, TInput> Create<TState, TInput>(
-        TState startingState,
-        Func<TState, TInput, TState> operation,
-        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
-        => new(
-            startingState,
-            (state, input) => ValueTask.FromResult(operation(state, input)),
-            executionDataflowBlockOptions);
+        => new(startingState, operationAsync, executionDataflowBlockOptions);
 }

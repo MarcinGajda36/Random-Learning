@@ -5,7 +5,7 @@ using System.Threading.Tasks.Dataflow;
 
 public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
     : IPropagatorBlock<TInput, TOutput>
-    where TOperation : struct, IOperationWithOutput<TState, TInput, TOutput>
+    where TOperation : IOperationWithOutput<TState, TInput, TOutput>
 {
     private readonly TransformBlock<TInput, TOutput> @operator;
     public TState State { get; private set; }
@@ -22,7 +22,7 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput, TOperation>
     private TransformBlock<TInput, TOutput> CreateOperator()
         => new(input =>
         {
-            (State, var output) = default(TOperation).Execute(State, input);
+            (State, var output) = TOperation.Execute(State, input);
             return output;
         });
 
@@ -55,7 +55,7 @@ public sealed class StatefulTwoWayActor<TState, TInput, TOutput>(
     private readonly struct FuncInStateOperation
         : IOperationWithOutput<(TState, Func<TState, TInput, (TState, TOutput)>), TInput, TOutput>
     {
-        public ((TState, Func<TState, TInput, (TState, TOutput)>), TOutput) Execute(
+        public static ((TState, Func<TState, TInput, (TState, TOutput)>), TOutput) Execute(
             (TState, Func<TState, TInput, (TState, TOutput)>) state,
             TInput input)
         {

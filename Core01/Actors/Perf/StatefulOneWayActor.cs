@@ -5,7 +5,7 @@ using System.Threading.Tasks.Dataflow;
 
 public sealed class StatefulOneWayActor<TState, TInput, TOperation>
     : ITargetBlock<TInput>
-    where TOperation : struct, IOperationWithoutOutput<TState, TInput>
+    where TOperation : IOperationWithoutOutput<TState, TInput>
 {
     private readonly ActionBlock<TInput> @operator;
     public TState State { get; private set; }
@@ -20,7 +20,7 @@ public sealed class StatefulOneWayActor<TState, TInput, TOperation>
     }
 
     private ActionBlock<TInput> CreateOperator()
-        => new(input => State = default(TOperation).Execute(State, input));
+        => new(input => State = TOperation.Execute(State, input));
 
     public bool Post(TInput input)
         => @operator.Post(input);

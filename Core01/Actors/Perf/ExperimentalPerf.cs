@@ -1,10 +1,9 @@
-﻿using System;
+﻿namespace MarcinGajda.Actors.Perf;
+using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MarcinGajda.Actors.Perf;
-
-sealed class StateBox<TState>
+internal sealed class StateBox<TState>
 {
     public TState State { get; set; }
 
@@ -12,7 +11,7 @@ sealed class StateBox<TState>
         => State = state;
 }
 
-readonly record struct StateInputBox<TState, TInput>(StateBox<TState> StateBag, TInput Input);
+internal readonly record struct StateInputBox<TState, TInput>(StateBox<TState> StateBag, TInput Input);
 
 public sealed class ExperimentalStatefulOneWayBlock<TState, TInput, TOperation>
     //: ITargetBlock<TInput>

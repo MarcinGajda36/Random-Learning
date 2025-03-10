@@ -1,16 +1,16 @@
-﻿using System;
+﻿namespace MarcinGajda.Actors;
+
+using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MarcinGajda.Actors;
-
-public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
+public abstract class StatefulTwoWayAsyncBlockBase<TState, TInput, TOutput>
     : IPropagatorBlock<TInput, TOutput>
 {
     private readonly TransformBlock<TInput, TOutput> block;
     protected TState State { get; private set; }
 
-    public StatefulTwoWayBlockBase(
+    public StatefulTwoWayAsyncBlockBase(
         TState startingState,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
     {
@@ -18,13 +18,13 @@ public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
         block = CreateBlock(executionDataflowBlockOptions);
     }
 
-    protected abstract ValueTask<(TState, TOutput)> Operation(TState state, TInput input);
+    protected abstract ValueTask<(TState, TOutput)> OperationAsync(TState state, TInput input);
 
     private TransformBlock<TInput, TOutput> CreateBlock(ExecutionDataflowBlockOptions? executionDataflowBlockOptions)
         => new(
             async input =>
             {
-                (State, var output) = await Operation(State, input);
+                (State, var output) = await OperationAsync(State, input);
                 return output;
             },
             executionDataflowBlockOptions ?? new());
@@ -50,36 +50,27 @@ public abstract class StatefulTwoWayBlockBase<TState, TInput, TOutput>
         => ((IDataflowBlock)block).Fault(exception);
 }
 
-public class StatefulTwoWayBlock<TState, TInput, TOutput>(
+public class StatefulTwoWayAsyncBlock<TState, TInput, TOutput>(
     TState startingState,
-    Func<TState, TInput, ValueTask<(TState, TOutput)>> operation,
+    Func<TState, TInput, ValueTask<(TState, TOutput)>> operationAsync,
     ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
-    : StatefulTwoWayBlockBase<TState, TInput, TOutput>(startingState, executionDataflowBlockOptions)
+    : StatefulTwoWayAsyncBlockBase<TState, TInput, TOutput>(startingState, executionDataflowBlockOptions)
 {
-    protected override ValueTask<(TState, TOutput)> Operation(TState state, TInput input)
-        => operation(state, input);
+    protected override ValueTask<(TState, TOutput)> OperationAsync(TState state, TInput input)
+        => operationAsync(state, input);
 }
 
-public static class StatefulTwoWayBlock
+public static class StatefulTwoWayAsyncBlock
 {
-    public static StatefulTwoWayBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
+    public static StatefulTwoWayAsyncBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
         TState startingState,
-        Func<TState, TInput, ValueTask<(TState, TOutput)>> operation,
+        Func<TState, TInput, ValueTask<(TState, TOutput)>> operationAsync,
         ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
-        => new(startingState, operation, executionDataflowBlockOptions);
-
-    public static StatefulTwoWayBlock<TState, TInput, TOutput> Create<TState, TInput, TOutput>(
-        TState startingState,
-        Func<TState, TInput, (TState, TOutput)> operation,
-        ExecutionDataflowBlockOptions? executionDataflowBlockOptions = null)
-        => new(
-            startingState,
-            (state, input) => ValueTask.FromResult(operation(state, input)),
-            executionDataflowBlockOptions);
+        => new(startingState, operationAsync, executionDataflowBlockOptions);
 
     public static void Test()
     {
-        var actor = Create("startState", (string currentState, int input) => (currentState + "newState", input * 10));
+        var actor = Create("startState", async (string currentState, int input) => (currentState + "newState", input * 10));
         _ = actor.AsObservable();
     }
 }
