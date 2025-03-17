@@ -2,17 +2,23 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
 public class RangeExtraction
 {
     public static string Extract(int[] args)
-    {
-        if (args is null or [])
+        => args switch
         {
-            return string.Empty;
-        }
+            null => null,
+            [] => string.Empty,
+            var many => ExtractMany(many),
+        };
+
+    private static string ExtractMany(int[] args)
+    {
+        Debug.Assert(args != null);
 
         var extracted = new StringBuilder();
         var currentRange = new List<int>();
