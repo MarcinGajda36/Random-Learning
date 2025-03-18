@@ -1,10 +1,11 @@
-﻿using System;
+﻿namespace MarcinGajda.Kafka;
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
 
-namespace MarcinGajda.Kafka;
 public partial class KafkaClient
 {
     private sealed class ProcessAndOffsetProcessor<TKey, TValue> : IDisposable
@@ -19,12 +20,11 @@ public partial class KafkaClient
         public ProcessAndOffsetProcessor(
             IConsumer<TKey, TValue> consumer,
             Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
-            int maxBufferedMessages,
-            int maxDegreeOfParallelism,
+            Settings settings,
             CancellationToken cancellationToken)
         {
-            processingBlock = CreateProcessingBlock(processor, maxBufferedMessages, maxDegreeOfParallelism, cancellationToken);
-            offsetBlock = CreateOffsetBlock(consumer, maxBufferedMessages);
+            processingBlock = CreateProcessingBlock(processor, settings, cancellationToken);
+            offsetBlock = CreateOffsetBlock(consumer, settings);
             processingOffsetLink = processingBlock.LinkTo(
                 offsetBlock,
                 new DataflowLinkOptions { PropagateCompletion = true });
@@ -33,16 +33,12 @@ public partial class KafkaClient
         public bool Enqueue(ConsumeResult<TKey, TValue> kafkaMessage)
             => processingBlock.Post(kafkaMessage);
 
-        public Task<bool> EnqueueAsync(ConsumeResult<TKey, TValue> kafkaMessage, CancellationToken cancellationToken)
-            => processingBlock.SendAsync(kafkaMessage, cancellationToken);
-
         public void Complete()
             => processingBlock.Complete();
 
         private static TransformBlock<ConsumeResult<TKey, TValue>, ConsumeResult<TKey, TValue>> CreateProcessingBlock(
             Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
-            int maxBufferedMessages,
-            int maxDegreeOfParallelism,
+            Settings settings,
             CancellationToken cancellationToken)
             => new(
                 async result =>
@@ -52,12 +48,15 @@ public partial class KafkaClient
                 },
                 new ExecutionDataflowBlockOptions
                 {
-                    BoundedCapacity = maxBufferedMessages,
-                    MaxDegreeOfParallelism = maxDegreeOfParallelism,
+                    BoundedCapacity = settings.MaxBufferedMessages,
+                    MaxDegreeOfParallelism = settings.MaxDegreeOfParallelism,
+                    TaskScheduler = settings.ProcessorScheduler,
                     CancellationToken = cancellationToken,
                 });
 
-        private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock(IConsumer<TKey, TValue> consumer, int maxBufferedMessages)
+        private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock(
+            IConsumer<TKey, TValue> consumer,
+            Settings settings)
             => new(
                 result =>
                 {
@@ -65,12 +64,20 @@ public partial class KafkaClient
                     {
                         consumer.StoreOffset(result);
                     }
-                    catch (KafkaException) { /*maybe log*/ }
+                    catch (KafkaException exception)
+                    {
+                        // Maybe log.
+                        if (exception.Error.IsFatal)
+                        {
+                            throw;
+                        }
+                    }
                 },
                 new ExecutionDataflowBlockOptions
                 {
-                    BoundedCapacity = maxBufferedMessages,
-                    SingleProducerConstrained = true
+                    BoundedCapacity = settings.MaxBufferedMessages,
+                    TaskScheduler = settings.ProcessorScheduler,
+                    SingleProducerConstrained = true,
                 });
 
         public void Dispose()
