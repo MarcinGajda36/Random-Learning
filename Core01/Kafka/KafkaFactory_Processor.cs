@@ -11,51 +11,6 @@ using Confluent.Kafka;
 namespace MarcinGajda.Kafka;
 public partial class KafkaFactory
 {
-    // I like v1 for maxDegreeOfParallelism > 1
-    private sealed class ProcessAndOffsetProcessorV1<TKey, TValue> : IDisposable
-    {
-        private readonly Subject<ConsumeResult<TKey, TValue>> queue = new();
-
-        public Task Completion { get; }
-
-        public ProcessAndOffsetProcessorV1(
-            IConsumer<TKey, TValue> consumer,
-            Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
-            int maxDegreeOfParallelism,
-            CancellationToken cancellationToken)
-        {
-            Completion = queue
-                .Select(result => Observable.FromAsync(async token =>
-                {
-                    await processor(result, token);
-                    return result;
-                }))
-                .Merge(maxDegreeOfParallelism)
-                .Select(result =>
-                {
-                    try
-                    {
-                        consumer.StoreOffset(result);
-                    }
-                    catch (KafkaException) { /*maybe log*/ }
-                    return Unit.Default;
-                })
-                .ToTask(cancellationToken);
-        }
-
-        public void Enqueue(ConsumeResult<TKey, TValue> kafkaMessage)
-            => queue.OnNext(kafkaMessage);
-
-        public void Complete()
-            => queue.OnCompleted();
-
-        public void Dispose()
-        {
-            queue.Dispose();
-        }
-    }
-
-    // I like this one for maxDegreeOfParallelism = 1
     private sealed class ProcessAndOffsetProcessorV2<TKey, TValue> : IDisposable
     {
         private readonly IConsumer<TKey, TValue> consumer;
@@ -116,5 +71,48 @@ public partial class KafkaFactory
 
         public void Dispose()
             => processingOffsetLink.Dispose();
+    }
+
+    private sealed class ProcessAndOffsetProcessorV1<TKey, TValue> : IDisposable
+    {
+        private readonly Subject<ConsumeResult<TKey, TValue>> queue = new();
+
+        public Task Completion { get; }
+
+        public ProcessAndOffsetProcessorV1(
+            IConsumer<TKey, TValue> consumer,
+            Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
+            int maxDegreeOfParallelism,
+            CancellationToken cancellationToken)
+        {
+            Completion = queue
+                .Select(result => Observable.FromAsync(async token =>
+                {
+                    await processor(result, token);
+                    return result;
+                }))
+                .Merge(maxDegreeOfParallelism) // WRONG. This changes order, making StoreOffset(...) go back and forth in time.
+                .Select(result =>
+                {
+                    try
+                    {
+                        consumer.StoreOffset(result);
+                    }
+                    catch (KafkaException) { /*maybe log*/ }
+                    return Unit.Default;
+                })
+                .ToTask(cancellationToken);
+        }
+
+        public void Enqueue(ConsumeResult<TKey, TValue> kafkaMessage)
+            => queue.OnNext(kafkaMessage);
+
+        public void Complete()
+            => queue.OnCompleted();
+
+        public void Dispose()
+        {
+            queue.Dispose();
+        }
     }
 }
