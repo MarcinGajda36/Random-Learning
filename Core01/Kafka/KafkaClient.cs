@@ -1,85 +1,47 @@
-﻿using System;
-using System.Reactive.Linq;
+﻿namespace MarcinGajda.Kafka;
+
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
-
-namespace MarcinGajda.Kafka;
 
 public record KafkaSettings(string Topic, string BootstrapServers, string GroupId);
 
-public sealed partial class KafkaFactory
+public sealed partial class KafkaClient
 {
+    private const int MaxBufferedMessages = 4096;
     public static Task UnboundedParallelismAtLeastOnceClient<TKey, TValue>(
         KafkaSettings kafkaSettings,
-        Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
-        CancellationToken cancellationToken)
+        Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
+        int maxBufferedMessages = MaxBufferedMessages,
+        CancellationToken cancellationToken = default)
         => AtLeastOnceClient(
             kafkaSettings,
             processor,
-            int.MaxValue,
+            DataflowBlockOptions.Unbounded,
+            maxBufferedMessages,
             cancellationToken);
 
     public static async Task AtLeastOnceClient<TKey, TValue>(
         KafkaSettings kafkaSettings,
-        Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
-        int maxDegreeOfParallelism,
-        CancellationToken cancellationToken)
+        Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
+        int maxDegreeOfParallelism = 1,
+        int maxBufferedMessages = MaxBufferedMessages,
+        CancellationToken cancellationToken = default)
     {
         var configuration = AutoOffsetDisabledConfig(kafkaSettings);
         using var client = new ConsumerBuilder<TKey, TValue>(configuration).Build();
-        string topic = kafkaSettings.Topic;
+        var topic = kafkaSettings.Topic;
         client.Subscribe(topic);
 
         try
         {
-            await ConsumeAsync(client, processor, maxDegreeOfParallelism, cancellationToken);
+            await ConsumeAsync(client, processor, maxBufferedMessages, maxDegreeOfParallelism, cancellationToken);
         }
         finally
         {
             client.Close();
-        }
-    }
-
-    public static IObservable<ConsumeResult<TKey, TValue>> IObservableTestClient<TKey, TValue>(KafkaSettings kafkaSettings)
-        => Observable.Using(
-            () => CreateConsumer<TKey, TValue>(kafkaSettings),
-            consumer => Observable.Create<ConsumeResult<TKey, TValue>>((observer, cancellation) =>
-            {
-                string topic = kafkaSettings.Topic;
-                consumer.Subscribe(topic);
-                Consume(consumer, observer, cancellation);
-                return Task.CompletedTask;
-            }));
-
-    private static IConsumer<TKey, TValue> CreateConsumer<TKey, TValue>(KafkaSettings kafkaSettings)
-    {
-        var configuration = new ConsumerConfig()
-        {
-            BootstrapServers = kafkaSettings.BootstrapServers,
-            GroupId = kafkaSettings.GroupId,
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-        };
-        return new ConsumerBuilder<TKey, TValue>(configuration).Build();
-    }
-
-    private static void Consume<TKey, TValue>(IConsumer<TKey, TValue> consumer, IObserver<ConsumeResult<TKey, TValue>> observer, CancellationToken cancellation)
-    {
-        try
-        {
-            while (cancellation.IsCancellationRequested is false)
-            {
-                observer.OnNext(consumer.Consume(cancellation));
-            }
-            observer.OnCompleted();
-        }
-        catch (Exception exception)
-        {
-            observer.OnError(exception);
-        }
-        finally
-        {
-            consumer.Close();
         }
     }
 
@@ -94,13 +56,15 @@ public sealed partial class KafkaFactory
 
     private static async Task ConsumeAsync<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
-        Func<ConsumeResult<TKey, TValue>, CancellationToken, Task> processor,
+        Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
+        int maxBufferedMessages,
         int maxDegreeOfParallelism,
         CancellationToken cancellationToken)
     {
-        var kafkaProcessor = new ProcessAndOffsetProcessorV1<TKey, TValue>(
+        var kafkaProcessor = new ProcessAndOffsetProcessor<TKey, TValue>(
             consumer,
             processor,
+            maxBufferedMessages,
             maxDegreeOfParallelism,
             cancellationToken);
 
@@ -115,15 +79,18 @@ public sealed partial class KafkaFactory
 
     private static void ConsumeAndProcessAsync<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
-        ProcessAndOffsetProcessorV1<TKey, TValue> kafkaProcessor,
+        ProcessAndOffsetProcessor<TKey, TValue> kafkaProcessor,
         CancellationToken cancellationToken)
     {
         while (cancellationToken.IsCancellationRequested is false)
         {
             try
             {
-                var kafkaMessage = consumer.Consume(cancellationToken);
-                kafkaProcessor.Enqueue(kafkaMessage);
+                var kafkaMessage = consumer.Consume(cancellationToken); // Add int and loop
+                if (kafkaProcessor.Enqueue(kafkaMessage) is false)
+                {
+                    return;
+                }
             }
             catch (ConsumeException ex)
             {
