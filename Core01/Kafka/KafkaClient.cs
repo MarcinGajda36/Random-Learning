@@ -26,7 +26,7 @@ public sealed partial class KafkaClient
         var configuration = AutoOffsetDisabledConfig(settings);
         using var client = new ConsumerBuilder<TKey, TValue>(configuration).Build();
         var topic = settings.Topic;
-        client.Subscribe(topic);
+        client.Subscribe(topic); // Maybe i should put it in Task.Factory.StartNew hmm
 
         try
         {
@@ -82,10 +82,14 @@ public sealed partial class KafkaClient
         {
             try
             {
-                var kafkaMessage = consumer.Consume(cancellationToken);
-                if (kafkaProcessor.Enqueue(kafkaMessage) is false)
+                const int OneSecondMilliseconds = 1000;
+                var kafkaMessage = consumer.Consume(OneSecondMilliseconds);
+                if (kafkaMessage != null)
                 {
-                    return;
+                    if (kafkaProcessor.Enqueue(kafkaMessage) is false)
+                    {
+                        return;
+                    }
                 }
             }
             catch (ConsumeException ex)

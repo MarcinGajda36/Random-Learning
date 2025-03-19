@@ -76,7 +76,7 @@ public partial class KafkaClient
                 new ExecutionDataflowBlockOptions
                 {
                     BoundedCapacity = settings.MaxBufferedMessages,
-                    TaskScheduler = settings.ProcessorScheduler,
+                    TaskScheduler = settings.ConsumerScheduler,
                     SingleProducerConstrained = true,
                 });
 
