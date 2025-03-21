@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Synchronizers;
 
-public sealed class AsyncLock(int max = 1) : IDisposable
+public readonly struct AsyncLock(int max = 1) : IDisposable
 {
     public struct Lease(SemaphoreSlim toRelease) : IDisposable
     {
