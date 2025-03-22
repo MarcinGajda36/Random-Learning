@@ -1,6 +1,7 @@
 ﻿namespace MarcinGajda.Synchronization.Synchronizers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -59,12 +60,29 @@ public static class TaskSequencial
         = new(static operation => operation.ExecuteAsync());
 
     public static async Task<TResult> AddNextGlobal<TResult>(
-        Func<CancellationToken, Task<TResult>> toRun,
+        Func<CancellationToken, Task<TResult>> function,
         CancellationToken cancellationToken)
     {
-        await using var operation = new Operation<TResult>(toRun, cancellationToken);
+        await using var operation = new Operation<TResult>(function, cancellationToken);
         _ = globalSequence.Post(operation);
         return await operation.Task;
+    }
+
+    public static async Task<IReadOnlyList<TResult>> SelectWhenAllSequencial<TSource, TResult>(
+        this IEnumerable<TSource> sources,
+        Func<TSource, CancellationToken, Task<TResult>> function,
+        CancellationToken cancellationToken)
+    {
+        var results = sources.TryGetNonEnumeratedCount(out var count)
+            ? new List<TResult>(count)
+            : new List<TResult>();
+
+        foreach (var source in sources)
+        {
+            results.Add(await function(source, cancellationToken));
+        }
+
+        return results;
     }
 
     public static Task<TResult> WhenAll<TResult>(
