@@ -4,8 +4,14 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-public readonly struct AsyncLock(int max = 1) : IDisposable
+public readonly struct AsyncLock(SemaphoreSlim semaphoreSlim) : IDisposable
 {
+    public AsyncLock(int initialCount, int maxCount)
+        : this(new SemaphoreSlim(initialCount, maxCount)) { }
+
+    public AsyncLock(int initialCount)
+        : this(initialCount, initialCount) { }
+
     public AsyncLock()
         : this(1) { }
 
@@ -17,7 +23,7 @@ public readonly struct AsyncLock(int max = 1) : IDisposable
             => Interlocked.Exchange(ref _semaphore, null)?.Release();
     }
 
-    private readonly SemaphoreSlim _semaphoreSlim = new(max, max);
+    private readonly SemaphoreSlim _semaphoreSlim = semaphoreSlim;
 
     public Releaser Acquire(CancellationToken cancellationToken = default)
     {
