@@ -15,8 +15,8 @@ public static class TaskSequencial
 
     private sealed class Operation<TResult> : IOperation, IAsyncDisposable
     {
-        private readonly Func<CancellationToken, Task<TResult>> operation;
         private readonly TaskCompletionSource<TResult> completionSource = new();
+        private readonly Func<CancellationToken, Task<TResult>> operation;
         private readonly CancellationToken cancellationToken;
         private readonly CancellationTokenRegistration taskCancellation;
 
