@@ -106,9 +106,8 @@ public static class SynchronizerTests
     public static async Task TestAsync()
     {
         using var synchronizer = new AsyncLock();
-        using var holder1 = synchronizer.Acquire(CancellationToken.None);
-        using var cancel = new CancellationTokenSource();
-        using var holder1_1 = synchronizer.Acquire(cancel.Token);
-        using var holder2 = await synchronizer.AcquireAsync(CancellationToken.None);
+        var result1 = synchronizer.ExecuteAsync(token => ValueTask.FromResult(1 + 1));
+        using var holder1 = await synchronizer.AcquireAsync(CancellationToken.None);
+        var result2 = 1 + 1;
     }
 }
