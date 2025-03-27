@@ -29,6 +29,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AdventOfCode2023FS", "Adven
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject1", "TestProject1\TestProject1.csproj", "{414ABF1A-CC94-43F2-AD9E-2BBCEBEC0391}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NativeAotWebApplication1", "NativeAotWebApplication1\NativeAotWebApplication1.csproj", "{687B8773-46EE-45F4-A8E7-9A577AB5DE72}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{414ABF1A-CC94-43F2-AD9E-2BBCEBEC0391}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{414ABF1A-CC94-43F2-AD9E-2BBCEBEC0391}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{414ABF1A-CC94-43F2-AD9E-2BBCEBEC0391}.Release|Any CPU.Build.0 = Release|Any CPU
+		{687B8773-46EE-45F4-A8E7-9A577AB5DE72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{687B8773-46EE-45F4-A8E7-9A577AB5DE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{687B8773-46EE-45F4-A8E7-9A577AB5DE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{687B8773-46EE-45F4-A8E7-9A577AB5DE72}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
