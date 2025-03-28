@@ -14,6 +14,7 @@ public sealed partial class KafkaClient
     {
         public int MaxDegreeOfParallelism { get; init; } = 1;
         public int MaxBufferedMessages { get; init; } = 4096;
+        public int ConsumeMillisecondsTimeout { get; init; } = 1024;
         public TaskScheduler ConsumerScheduler { get; init; } = TaskScheduler.Default;
         public TaskScheduler ProcessorScheduler { get; init; } = TaskScheduler.Default;
     }
@@ -25,17 +26,7 @@ public sealed partial class KafkaClient
     {
         var configuration = AutoOffsetDisabledConfig(settings);
         using var client = new ConsumerBuilder<TKey, TValue>(configuration).Build();
-        var topic = settings.Topic;
-        client.Subscribe(topic); // Maybe i should put it in Task.Factory.StartNew hmm
-
-        try
-        {
-            await ConsumeAsync(client, processor, settings, cancellationToken);
-        }
-        finally
-        {
-            client.Close();
-        }
+        await ConsumeAsync(client, processor, settings, cancellationToken);
     }
 
     private static ConsumerConfig AutoOffsetDisabledConfig(Settings kafkaSettings)
@@ -61,12 +52,23 @@ public sealed partial class KafkaClient
             settings,
             cancellationToken);
 
+        var processorTask = kafkaProcessor.Completion;
         var consumerTask = Task.Factory.StartNew(
-            () => ConsumeAndProcess(consumer, kafkaProcessor, cancellationToken),
+            () =>
+            {
+                consumer.Subscribe(settings.Topic);
+                try
+                {
+                    ConsumeAndProcess(consumer, kafkaProcessor, settings.ConsumeMillisecondsTimeout, cancellationToken);
+                }
+                finally
+                {
+                    consumer.Close();
+                }
+            },
             cancellationToken,
             TaskCreationOptions.LongRunning,
             settings.ConsumerScheduler);
-        var processorTask = kafkaProcessor.Completion;
 
         _ = await Task.WhenAny(consumerTask, processorTask);
         await cancellationSource.CancelAsync();
@@ -76,14 +78,14 @@ public sealed partial class KafkaClient
     private static void ConsumeAndProcess<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
         ProcessAndOffsetProcessor<TKey, TValue> kafkaProcessor,
+        int consumeMillisecondsTimeout,
         CancellationToken cancellationToken)
     {
         while (cancellationToken.IsCancellationRequested is false)
         {
             try
             {
-                const int OneSecondMilliseconds = 1000;
-                var kafkaMessage = consumer.Consume(OneSecondMilliseconds);
+                var kafkaMessage = consumer.Consume(consumeMillisecondsTimeout);
                 if (kafkaMessage != null)
                 {
                     if (kafkaProcessor.Enqueue(kafkaMessage) is false)
