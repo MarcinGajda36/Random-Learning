@@ -27,6 +27,7 @@ public class MySQLiteContext : DbContext
 
     public MySQLiteContext(DbContextOptions options) : base(options)
     {
+        //Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
