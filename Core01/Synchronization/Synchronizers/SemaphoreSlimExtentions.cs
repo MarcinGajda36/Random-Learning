@@ -4,17 +4,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-public readonly struct AsyncLock(SemaphoreSlim semaphoreSlim) : IDisposable
+public static class SemaphoreSlimExtentions
 {
-    public AsyncLock(int initialCount, int maxCount)
-        : this(new SemaphoreSlim(initialCount, maxCount)) { }
-
-    public AsyncLock(int initialCount)
-        : this(initialCount, initialCount) { }
-
-    public AsyncLock()
-        : this(1) { }
-
     public sealed class Releaser(SemaphoreSlim toRelease) : IDisposable
     {
         private SemaphoreSlim? _semaphore = toRelease;
@@ -23,89 +14,86 @@ public readonly struct AsyncLock(SemaphoreSlim semaphoreSlim) : IDisposable
             => Interlocked.Exchange(ref _semaphore, null)?.Release();
     }
 
-    private readonly SemaphoreSlim _semaphoreSlim = semaphoreSlim;
-
-    public Releaser Acquire(CancellationToken cancellationToken = default)
+    public static Releaser Acquire(this SemaphoreSlim semaphoreSlim, CancellationToken cancellationToken = default)
     {
-        var semaphore = _semaphoreSlim;
-        semaphore.Wait(cancellationToken);
-        return new Releaser(semaphore);
+        semaphoreSlim.Wait(cancellationToken);
+        return new Releaser(semaphoreSlim);
     }
 
-    public ValueTask<Releaser> AcquireAsync(CancellationToken cancellationToken = default)
+    public static ValueTask<Releaser> AcquireAsync(this SemaphoreSlim semaphoreSlim, CancellationToken cancellationToken = default)
     {
-        var semaphore = _semaphoreSlim;
-        var wait = semaphore.WaitAsync(cancellationToken);
+        var wait = semaphoreSlim.WaitAsync(cancellationToken);
         return wait.IsCompletedSuccessfully
-            ? ValueTask.FromResult(new Releaser(semaphore))
-            : CoreAcquireAsync(wait, semaphore);
+            ? ValueTask.FromResult(new Releaser(semaphoreSlim))
+            : CoreAcquireAsync(wait, semaphoreSlim);
 
-        static async ValueTask<Releaser> CoreAcquireAsync(Task wait, SemaphoreSlim semaphore)
+        static async ValueTask<Releaser> CoreAcquireAsync(Task wait, SemaphoreSlim semaphoreSlim)
         {
             await wait;
-            return new Releaser(semaphore);
+            return new Releaser(semaphoreSlim);
         }
     }
 
-    public TResult Execute<TArgument, TResult>(
+    public static TResult Execute<TArgument, TResult>(
+        this SemaphoreSlim semaphoreSlim,
         TArgument argument,
         Func<TArgument, CancellationToken, TResult> function,
         CancellationToken cancellationToken = default)
     {
-        var semaphore = _semaphoreSlim;
-        semaphore.Wait(cancellationToken);
+        semaphoreSlim.Wait(cancellationToken);
         try
         {
             return function(argument, cancellationToken);
         }
         finally
         {
-            _ = semaphore.Release();
+            _ = semaphoreSlim.Release();
         }
     }
 
-    public TResult Execute<TResult>(
+    public static TResult Execute<TResult>(
+        this SemaphoreSlim semaphoreSlim,
         Func<CancellationToken, TResult> function,
         CancellationToken cancellationToken = default)
         => Execute(
+            semaphoreSlim,
             function,
             static (func, token) => func(token),
             cancellationToken);
 
-    public async ValueTask<TResult> ExecuteAsync<TArgument, TResult>(
+    public static async ValueTask<TResult> ExecuteAsync<TArgument, TResult>(
+        this SemaphoreSlim semaphoreSlim,
         TArgument argument,
         Func<TArgument, CancellationToken, ValueTask<TResult>> function,
         CancellationToken cancellationToken = default)
     {
-        var semaphore = _semaphoreSlim;
-        await semaphore.WaitAsync(cancellationToken);
+        await semaphoreSlim.WaitAsync(cancellationToken);
         try
         {
             return await function(argument, cancellationToken);
         }
         finally
         {
-            _ = semaphore.Release();
+            _ = semaphoreSlim.Release();
         }
     }
 
-    public ValueTask<TResult> ExecuteAsync<TResult>(
+    public static ValueTask<TResult> ExecuteAsync<TResult>(
+        this SemaphoreSlim semaphoreSlim,
         Func<CancellationToken, ValueTask<TResult>> function,
         CancellationToken cancellationToken = default)
         => ExecuteAsync(
+            semaphoreSlim,
             function,
             static (func, token) => func(token),
             cancellationToken);
-
-    public void Dispose()
-        => _semaphoreSlim.Dispose();
 }
 
 public static class SynchronizerTests
 {
     public static async Task TestAsync()
     {
-        using var synchronizer = new AsyncLock();
+        using var synchronizer = new SemaphoreSlim(1, 1);
         var result1 = synchronizer.ExecuteAsync(token => ValueTask.FromResult(1 + 1));
         using var holder1 = await synchronizer.AcquireAsync(CancellationToken.None);
         var result2 = 1 + 1;
