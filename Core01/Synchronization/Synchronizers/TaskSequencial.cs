@@ -16,14 +16,14 @@ public static class TaskSequencial
     private sealed class Operation<TResult> : IOperation, IAsyncDisposable
     {
         private readonly TaskCompletionSource<TResult> completionSource = new();
-        private readonly Func<CancellationToken, Task<TResult>> operation;
+        private readonly Func<CancellationToken, ValueTask<TResult>> operation;
         private readonly CancellationToken cancellationToken;
         private readonly CancellationTokenRegistration taskCancellation;
 
         public Task<TResult> Task
             => completionSource.Task;
 
-        public Operation(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
+        public Operation(Func<CancellationToken, ValueTask<TResult>> operation, CancellationToken cancellationToken)
         {
             this.operation = operation;
             this.cancellationToken = cancellationToken;
@@ -57,20 +57,20 @@ public static class TaskSequencial
     }
 
     private static readonly ActionBlock<IOperation> globalSequence
-        = new(static operation => operation.ExecuteAsync());
+        = new(static operation => operation.ExecuteAsync(), new() { BoundedCapacity = 4096 });
 
     public static async Task<TResult> AddNextGlobal<TResult>(
-        Func<CancellationToken, Task<TResult>> function,
+        Func<CancellationToken, ValueTask<TResult>> function,
         CancellationToken cancellationToken)
     {
         await using var operation = new Operation<TResult>(function, cancellationToken);
-        _ = globalSequence.Post(operation);
+        _ = await globalSequence.SendAsync(operation);
         return await operation.Task;
     }
 
     public static async Task<IReadOnlyList<TResult>> SelectWhenAllSequencial<TSource, TResult>(
         this IEnumerable<TSource> sources,
-        Func<TSource, CancellationToken, Task<TResult>> function,
+        Func<TSource, CancellationToken, ValueTask<TResult>> function,
         CancellationToken cancellationToken)
     {
         var results = sources.TryGetNonEnumeratedCount(out var count)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MarcinGajda.NewSwitches;
@@ -17,4 +18,26 @@ public static class NewSwitch
         var dict when dict.TryGetValue(key, out var val) => val,
         _ => null,
     };
+
+    public static bool IsPalindrome(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        return text.AsSpan() switch
+        {
+            [] or [_] => true,
+            var multiChar => IsPalindromeCore(multiChar),
+        };
+
+        static bool IsPalindromeCore(ReadOnlySpan<char> text)
+        {
+            for (var i = 0; i < text.Length / 2; ++i)
+            {
+                if (text[i] != text[^(1 + i)])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 }
