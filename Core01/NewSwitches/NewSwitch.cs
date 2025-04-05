@@ -24,7 +24,7 @@ public static class NewSwitch
         ArgumentNullException.ThrowIfNull(text);
         return text.AsSpan() switch
         {
-            [] or [_] => true,
+        [] or [_] => true,
             var multiChar => IsPalindromeCore(multiChar),
         };
 

@@ -11,8 +11,8 @@ public static class HistoricalToLive_Casting
     {
         Live = 0,
         Historical,
-        HistoricalError,
         HistoricalCompleted,
+        HistoricalError,
     }
 
     private readonly record struct Message(MessageType Type, object? Value);
@@ -20,25 +20,24 @@ public static class HistoricalToLive_Casting
     //interface IHandler<TValue> { IList<TValue> Handle(Message message); } // TODO can try more OOP
     private sealed class ConcatState<TValue>
     {
-        public Func<Message, IList<TValue>> Handler { get; private set; }
+        public delegate IEnumerable<TValue> ResultSelector(in Message message);
+        public ResultSelector Handler { get; private set; }
 
         public ConcatState()
-        {
-            Handler = HistoryAndLiveHandler();
-        }
+            => Handler = HistoryAndLiveHandler();
 
-        private static IList<TValue> LiveHandler(Message message)
-            => new[] { (TValue)message.Value! };
+        private static IEnumerable<TValue> LiveHandler(in Message message)
+            => [(TValue)message.Value!];
 
-        private Func<Message, IList<TValue>> HistoryAndLiveHandler()
+        private ResultSelector HistoryAndLiveHandler()
         {
-            List<TValue> liveBuffer = new();
-            return (message) => message.Type switch
+            List<TValue> liveBuffer = [];
+            return (in Message message) => message.Type switch
             {
                 MessageType.Live => HandleLiveMessage(liveBuffer, (TValue)message.Value!),
-                MessageType.Historical => (IList<TValue>)message.Value!,
-                MessageType.HistoricalError => throw (Exception)message.Value!,
+                MessageType.Historical => (IEnumerable<TValue>)message.Value!,
                 MessageType.HistoricalCompleted => HandleHistoricalCompletion(liveBuffer),
+                MessageType.HistoricalError => throw ((Exception)message.Value!),
                 _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
             };
         }
@@ -49,14 +48,14 @@ public static class HistoricalToLive_Casting
             return buffer;
         }
 
-        private static IList<TValue> HandleLiveMessage(List<TValue> buffer, TValue value)
+        private static IEnumerable<TValue> HandleLiveMessage(List<TValue> buffer, TValue value)
         {
             buffer.Add(value);
-            return Array.Empty<TValue>();
+            return [];
         }
     }
 
-    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    private readonly record struct Concat<TValue>(IEnumerable<TValue> Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -64,12 +63,12 @@ public static class HistoricalToLive_Casting
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(
-            new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
-            HandleNextMessage)
+            new Concat<TValue>([], new ConcatState<TValue>()),
+            static (state, message) => HandleNextMessage(in state, in message))
         .SelectMany(state => state.Return); // TODO Maybe i can use ArrayPool for live?
 
-    private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message message)
-        => previous with { Return = previous.State.Handler(message) };
+    private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message message)
+        => previous with { Return = previous.State.Handler(in message) };
 
     private static IObservable<Message> GetLiveMessages<TValue>(IObservable<TValue> live)
         => live.Select(live => new Message(MessageType.Live, live));

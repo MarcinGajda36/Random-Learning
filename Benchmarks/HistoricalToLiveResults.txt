@@ -1,5 +1,6 @@
 ﻿
 
+
 HistoricalToLiveBenchmark 
 ElementsCount = 4096
 run 1
@@ -697,3 +698,10 @@ Unsafe.As<>
 | HistoricalToLive_Casting_Strings |         10000 |   1.975 ms | 0.0355 ms | 0.0315 ms |         - |         - |         - |   700.23 KB |
 | HistoricalToLive_Casting_Strings |        250000 |  29.979 ms | 0.5987 ms | 0.8776 ms | 2000.0000 | 1000.0000 | 1000.0000 | 13960.74 KB |
 | HistoricalToLive_Casting_Strings |       1000000 | 117.729 ms | 2.2573 ms | 3.0134 ms | 8000.0000 | 3000.0000 | 3000.0000 | 55834.32 KB |
+
+
+| Method                           | ElementsCount | Mean       | Error     | StdDev    | Allocated   |
+|--------------------------------- |-------------- |-----------:|----------:|----------:|------------:|
+| HistoricalToLive_Casting_Strings | 10000         |   2.985 ms | 0.0494 ms | 0.0438 ms |    661.2 KB |
+| HistoricalToLive_Casting_Strings | 250000        |  27.703 ms | 0.5391 ms | 0.4779 ms | 12983.61 KB |
+| HistoricalToLive_Casting_Strings | 1000000       | 117.254 ms | 0.9827 ms | 0.9192 ms | 51923.52 KB |

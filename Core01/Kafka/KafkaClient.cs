@@ -7,7 +7,7 @@ using Confluent.Kafka;
 
 public sealed partial class KafkaClient
 {
-    public record Settings(
+    public sealed record Settings(
         string Topic,
         string BootstrapServers,
         string GroupId)
