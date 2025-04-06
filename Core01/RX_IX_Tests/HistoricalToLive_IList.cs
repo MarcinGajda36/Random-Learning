@@ -1,57 +1,56 @@
-﻿using System;
+﻿namespace MarcinGajda.RX_IX_Tests;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace MarcinGajda.RX_IX_Tests;
 public static class HistoricalToLive_IList
 {
     private enum MessageType : byte
     {
         Live = 0,
         Historical,
-        HistoricalError,
         HistoricalCompleted,
+        HistoricalError,
     }
 
-    private readonly record struct Message<TValue>(MessageType Type, IList<TValue> Values, Exception? Exception);
+    private readonly record struct Message<TValue>(MessageType Type, IEnumerable<TValue> Values, Exception? Exception);
 
     private sealed class ConcatState<TValue>
     {
-        private List<TValue>? liveBuffer = new();
-        private bool hasHistoricalEnded;
+        private List<TValue>? liveBuffer = [];
 
-        public IList<TValue> HandleNextMessage(Message<TValue> message)
+        public IEnumerable<TValue> HandleNextMessage(in Message<TValue> message)
             => message.Type switch
             {
                 MessageType.Live => HandleLiveMessage(message.Values),
                 MessageType.Historical => message.Values,
-                MessageType.HistoricalError => throw message.Exception!,
                 MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
+                MessageType.HistoricalError => throw message.Exception!,
                 _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
             };
 
         private List<TValue> HandleHistoricalCompletion()
         {
-            hasHistoricalEnded = true;
             var buffered = liveBuffer;
             liveBuffer = null;
             return buffered!;
         }
 
-        private IList<TValue> HandleLiveMessage(IList<TValue> values)
+        private IEnumerable<TValue> HandleLiveMessage(IEnumerable<TValue> values)
         {
-            if (hasHistoricalEnded)
+            if (liveBuffer == null)
             {
                 return values;
             }
-            liveBuffer!.AddRange(values);
-            return Array.Empty<TValue>();
+            liveBuffer.AddRange(values);
+            return [];
         }
     }
 
-    private readonly record struct Concat<TValue>(IList<TValue> Return, ConcatState<TValue> State);
+    private readonly record struct Concat<TValue>(IEnumerable<TValue> Return, ConcatState<TValue> State);
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
@@ -59,15 +58,15 @@ public static class HistoricalToLive_IList
         => GetLiveMessages(live)
         .Merge(GetHistoricalMessages(historical))
         .Scan(
-            new Concat<TValue>(Array.Empty<TValue>(), new ConcatState<TValue>()),
-            HandleNextMessage)
+            new Concat<TValue>([], new ConcatState<TValue>()),
+            static (previous, message) => HandleNextMessage(in previous, in message))
         .SelectMany(state => state.Return);
 
-    private static Concat<TValue> HandleNextMessage<TValue>(Concat<TValue> previous, Message<TValue> message)
-        => previous with { Return = previous.State.HandleNextMessage(message) };
+    private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
+        => previous with { Return = previous.State.HandleNextMessage(in message) };
 
     private static IObservable<Message<TValue>> GetLiveMessages<TValue>(IObservable<TValue> live)
-        => live.Select(live => new Message<TValue>(MessageType.Live, new[] { live }, null));
+        => live.Select(live => new Message<TValue>(MessageType.Live, [live], null));
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
@@ -76,8 +75,8 @@ public static class HistoricalToLive_IList
         .Select(notification => notification.Kind switch
         {
             NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, notification.Value, null),
-            NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, Array.Empty<TValue>(), notification.Exception!),
-            NotificationKind.OnCompleted => new Message<TValue>(MessageType.HistoricalCompleted, Array.Empty<TValue>(), null),
+            NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, [], notification.Exception!),
+            NotificationKind.OnCompleted => new Message<TValue>(MessageType.HistoricalCompleted, [], null),
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
 }
