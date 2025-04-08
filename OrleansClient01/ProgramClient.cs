@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-internal class Program
+internal class ProgramClient
 {
     static async Task Main(string[] args)
     {
@@ -21,12 +21,19 @@ internal class Program
 
         IClusterClient client = host.Services.GetRequiredService<IClusterClient>();
         IHello helloGrain = client.GetGrain<IHello>(0);
-        var response = await helloGrain.SayHello("Hi from Marcin!");
-        Console.WriteLine(
-            $"""
-            Response: {response}
-            """);
-        Console.ReadKey();
+
+        var line = string.Empty;
+        while (line != "quit")
+        {
+            Console.Write("Provide text: ");
+            line = Console.ReadLine() ?? string.Empty;
+            var response = await helloGrain.SayHello(line);
+            Console.WriteLine(
+                $"""
+                Response: {response}
+                """);
+        }
+
         await host.StopAsync();
     }
 }

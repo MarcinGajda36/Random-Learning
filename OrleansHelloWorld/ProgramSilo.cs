@@ -3,7 +3,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-internal class Program
+internal class ProgramSilo
 {
     static async Task Main(string[] args)
     {
