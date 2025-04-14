@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-public static class SemaphoreSlimExtentions
+public static class SemaphoreSlimExtension
 {
     public sealed class Releaser(SemaphoreSlim toRelease) : IDisposable
     {
@@ -24,7 +24,7 @@ public static class SemaphoreSlimExtentions
     {
         var wait = semaphoreSlim.WaitAsync(cancellationToken);
         return wait.IsCompletedSuccessfully
-            ? ValueTask.FromResult(new Releaser(semaphoreSlim))
+            ? new(new Releaser(semaphoreSlim))
             : CoreAcquireAsync(wait, semaphoreSlim);
 
         static async ValueTask<Releaser> CoreAcquireAsync(Task wait, SemaphoreSlim semaphoreSlim)

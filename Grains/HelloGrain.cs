@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using GrainInterfaces;
 using Microsoft.Extensions.Logging;
+using Orleans;
 
 public class HelloGrain(ILogger<HelloGrain> logger)
     : Grain, IHello

@@ -1,10 +1,12 @@
 ﻿namespace OrleansClient01;
 
+using System;
 using System.Threading.Tasks;
 using GrainInterfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Orleans;
 
 internal class ProgramClient
 {
