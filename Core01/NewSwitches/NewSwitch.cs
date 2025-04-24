@@ -25,10 +25,10 @@ public static class NewSwitch
         return text.AsSpan() switch
         {
         [] or [_] => true,
-            var multiChar => IsPalindromeCore(multiChar),
+            var multiChar => Core(multiChar),
         };
 
-        static bool IsPalindromeCore(ReadOnlySpan<char> text)
+        static bool Core(ReadOnlySpan<char> text)
         {
             for (var i = 0; i < text.Length / 2; ++i)
             {
