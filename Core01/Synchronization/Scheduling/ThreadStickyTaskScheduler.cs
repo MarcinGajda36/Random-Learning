@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace MarcinGajda.Synchronization.Scheduling;
 
-[StructLayout(LayoutKind.Sequential)]
 sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
 {
     const int DefaultMaxWorkers = 4;
@@ -41,10 +40,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     }
 
     protected override void QueueTask(Task task)
-    {
-        var index = Environment.CurrentManagedThreadId & queueIndexMask;
-        queues[index].Enqueue(task);
-    }
+        => queues[Environment.CurrentManagedThreadId & queueIndexMask].Enqueue(task);
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
@@ -67,9 +63,7 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     [StructLayout(LayoutKind.Sequential)]
     sealed class SingleThreadScheduler : IDisposable
     {
-        // How to replace ConcurrentQueue<Task>?
-        // I can try something like in 
-        readonly ConcurrentQueue<Task> queue;
+        readonly ConcurrentQueue<Task> myQueue;
         readonly ThreadStickyTaskScheduler parent;
         readonly ConcurrentQueue<Task> neighborsQueue;
 
@@ -92,8 +86,9 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             } while ((thread.ManagedThreadId & queueIndexMask) != nextIndex);
             cancellation = new CancellationTokenSource();
             var queues = parent.queues;
-            queue = queues[index];
-            neighborsQueue = queues[nextIndex];
+            myQueue = queues[index];
+            var previousIndex = (index - 1) & queueIndexMask;
+            neighborsQueue = queues[previousIndex];
         }
 
         public void Start()
@@ -104,14 +99,14 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             var token = cancellation.Token;
             while (token.IsCancellationRequested is false)
             {
-                while (queue.TryDequeue(out var task))
+                while (myQueue.TryDequeue(out var task))
                 {
                     parent.TryExecuteTask(task);
                 }
 
                 HelpNeighbor();
 
-                if (queue.TryDequeue(out var stillEmptyCheck))
+                if (myQueue.TryDequeue(out var stillEmptyCheck))
                 {
                     parent.TryExecuteTask(stillEmptyCheck);
                 }
@@ -119,18 +114,17 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 {
                     // Tried ManualResetEventSlim to replace Thread.Sleep/Yield and it's cool but not for this implementation 
                     // because i like that thread without it's own elements help with neighborsQueue
-                    Thread.Sleep(0);
+                    Thread.Sleep(1);
                 }
             }
         }
 
         void HelpNeighbor()
         {
-            int limit = 32;
-            while (limit > 0 && neighborsQueue.TryDequeue(out var task))
+            int limit = 512;
+            while (limit-- > 0 && neighborsQueue.TryDequeue(out var task))
             {
                 parent.TryExecuteTask(task);
-                --limit;
             }
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -17,6 +18,7 @@ using MarcinGajda.PeriodicCheckers;
 using MarcinGajda.RX_IX_Tests;
 using MarcinGajda.Structs;
 using MarcinGajda.Synchronization.Pooling;
+using MarcinGajda.Synchronization.Scheduling;
 using MarcinGajda.WORK_observable;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -51,11 +53,13 @@ internal class Program
 
     public static async Task Main()
     {
+        await TestThreadStickyTaskScheduler();
+        await Task.Delay(-1);
+
         await using var file = new FileStream("", FileMode.Create, FileAccess.Write, FileShare.Read, 4096, FileOptions.WriteThrough);
 
         TestSpanAfterGC();
         PoolTest();
-        await Task.Delay(-1);
         _ = TestClosure();
         await Observables.LinqQueryTests();
 
@@ -114,6 +118,13 @@ internal class Program
         (_, _, _, int pop1, _, int pop2) = QueryCityDataForYears("New York City", 1960, 2010);
         Console.WriteLine($"Population change, 1960 to 2010: {pop2 - pop1:N0}");
         ParrallelTests();
+    }
+
+    private static async Task TestThreadStickyTaskScheduler()
+    {
+        var concurrency = BitOperations.RoundUpToPowerOf2((uint)Environment.ProcessorCount);
+        using var scheduler = new ThreadStickyTaskScheduler((int)concurrency);
+        await Task.Delay(-1);
     }
 
     private static void PoolTest()
