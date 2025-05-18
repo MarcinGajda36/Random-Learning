@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,15 +59,15 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
     public void Dispose()
         => Array.ForEach(workers, worker => worker.Dispose());
 
-    [StructLayout(LayoutKind.Sequential)]
     sealed class SingleThreadScheduler : IDisposable
     {
         readonly ConcurrentQueue<Task> myQueue;
         readonly ThreadStickyTaskScheduler parent;
-        readonly ConcurrentQueue<Task> neighborsQueue;
 
         readonly CancellationTokenSource cancellation;
         readonly Thread thread;
+
+        readonly int neighbor;
 
         public SingleThreadScheduler(int index, ThreadStickyTaskScheduler parent)
         {
@@ -85,10 +84,8 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
                 // 3) i expect this to be one time cost at startup to increase performance at runtime
             } while ((thread.ManagedThreadId & queueIndexMask) != nextIndex);
             cancellation = new CancellationTokenSource();
-            var queues = parent.queues;
-            myQueue = queues[index];
-            var previousIndex = (index - 1) & queueIndexMask;
-            neighborsQueue = queues[previousIndex];
+            myQueue = parent.queues[index];
+            neighbor = (index - 1) & parent.queueIndexMask;
         }
 
         public void Start()
@@ -97,18 +94,34 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
         void Schedule()
         {
             var token = cancellation.Token;
+            var myQueue_ = myQueue;
+            var parent_ = parent;
+            var neighbor_ = neighbor;
             while (token.IsCancellationRequested is false)
             {
-                while (myQueue.TryDequeue(out var task))
+                while (myQueue_.TryDequeue(out var task))
                 {
-                    parent.TryExecuteTask(task);
+                    parent_.TryExecuteTask(task);
                 }
 
-                HelpNeighbor();
-
-                if (myQueue.TryDequeue(out var stillEmptyCheck))
+                var neighborQueue = parent_.queues[neighbor_];
+                var limit = 512;
+                while (limit-- > 0)
                 {
-                    parent.TryExecuteTask(stillEmptyCheck);
+                    if (neighborQueue.TryDequeue(out var task))
+                    {
+                        parent_.TryExecuteTask(task);
+                    }
+                    else
+                    {
+                        neighbor_ = (neighbor_ - 1) & parent_.queueIndexMask;
+                        break;
+                    }
+                }
+
+                if (myQueue_.TryDequeue(out var stillEmptyCheck))
+                {
+                    parent_.TryExecuteTask(stillEmptyCheck);
                 }
                 else
                 {
@@ -119,19 +132,11 @@ sealed class ThreadStickyTaskScheduler : TaskScheduler, IDisposable
             }
         }
 
-        void HelpNeighbor()
-        {
-            int limit = 512;
-            while (limit-- > 0 && neighborsQueue.TryDequeue(out var task))
-            {
-                parent.TryExecuteTask(task);
-            }
-        }
-
         public void Dispose()
         {
-            cancellation.Cancel();
-            cancellation.Dispose();
+            var cancellation_ = cancellation;
+            cancellation_.Cancel();
+            cancellation_.Dispose();
         }
     }
 }
