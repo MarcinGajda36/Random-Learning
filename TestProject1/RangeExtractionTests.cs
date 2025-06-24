@@ -12,7 +12,7 @@ public class RangeExtractionTests
         var result = RangeExtraction.Extract(input);
 
         // Assert
-        Assert.AreEqual(string.Empty, result);
+        Assert.That(result, Is.EqualTo(string.Empty));
     }
 
     [Test]
@@ -25,7 +25,7 @@ public class RangeExtractionTests
         var result = RangeExtraction.Extract(input);
 
         // Assert
-        Assert.AreEqual("5", result);
+        Assert.That(result, Is.EqualTo("5"));
     }
 
     [Test]
@@ -38,7 +38,7 @@ public class RangeExtractionTests
         var result = RangeExtraction.Extract(input);
 
         // Assert
-        Assert.AreEqual("1-5", result);
+        Assert.That(result, Is.EqualTo("1-5"));
     }
 
     [Test]
@@ -51,7 +51,7 @@ public class RangeExtractionTests
         var result = RangeExtraction.Extract(input);
 
         // Assert
-        Assert.AreEqual("1,3,5,7", result);
+        Assert.That(result, Is.EqualTo("1,3,5,7"));
     }
 
     [Test]
@@ -64,6 +64,6 @@ public class RangeExtractionTests
         var result = RangeExtraction.Extract(input);
 
         // Assert
-        Assert.AreEqual("1-3,5,7-9,11", result);
+        Assert.That(result, Is.EqualTo("1-3,5,7-9,11"));
     }
 }

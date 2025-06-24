@@ -1,0 +1,5 @@
+﻿{
+  Type: Exception,
+  Message: Exception of type 'System.Exception' was thrown.,
+  StackTrace: at TestProject1.Tests.SnailTest.<>c.<FirstThrowingSnapshotTest>b__4_0()
+}

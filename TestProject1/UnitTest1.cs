@@ -1,5 +1,6 @@
 namespace TestProject1;
 
+using System.Threading.Tasks;
 using LeetCode;
 
 public class Tests
@@ -27,6 +28,18 @@ public class Tests
         public void Test(int[][] array, int[] result)
         {
             Assert.That(SnailSolution.Snail(array), Is.EqualTo(result));
+        }
+
+        [Test]
+        public async Task FirstSnapshotTest()
+        {
+            await Verify(new { x = 1, y = 5, z = "abc" });
+        }
+
+        [Test]
+        public async Task FirstThrowingSnapshotTest()
+        {
+            await ThrowsTask(() => throw new Exception());
         }
     }
 }
