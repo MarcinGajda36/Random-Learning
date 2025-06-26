@@ -8,7 +8,7 @@ public class Tests
     public class SnailTest
     {
         [Test, Order(1)]
-        public void SnailTest1()
+        public async Task SnailTest1()
         {
             int[][] array =
             {
@@ -17,7 +17,9 @@ public class Tests
                 new []{7, 8, 9}
             };
             var r = new[] { 1, 2, 3, 6, 9, 8, 7, 4, 5 };
-            Test(array, r);
+            var snail = SnailSolution.Snail(array);
+            Test(snail, r);
+            await Verify(snail);
         }
 
         public string Int2dToString(int[][] a)
@@ -25,9 +27,9 @@ public class Tests
             return $"[{string.Join("\n", a.Select(row => $"[{string.Join(",", row)}]"))}]";
         }
 
-        public void Test(int[][] array, int[] result)
+        public void Test(int[] snail, int[] result)
         {
-            Assert.That(SnailSolution.Snail(array), Is.EqualTo(result));
+            Assert.That(snail, Is.EqualTo(result));
         }
 
         [Test]
