@@ -1,5 +1,11 @@
 ﻿namespace FsCsConnection
 
+open ProviderImplementation.ProvidedTypes.BinaryWriter
+open PerKeySynchronizers.UnboundedParallelism
+open System
+open System.Threading
+open System.Threading.Tasks
+
 module Say =
     let methodWithIn (a:inref<int>) =
         a + 10
@@ -32,3 +38,12 @@ module Say =
             (rest.[0] = rest.[rest.Length - 1])
             && (loop rest.[1..(rest.Length - 2)])
       text.ToUpperInvariant () |> loop
+
+    let synchronizer = new PerKeySynchronizer<Guid> ()
+    let usePerKey = task {
+        let key = Guid.NewGuid()
+        let operation (token: CancellationToken) = task { 1 + 1 } |> ValueTask
+        let! result = synchronizer.SynchronizeAsync (key, operation)
+        ()
+    }
+        
