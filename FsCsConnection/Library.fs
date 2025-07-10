@@ -40,10 +40,19 @@ module Say =
       text.ToUpperInvariant () |> loop
 
     let synchronizer = new PerKeySynchronizer<Guid> ()
-    let usePerKey = task {
+    let usePerKeyTask = task {
         let key = Guid.NewGuid()
         let operation (token: CancellationToken) = task { 1 + 1 } |> ValueTask
-        let! result = synchronizer.SynchronizeAsync (key, operation)
+        let! token = Async.CancellationToken
+        let! result = synchronizer.SynchronizeAsync (key, operation, token)
+        ()
+    }
+
+    let usePerKeyAsync = async {
+        let key = Guid.NewGuid()
+        let operation (token: CancellationToken) = task { 1 + 1 } |> ValueTask
+        let! token = Async.CancellationToken
+        let! result = (synchronizer.SynchronizeAsync (key, operation, token)).AsTask() |> Async.AwaitTask
         ()
     }
         
