@@ -70,9 +70,9 @@ public sealed partial class KafkaClient
             TaskCreationOptions.LongRunning,
             settings.ConsumerScheduler);
 
-        _ = await Task.WhenAny(consumerTask, processorTask);
+        var firstToFinish = await Task.WhenAny(consumerTask, processorTask);
         await cancellationSource.CancelAsync();
-        await Task.WhenAll(consumerTask, processorTask);
+        await Task.WhenAll(firstToFinish, consumerTask, processorTask);
     }
 
     private static void ConsumeAndProcess<TKey, TValue>(
