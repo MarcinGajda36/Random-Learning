@@ -4,13 +4,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-
-public enum KafkaClientOrigin
-{
-    Consumer,
-    Processor,
-    StoreOffset
-}
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 public sealed partial class KafkaClient
 {
@@ -24,7 +19,7 @@ public sealed partial class KafkaClient
         public TimeSpan ConsumeTimeout { get; init; } = TimeSpan.FromSeconds(1);
         public TaskScheduler ConsumerScheduler { get; init; } = TaskScheduler.Default;
         public TaskScheduler ProcessorScheduler { get; init; } = TaskScheduler.Default;
-        public Action<KafkaClientOrigin, Exception> ExceptionHandler { get; init; } = (_, _) => { };
+        public ILogger Logger { get; init; } = NullLogger.Instance;
     }
 
     public static Task AtLeastOnceAsync<TKey, TValue>(
@@ -39,10 +34,10 @@ public sealed partial class KafkaClient
         ArgumentNullException.ThrowIfNull(settings.ProcessorScheduler);
         ArgumentNullException.ThrowIfNull(settings.ExceptionHandler);
         ArgumentNullException.ThrowIfNull(processor);
-        return AtLeastOnceCoreAsync(settings, processor, cancellationToken);
+        return AtLeastOnceCore(settings, processor, cancellationToken);
     }
 
-    private static async Task AtLeastOnceCoreAsync<TKey, TValue>(
+    private static async Task AtLeastOnceCore<TKey, TValue>(
         Settings settings,
         Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
         CancellationToken cancellationToken)
@@ -104,7 +99,8 @@ public sealed partial class KafkaClient
         Settings settings,
         CancellationToken cancellationToken)
     {
-        var exceptionHandler = settings.ExceptionHandler;
+        var logger = settings.Logger;
+        string[] loggerParams = [settings.Topic, settings.GroupId];
         var consumeTimeout = settings.ConsumeTimeout;
         while (cancellationToken.IsCancellationRequested is false)
         {
@@ -119,15 +115,43 @@ public sealed partial class KafkaClient
                     }
                 }
             }
-            catch (Exception ex)
+            catch (ConsumeException ex)
             {
-                exceptionHandler(KafkaClientOrigin.Consumer, ex);
                 // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
-                if (ex is ConsumeException { Error.IsFatal: true })
+                if (ex.Error.IsFatal)
                 {
+                    logger.LogError(
+                        ex,
+                        "Fatal exception during consuming from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                        loggerParams);
                     kafkaProcessor.Complete();
                     throw;
                 }
+                else
+                {
+                    logger.LogWarning(
+                        ex,
+                        "Non fatal exception during consuming from topic: {Topic}, groupId: {GroupId}. Trying again.",
+                        loggerParams);
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                logger.LogInformation(
+                    ex,
+                    "Canceled exception during consuming from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                    loggerParams);
+                kafkaProcessor.Complete();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Unknown exception during consuming from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                    loggerParams);
+                kafkaProcessor.Complete();
+                throw;
             }
         }
     }

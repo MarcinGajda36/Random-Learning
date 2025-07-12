@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 
 public partial class KafkaClient
 {
@@ -39,20 +40,23 @@ public partial class KafkaClient
             Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
             Settings settings,
             CancellationToken cancellationToken)
-        {
-            var exceptionHandler = settings.ExceptionHandler;
-            return new(
+            => new(
                 async result =>
                 {
                     try
                     {
                         await processor(result, cancellationToken);
+                        return result;
                     }
                     catch (Exception ex)
                     {
-                        exceptionHandler(KafkaClientOrigin.Processor, ex);
+                        settings.Logger.LogError(
+                            ex,
+                            "Unhandled exception during processing from topic: {Topic}, groupId: {GroupId}. Closing processing.",
+                            settings.Topic,
+                            settings.GroupId);
+                        throw;
                     }
-                    return result;
                 },
                 new ExecutionDataflowBlockOptions
                 {
@@ -61,13 +65,13 @@ public partial class KafkaClient
                     TaskScheduler = settings.ProcessorScheduler,
                     CancellationToken = cancellationToken,
                 });
-        }
 
         private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock(
             IConsumer<TKey, TValue> consumer,
             Settings settings)
         {
-            var exceptionHandler = settings.ExceptionHandler;
+            var logger = settings.Logger;
+            string[] loggerParams = [settings.Topic, settings.GroupId];
             return new(
                 result =>
                 {
@@ -75,13 +79,23 @@ public partial class KafkaClient
                     {
                         consumer.StoreOffset(result);
                     }
-                    catch (Exception ex)
+                    catch (KafkaException ex)
                     {
-                        exceptionHandler(KafkaClientOrigin.StoreOffset, ex);
                         // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
-                        if (ex is ConsumeException { Error.IsFatal: true })
+                        if (ex.Error.IsFatal)
                         {
+                            logger.LogError(
+                                ex,
+                                "Fatal exception during StoreOffset from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                                loggerParams);
                             throw;
+                        }
+                        else
+                        {
+                            logger.LogWarning(
+                                ex,
+                                "Non fatal exception during StoreOffset from topic: {Topic}, groupId: {GroupId}. Trying again.",
+                                loggerParams);
                         }
                     }
                 },
