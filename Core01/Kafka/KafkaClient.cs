@@ -4,6 +4,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 public sealed partial class KafkaClient
 {
@@ -14,15 +16,26 @@ public sealed partial class KafkaClient
     {
         public int MaxDegreeOfParallelism { get; init; } = 1;
         public int MaxBufferedMessages { get; init; } = 4096;
-        public int ConsumeMillisecondsTimeout { get; init; } = 1024;
+        public TimeSpan ConsumeTimeout { get; init; } = TimeSpan.FromSeconds(1);
         public TaskScheduler ConsumerScheduler { get; init; } = TaskScheduler.Default;
         public TaskScheduler ProcessorScheduler { get; init; } = TaskScheduler.Default;
+        public ILogger Logger { get; init; } = NullLogger.Instance;
     }
 
-    public static async Task AtLeastOnceClient<TKey, TValue>(
+    public static Task AtLeastOnceAsync<TKey, TValue>(
         Settings settings,
         Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
         CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(processor);
+        return AtLeastOnceCore(settings, processor, cancellationToken);
+    }
+
+    private static async Task AtLeastOnceCore<TKey, TValue>(
+        Settings settings,
+        Func<ConsumeResult<TKey, TValue>, CancellationToken, ValueTask> processor,
+        CancellationToken cancellationToken)
     {
         var configuration = AutoOffsetDisabledConfig(settings);
         using var client = new ConsumerBuilder<TKey, TValue>(configuration).Build();
@@ -59,7 +72,7 @@ public sealed partial class KafkaClient
                 consumer.Subscribe(settings.Topic);
                 try
                 {
-                    ConsumeAndProcess(consumer, kafkaProcessor, settings.ConsumeMillisecondsTimeout, cancellationToken);
+                    ConsumeAndProcess(consumer, kafkaProcessor, settings, cancellationToken);
                 }
                 finally
                 {
@@ -78,14 +91,17 @@ public sealed partial class KafkaClient
     private static void ConsumeAndProcess<TKey, TValue>(
         IConsumer<TKey, TValue> consumer,
         ProcessAndOffsetProcessor<TKey, TValue> kafkaProcessor,
-        int consumeMillisecondsTimeout,
+        Settings settings,
         CancellationToken cancellationToken)
     {
+        var logger = settings.Logger;
+        string[] loggerParams = [settings.Topic, settings.GroupId];
+        var consumeTimeout = settings.ConsumeTimeout;
         while (cancellationToken.IsCancellationRequested is false)
         {
             try
             {
-                var kafkaMessage = consumer.Consume(consumeMillisecondsTimeout);
+                var kafkaMessage = consumer.Consume(consumeTimeout);
                 if (kafkaMessage != null)
                 {
                     if (kafkaProcessor.Enqueue(kafkaMessage) is false)
@@ -97,16 +113,38 @@ public sealed partial class KafkaClient
             catch (ConsumeException ex)
             {
                 // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
-                // Maybe log.
                 if (ex.Error.IsFatal)
                 {
+                    logger.LogError(
+                        ex,
+                        "Fatal exception during consuming from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                        loggerParams);
                     kafkaProcessor.Complete();
                     throw;
                 }
+                else
+                {
+                    logger.LogWarning(
+                        ex,
+                        "Non fatal exception during consuming from topic: {Topic}, groupId: {GroupId}. Trying again.",
+                        loggerParams);
+                }
             }
-            catch
+            catch (OperationCanceledException ex)
             {
-                // Maybe log x2.
+                logger.LogInformation(
+                    ex,
+                    "Canceled exception during consuming from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                    loggerParams);
+                kafkaProcessor.Complete();
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Unknown exception during consuming from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                    loggerParams);
                 kafkaProcessor.Complete();
                 throw;
             }

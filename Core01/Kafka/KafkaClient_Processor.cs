@@ -5,17 +5,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 
 public partial class KafkaClient
 {
     private sealed class ProcessAndOffsetProcessor<TKey, TValue> : IDisposable
     {
         private readonly TransformBlock<ConsumeResult<TKey, TValue>, ConsumeResult<TKey, TValue>> processingBlock;
-        private readonly ActionBlock<ConsumeResult<TKey, TValue>> offsetBlock;
         private readonly IDisposable processingOffsetLink;
 
-        public Task Completion
-            => offsetBlock.Completion;
+        internal Task Completion;
 
         public ProcessAndOffsetProcessor(
             IConsumer<TKey, TValue> consumer,
@@ -24,10 +23,11 @@ public partial class KafkaClient
             CancellationToken cancellationToken)
         {
             processingBlock = CreateProcessingBlock(processor, settings, cancellationToken);
-            offsetBlock = CreateOffsetBlock(consumer, settings);
+            var offsetBlock = CreateOffsetBlock(consumer, settings);
             processingOffsetLink = processingBlock.LinkTo(
                 offsetBlock,
                 new DataflowLinkOptions { PropagateCompletion = true });
+            Completion = offsetBlock.Completion;
         }
 
         public bool Enqueue(ConsumeResult<TKey, TValue> kafkaMessage)
@@ -43,8 +43,20 @@ public partial class KafkaClient
             => new(
                 async result =>
                 {
-                    await processor(result, cancellationToken);
-                    return result;
+                    try
+                    {
+                        await processor(result, cancellationToken);
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        settings.Logger.LogError(
+                            ex,
+                            "Unhandled exception during processing from topic: {Topic}, groupId: {GroupId}. Closing processing.",
+                            settings.Topic,
+                            settings.GroupId);
+                        throw;
+                    }
                 },
                 new ExecutionDataflowBlockOptions
                 {
@@ -57,19 +69,33 @@ public partial class KafkaClient
         private static ActionBlock<ConsumeResult<TKey, TValue>> CreateOffsetBlock(
             IConsumer<TKey, TValue> consumer,
             Settings settings)
-            => new(
+        {
+            var logger = settings.Logger;
+            string[] loggerParams = [settings.Topic, settings.GroupId];
+            return new(
                 result =>
                 {
                     try
                     {
                         consumer.StoreOffset(result);
                     }
-                    catch (KafkaException exception)
+                    catch (KafkaException ex)
                     {
-                        // Maybe log.
-                        if (exception.Error.IsFatal)
+                        // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
+                        if (ex.Error.IsFatal)
                         {
+                            logger.LogError(
+                                ex,
+                                "Fatal exception during StoreOffset from topic: {Topic}, groupId: {GroupId}. Closing consumption.",
+                                loggerParams);
                             throw;
+                        }
+                        else
+                        {
+                            logger.LogWarning(
+                                ex,
+                                "Non fatal exception during StoreOffset from topic: {Topic}, groupId: {GroupId}. Trying again.",
+                                loggerParams);
                         }
                     }
                 },
@@ -79,6 +105,7 @@ public partial class KafkaClient
                     TaskScheduler = settings.ConsumerScheduler,
                     SingleProducerConstrained = true,
                 });
+        }
 
         public void Dispose()
             => processingOffsetLink.Dispose();
