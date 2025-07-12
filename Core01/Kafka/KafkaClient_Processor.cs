@@ -94,7 +94,7 @@ public partial class KafkaClient
                         {
                             logger.LogWarning(
                                 ex,
-                                "Non fatal exception during StoreOffset from topic: {Topic}, groupId: {GroupId}. Trying again.",
+                                "Non fatal exception during StoreOffset from topic: {Topic}, groupId: {GroupId}. Continuing.",
                                 loggerParams);
                         }
                     }

@@ -32,7 +32,7 @@ public sealed partial class KafkaClient
         ArgumentOutOfRangeException.ThrowIfLessThan(settings.MaxBufferedMessages, -1);
         ArgumentNullException.ThrowIfNull(settings.ConsumerScheduler);
         ArgumentNullException.ThrowIfNull(settings.ProcessorScheduler);
-        ArgumentNullException.ThrowIfNull(settings.ExceptionHandler);
+        ArgumentNullException.ThrowIfNull(settings.Logger);
         ArgumentNullException.ThrowIfNull(processor);
         return AtLeastOnceCore(settings, processor, cancellationToken);
     }
