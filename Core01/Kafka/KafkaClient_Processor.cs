@@ -71,7 +71,7 @@ public partial class KafkaClient
             Settings settings)
         {
             var logger = settings.Logger;
-            string[] loggerParams = [settings.Topic, settings.GroupId];
+            object[] loggerParams = [settings.Topic, settings.GroupId];
             return new(
                 result =>
                 {

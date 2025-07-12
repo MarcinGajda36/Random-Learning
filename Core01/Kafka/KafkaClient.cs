@@ -100,7 +100,7 @@ public sealed partial class KafkaClient
         CancellationToken cancellationToken)
     {
         var logger = settings.Logger;
-        string[] loggerParams = [settings.Topic, settings.GroupId];
+        object[] loggerParams = [settings.Topic, settings.GroupId];
         var consumeTimeout = settings.ConsumeTimeout;
         while (cancellationToken.IsCancellationRequested is false)
         {
