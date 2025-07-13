@@ -42,7 +42,7 @@ module Say =
     let synchronizer = new PerKeySynchronizer<Guid> ()
     let usePerKeyTask = task {
         let key = Guid.NewGuid()
-        let operation (token: CancellationToken) = task { 1 + 1 } |> ValueTask
+        let operation (token: CancellationToken) = task { return 1 + 1 } |> ValueTask<int>
         let! token = Async.CancellationToken
         let! result = synchronizer.SynchronizeAsync (key, operation, token)
         ()
