@@ -13,7 +13,7 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
    where TContext : DbContext
 {
     public Task<TResult> SaveToDbInTransactionAsync<TResult>(
-        Func<TContext, CancellationToken, Task<TResult>> resultFactory,
+        Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
     {
@@ -32,7 +32,7 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
     }
 
     public Task<TResult> SaveToDbAsync<TResult>(
-        Func<TContext, CancellationToken, Task<TResult>> resultFactory,
+        Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(resultFactory);
@@ -67,7 +67,7 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
 
     public Task<TResult> ReadFromDbInTransactionAsync<TResult, TEntity>(
         Func<TContext, IQueryable<TEntity>> entitySelector,
-        Func<IQueryable<TEntity>, CancellationToken, Task<TResult>> resultFactory,
+        Func<IQueryable<TEntity>, CancellationToken, ValueTask<TResult>> resultFactory,
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
         where TEntity : class
