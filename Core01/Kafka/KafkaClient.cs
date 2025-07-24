@@ -28,6 +28,7 @@ public sealed partial class KafkaClient
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(settings);
+        // TODO: check settings.X in setters
         ArgumentOutOfRangeException.ThrowIfLessThan(settings.MaxDegreeOfParallelism, -1);
         ArgumentOutOfRangeException.ThrowIfLessThan(settings.MaxBufferedMessages, -1);
         ArgumentNullException.ThrowIfNull(settings.ConsumerScheduler);
