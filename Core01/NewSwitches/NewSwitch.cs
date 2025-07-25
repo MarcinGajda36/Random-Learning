@@ -19,7 +19,7 @@ public static class NewSwitch
         _ => null,
     };
 
-    public static bool IsPalindrome(string text)
+    public static bool IsPalindrome1(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
         return text.AsSpan() switch
@@ -39,5 +39,29 @@ public static class NewSwitch
             }
             return true;
         }
+    }
+
+    public static bool IsPalindrome2(string text)
+    {
+        ReadOnlySpan<char> leftToCheck = text;
+        while (leftToCheck.Length > 0)
+        {
+            switch (leftToCheck)
+            {
+                case [var first, .. var mid, var last]:
+                    if (first == last)
+                    {
+                        leftToCheck = mid;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    break;
+                case [_] or []:
+                    return true;
+            }
+        }
+        return true;
     }
 }
