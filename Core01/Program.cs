@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using MarcinGajda.AsyncDispose_;
@@ -53,6 +54,8 @@ internal class Program
 
     public static async Task Main()
     {
+        var hash = SHA3_256.HashData([1, 2, 3]);
+
         await TestThreadStickyTaskScheduler();
         await Task.Delay(-1);
 
