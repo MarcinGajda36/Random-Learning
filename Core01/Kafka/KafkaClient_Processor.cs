@@ -14,7 +14,7 @@ public partial class KafkaClient
         private readonly TransformBlock<ConsumeResult<TKey, TValue>, ConsumeResult<TKey, TValue>> processingBlock;
         private readonly IDisposable processingOffsetLink;
 
-        internal Task Completion;
+        internal readonly Task Completion;
 
         public ProcessAndOffsetProcessor(
             IConsumer<TKey, TValue> consumer,
@@ -71,7 +71,7 @@ public partial class KafkaClient
             Settings settings)
         {
             var logger = settings.Logger;
-            object[] loggerParams = [settings.Topic, settings.GroupId];
+            object?[] loggerParams = [settings.Topic, settings.GroupId];
             return new(
                 result =>
                 {
