@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> dbContextFactory)
+public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> dbContextFactory) // I Could change it to be extensions on factory, or struct?
    where TContext : DbContext
 {
     public Task<TResult> SaveToDbInTransactionAsync<TResult>(
@@ -105,7 +105,7 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
                 (argument, resultFactory),
                 static (contextBase, arguments, cancellationToken) =>
                 {
-                    contextBase.ChangeTracker.Clear();
+                    contextBase.ChangeTracker.Clear(); // When re-try triggers then ChangeTracker still has changes from previous try iirc.
                     return arguments.resultFactory((TContext)contextBase, arguments.argument, cancellationToken);
                 },
                 null,
