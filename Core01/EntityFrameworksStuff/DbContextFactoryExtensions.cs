@@ -17,17 +17,31 @@ public static class DbContextFactoryExtensions
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
         where TContext : DbContext
+        => SaveInTransactionAsync(
+            dbContextFactory,
+            resultFactory,
+            static (context, resultFactory, cancellationToken) => resultFactory(context, cancellationToken),
+            isolationLevel,
+            cancellationToken);
+
+    public static Task<TResult> SaveInTransactionAsync<TContext, TArgument, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
+        TArgument argument,
+        Func<TContext, TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+        CancellationToken cancellationToken = default)
+        where TContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
             dbContextFactory,
-            (isolationLevel, resultFactory),
+            (isolationLevel, resultFactory, argument),
             static async (context, arguments, cancellationToken) =>
             {
-                var (isolationLevel, resultFactory) = arguments;
+                var (isolationLevel, resultFactory, argument) = arguments;
                 await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
-                var result = await resultFactory(context, cancellationToken);
+                var result = await resultFactory(context, argument, cancellationToken);
                 _ = await context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return result;
@@ -40,15 +54,28 @@ public static class DbContextFactoryExtensions
         Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
         where TContext : DbContext
+        => SaveAsync(
+            dbContextFactory,
+            resultFactory,
+            static (context, resultFactory, cancellationToken) => resultFactory(context, cancellationToken),
+            cancellationToken);
+
+    public static Task<TResult> SaveAsync<TContext, TArgument, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
+        TArgument argument,
+        Func<TContext, TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+        where TContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
             dbContextFactory,
-            resultFactory,
-            static async (context, resultFactory, cancellationToken) =>
+            (resultFactory, argument),
+            static async (context, arguments, cancellationToken) =>
             {
-                var result = await resultFactory(context, cancellationToken);
+                var (resultFactory, argument) = arguments;
+                var result = await resultFactory(context, argument, cancellationToken);
                 _ = await context.SaveChangesAsync(cancellationToken);
                 return result;
             },
@@ -62,18 +89,33 @@ public static class DbContextFactoryExtensions
         CancellationToken cancellationToken = default)
         where TContext : DbContext
         where TEntity : class
+        => ReadAsync(
+            dbContextFactory,
+            resultFactory,
+            entitySelector,
+            static (entities, resultFactory, cancellationToken) => resultFactory(entities, cancellationToken),
+            cancellationToken);
+
+    public static Task<TResult> ReadAsync<TContext, TArgument, TResult, TEntity>(
+        this IDbContextFactory<TContext> dbContextFactory,
+        TArgument argument,
+        Func<TContext, IQueryable<TEntity>> entitySelector,
+        Func<IQueryable<TEntity>, TArgument, CancellationToken, Task<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+        where TContext : DbContext
+        where TEntity : class
     {
         ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(entitySelector);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
             dbContextFactory,
-            (entitySelector, resultFactory),
+            (entitySelector, resultFactory, argument),
             static (context, arguments, cancellationToken) =>
             {
-                var (entitySelector, resultFactory) = arguments;
+                var (entitySelector, resultFactory, argument) = arguments;
                 var entities = entitySelector(context).AsNoTracking();
-                return resultFactory(entities, cancellationToken);
+                return resultFactory(entities, argument, cancellationToken);
             },
             cancellationToken);
     }
@@ -86,22 +128,50 @@ public static class DbContextFactoryExtensions
         CancellationToken cancellationToken = default)
         where TContext : DbContext
         where TEntity : class
+        => ReadInTransactionAsync(
+            dbContextFactory,
+            resultFactory,
+            entitySelector,
+            static (queryable, resultSelector, cancellationToken) => resultSelector(queryable, cancellationToken),
+            isolationLevel,
+            cancellationToken);
+
+    public static Task<TResult> ReadInTransactionAsync<TContext, TArgument, TResult, TEntity>(
+        this IDbContextFactory<TContext> dbContextFactory,
+        TArgument argument,
+        Func<TContext, IQueryable<TEntity>> entitySelector,
+        Func<IQueryable<TEntity>, TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+        CancellationToken cancellationToken = default)
+        where TContext : DbContext
+        where TEntity : class
     {
         ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(entitySelector);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
             dbContextFactory,
-            (isolationLevel, entitySelector, resultFactory),
+            (isolationLevel, entitySelector, resultFactory, argument),
             static async (context, arguments, cancellationToken) =>
             {
-                var (isolationLevel, entitySelector, resultFactory) = arguments;
+                var (isolationLevel, entitySelector, resultFactory, argument) = arguments;
                 await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
                 var entities = entitySelector(context).AsNoTracking();
-                return await resultFactory(entities, cancellationToken);
+                return await resultFactory(entities, argument, cancellationToken);
             },
             cancellationToken);
     }
+
+    public static Task<TResult> ExecuteInStrategyAsync<TContext, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
+        Func<TContext, CancellationToken, Task<TResult>> resultFactory,
+        CancellationToken cancellationToken = default)
+        where TContext : DbContext
+        => ExecuteInStrategyAsync(
+            dbContextFactory,
+            resultFactory,
+            static (context, resultFactory, cancellationToken) => resultFactory(context, cancellationToken),
+            cancellationToken);
 
     public static Task<TResult> ExecuteInStrategyAsync<TContext, TArgument, TResult>(
         this IDbContextFactory<TContext> dbContextFactory,
@@ -141,18 +211,32 @@ public static class DbContextFactoryExtensions
         CancellationToken cancellationToken = default)
         where TContext : DbContext
         where TResult : class
+        => StreamAsync(
+            dbContextFactory,
+            queryFactory,
+            static (context, queryFactory) => queryFactory(context),
+            cancellationToken);
+
+    public static IAsyncEnumerable<TResult> StreamAsync<TContext, TArgument, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
+        TArgument argument,
+        Func<TContext, TArgument, IQueryable<TResult>> queryFactory,
+        CancellationToken cancellationToken = default)
+        where TContext : DbContext
+        where TResult : class
     {
         ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(queryFactory);
-        return Core(dbContextFactory, queryFactory, cancellationToken);
+        return Core(dbContextFactory, argument, queryFactory, cancellationToken);
 
         static async IAsyncEnumerable<TResult> Core(
             IDbContextFactory<TContext> dbContextFactory,
-            Func<TContext, IQueryable<TResult>> queryFactory,
+            TArgument argument,
+            Func<TContext, TArgument, IQueryable<TResult>> queryFactory,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             await using var context = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-            await foreach (var result in queryFactory(context)
+            await foreach (var result in queryFactory(context, argument)
                 .AsNoTracking()
                 .AsAsyncEnumerable()
                 .WithCancellation(cancellationToken))
