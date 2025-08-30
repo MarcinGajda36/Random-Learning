@@ -9,21 +9,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> dbContextFactory) // I Could change it to be extensions on factory, or struct?
-   where TContext : DbContext
+public static class DbContextFactoryExtensions
 {
-    public Task<TResult> SaveToDbInTransactionAsync<TResult>(
+    public static Task<TResult> SaveInTransactionAsync<TContext, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
+        where TContext : DbContext
     {
+        ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
+            dbContextFactory,
             (isolationLevel, resultFactory),
             static async (context, arguments, cancellationToken) =>
             {
-                await using var transaction = await context.Database.BeginTransactionAsync(arguments.isolationLevel, cancellationToken);
-                var result = await arguments.resultFactory(context, cancellationToken);
+                var (isolationLevel, resultFactory) = arguments;
+                await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+                var result = await resultFactory(context, cancellationToken);
                 _ = await context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 return result;
@@ -31,12 +35,16 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
             cancellationToken);
     }
 
-    public Task<TResult> SaveToDbAsync<TResult>(
+    public static Task<TResult> SaveAsync<TContext, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
+        where TContext : DbContext
     {
+        ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
+            dbContextFactory,
             resultFactory,
             static async (context, resultFactory, cancellationToken) =>
             {
@@ -47,49 +55,62 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
             cancellationToken);
     }
 
-    public Task<TResult> ReadFromDbAsync<TResult, TEntity>(
+    public static Task<TResult> ReadAsync<TContext, TResult, TEntity>(
+        this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, IQueryable<TEntity>> entitySelector,
         Func<IQueryable<TEntity>, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
+        where TContext : DbContext
         where TEntity : class
     {
+        ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(entitySelector);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
+            dbContextFactory,
             (entitySelector, resultFactory),
             static (context, arguments, cancellationToken) =>
             {
-                var entities = arguments.entitySelector(context).AsNoTracking();
-                return arguments.resultFactory(entities, cancellationToken);
+                var (entitySelector, resultFactory) = arguments;
+                var entities = entitySelector(context).AsNoTracking();
+                return resultFactory(entities, cancellationToken);
             },
             cancellationToken);
     }
 
-    public Task<TResult> ReadFromDbInTransactionAsync<TResult, TEntity>(
+    public static Task<TResult> ReadInTransactionAsync<TContext, TResult, TEntity>(
+        this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, IQueryable<TEntity>> entitySelector,
         Func<IQueryable<TEntity>, CancellationToken, ValueTask<TResult>> resultFactory,
         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
         CancellationToken cancellationToken = default)
+        where TContext : DbContext
         where TEntity : class
     {
+        ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(entitySelector);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return ExecuteInStrategyAsync(
+            dbContextFactory,
             (isolationLevel, entitySelector, resultFactory),
             static async (context, arguments, cancellationToken) =>
             {
-                await using var transaction = await context.Database.BeginTransactionAsync(arguments.isolationLevel, cancellationToken);
-                var entities = arguments.entitySelector(context).AsNoTracking();
-                return await arguments.resultFactory(entities, cancellationToken);
+                var (isolationLevel, entitySelector, resultFactory) = arguments;
+                await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+                var entities = entitySelector(context).AsNoTracking();
+                return await resultFactory(entities, cancellationToken);
             },
             cancellationToken);
     }
 
-    public Task<TResult> ExecuteInStrategyAsync<TArgument, TResult>(
+    public static Task<TResult> ExecuteInStrategyAsync<TContext, TArgument, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
         TArgument argument,
         Func<TContext, TArgument, CancellationToken, Task<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
+        where TContext : DbContext
     {
+        ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(resultFactory);
         return Core(dbContextFactory, argument, resultFactory, cancellationToken);
 
@@ -105,19 +126,23 @@ public sealed class DBContextExperiments<TContext>(IDbContextFactory<TContext> d
                 (argument, resultFactory),
                 static (contextBase, arguments, cancellationToken) =>
                 {
+                    var (argument, resultFactory) = arguments;
                     contextBase.ChangeTracker.Clear(); // When re-try triggers then ChangeTracker still has changes from previous try iirc.
-                    return arguments.resultFactory((TContext)contextBase, arguments.argument, cancellationToken);
+                    return resultFactory((TContext)contextBase, argument, cancellationToken);
                 },
                 null,
                 cancellationToken);
         }
     }
 
-    public IAsyncEnumerable<TResult> StreamFromDbAsync<TResult>(
+    public static IAsyncEnumerable<TResult> StreamAsync<TContext, TResult>(
+        this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, IQueryable<TResult>> queryFactory,
         CancellationToken cancellationToken = default)
+        where TContext : DbContext
         where TResult : class
     {
+        ArgumentNullException.ThrowIfNull(dbContextFactory);
         ArgumentNullException.ThrowIfNull(queryFactory);
         return Core(dbContextFactory, queryFactory, cancellationToken);
 
