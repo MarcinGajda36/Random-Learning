@@ -43,25 +43,17 @@ public static class NewSwitch
 
     public static bool IsPalindrome2(string text)
     {
-        ReadOnlySpan<char> leftToCheck = text;
-        while (leftToCheck.Length > 0)
+        var leftToCheck = text.AsSpan();
+        while (leftToCheck is [var first, .. var rest, var last])
         {
-            switch (leftToCheck)
+            if (first != last)
             {
-                case [var first, .. var mid, var last]:
-                    if (first == last)
-                    {
-                        leftToCheck = mid;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                    break;
-                case [_] or []:
-                    return true;
+                return false;
             }
+
+            leftToCheck = rest;
         }
+
         return true;
     }
 }
