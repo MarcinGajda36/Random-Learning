@@ -43,6 +43,7 @@ public static class NewSwitch
 
     public static bool IsPalindrome2(string text)
     {
+        ArgumentNullException.ThrowIfNull(text);
         var leftToCheck = text.AsSpan();
         while (leftToCheck is [var first, .. var rest, var last])
         {
