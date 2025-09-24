@@ -24,6 +24,10 @@ public static class NewSwitch
         ArgumentNullException.ThrowIfNull(text);
         return text switch
         {
+            // Notes about pattern matching:
+            // 1) I like going directly for the case i am interested in first, instead of excluding other cases first,
+            // 2) I like making each case 'self contained', it contradicts 'solving a problems you don't have' a bit though
+            // 3) I like assigning variable after pattern, it helps with using wrong variable in wrong place, especially with copy-paste
             { Length: > 1 } multiChar => Core(multiChar),
             { Length: <= 1 } => true,
         };
