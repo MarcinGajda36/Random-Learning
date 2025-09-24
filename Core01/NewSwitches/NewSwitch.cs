@@ -22,10 +22,10 @@ public static class NewSwitch
     public static bool IsPalindrome1(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        return text.AsSpan() switch
+        return text switch
         {
-        [] or [_] => true,
-            var multiChar => Core(multiChar),
+            { Length: > 1 } multiChar => Core(multiChar),
+            [] or [_] => true,
         };
 
         static bool Core(ReadOnlySpan<char> text)
