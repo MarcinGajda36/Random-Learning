@@ -21,6 +21,8 @@ public static class NewSwitch
 
     public static bool IsPalindrome1(string text)
     {
+        // Argument checking notes:
+        // 1) I am thinking about ArgumentNullException.ThrowIfNull in public methods and Debug.Assert in private methods
         ArgumentNullException.ThrowIfNull(text);
         return text switch
         {
