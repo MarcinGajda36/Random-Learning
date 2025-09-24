@@ -25,7 +25,7 @@ public static class NewSwitch
         return text switch
         {
             { Length: > 1 } multiChar => Core(multiChar),
-            [] or [_] => true,
+            { Length: <= 1 } => true,
         };
 
         static bool Core(ReadOnlySpan<char> text)
