@@ -80,7 +80,7 @@ public static class NewSwitch
             IReadOnlyCollection<TSource> collection => collection switch
             {
                 { Count: < 1 } => [],
-                { Count: >= 1 } some => MapCollection(some, mapper)
+                var some => MapCollection(some, mapper)
             },
             var enumerable => MapEnumerable(enumerable, mapper)
         };
