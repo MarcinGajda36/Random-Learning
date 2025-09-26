@@ -70,7 +70,7 @@ public static class NewSwitch
             TSource[] array => array switch
             {
                 [] => [],
-                var some => MapSpan(array, mapper),
+                var some => MapSpan(some, mapper),
             },
             List<TSource> list => list switch
             {
