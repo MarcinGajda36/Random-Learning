@@ -70,17 +70,17 @@ public static class NewSwitch
             TSource[] array => array switch
             {
                 [] => [],
-                var many => MapSpan(array, mapper),
+                var some => MapSpan(array, mapper),
             },
             List<TSource> list => list switch
             {
                 [] => [],
-                var many => MapSpan(CollectionsMarshal.AsSpan(many), mapper),
+                var some => MapSpan(CollectionsMarshal.AsSpan(some), mapper),
             },
             IReadOnlyCollection<TSource> collection => collection switch
             {
                 { Count: < 1 } => [],
-                { Count: >= 1 } notEmpty => MapCollection(notEmpty, mapper)
+                { Count: >= 1 } some => MapCollection(some, mapper)
             },
             var enumerable => MapEnumerable(enumerable, mapper)
         };
