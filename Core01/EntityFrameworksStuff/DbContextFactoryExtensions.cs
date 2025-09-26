@@ -9,11 +9,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
+public readonly record struct SavedResult<TResult>(TResult Result, int AffectedRows);
 public static class DbContextFactoryExtensions
 {
     public const IsolationLevel DefaultIsolationLevel = IsolationLevel.ReadCommitted;
 
-    public static Task<TResult> SaveInTransactionAsync<TContext, TArgument, TResult>(
+    public static Task<SavedResult<TResult>> SaveInTransactionAsync<TContext, TArgument, TResult>(
         this IDbContextFactory<TContext> dbContextFactory,
         TArgument argument,
         Func<TContext, TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
@@ -31,14 +32,14 @@ public static class DbContextFactoryExtensions
                 var (isolationLevel, resultFactory, argument) = arguments;
                 await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
                 var result = await resultFactory(context, argument, cancellationToken);
-                _ = await context.SaveChangesAsync(cancellationToken);
+                var affectedRows = await context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                return result;
+                return new SavedResult<TResult>(result, affectedRows);
             },
             cancellationToken);
     }
 
-    public static Task<TResult> SaveAsync<TContext, TArgument, TResult>(
+    public static Task<SavedResult<TResult>> SaveAsync<TContext, TArgument, TResult>(
         this IDbContextFactory<TContext> dbContextFactory,
         TArgument argument,
         Func<TContext, TArgument, CancellationToken, ValueTask<TResult>> resultFactory,
@@ -54,8 +55,8 @@ public static class DbContextFactoryExtensions
             {
                 var (resultFactory, argument) = arguments;
                 var result = await resultFactory(context, argument, cancellationToken);
-                _ = await context.SaveChangesAsync(cancellationToken);
-                return result;
+                var affectedRows = await context.SaveChangesAsync(cancellationToken);
+                return new SavedResult<TResult>(result, affectedRows);
             },
             cancellationToken);
     }
@@ -200,7 +201,7 @@ public static class DbContextFactoryExtensions
         }
     }
 
-    public static Task<TResult> SaveInTransactionAsync<TContext, TResult>(
+    public static Task<SavedResult<TResult>> SaveInTransactionAsync<TContext, TResult>(
         this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         IsolationLevel isolationLevel = DefaultIsolationLevel,
@@ -217,14 +218,14 @@ public static class DbContextFactoryExtensions
                 var (isolationLevel, resultFactory) = arguments;
                 await using var transaction = await context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
                 var result = await resultFactory(context, cancellationToken);
-                _ = await context.SaveChangesAsync(cancellationToken);
+                var affectedRows = await context.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                return result;
+                return new SavedResult<TResult>(result, affectedRows);
             },
             cancellationToken);
     }
 
-    public static Task<TResult> SaveAsync<TContext, TResult>(
+    public static Task<SavedResult<TResult>> SaveAsync<TContext, TResult>(
         this IDbContextFactory<TContext> dbContextFactory,
         Func<TContext, CancellationToken, ValueTask<TResult>> resultFactory,
         CancellationToken cancellationToken = default)
@@ -238,8 +239,8 @@ public static class DbContextFactoryExtensions
             static async (context, resultFactory, cancellationToken) =>
             {
                 var result = await resultFactory(context, cancellationToken);
-                _ = await context.SaveChangesAsync(cancellationToken);
-                return result;
+                var affectedRows = await context.SaveChangesAsync(cancellationToken);
+                return new SavedResult<TResult>(result, affectedRows);
             },
             cancellationToken);
     }
