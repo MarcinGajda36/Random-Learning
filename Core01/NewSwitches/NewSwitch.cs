@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace MarcinGajda.NewSwitches;
 
@@ -62,5 +64,63 @@ public static class NewSwitch
         }
 
         return true;
+    }
+
+    public static TDestination[] ConvertAll<TSource, TDestination>(
+        IEnumerable<TSource> source,
+        Func<TSource, TDestination> mapper)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(mapper);
+        return source switch
+        {
+            TSource[] array => array switch
+            {
+                [] => [],
+                var many => MapSpan(array, mapper),
+            },
+            List<TSource> list => list switch
+            {
+                [] => [],
+                var many => MapSpan(CollectionsMarshal.AsSpan(many), mapper),
+            },
+            IReadOnlyCollection<TSource> collection => collection switch
+            {
+                { Count: < 1 } => [],
+                { Count: >= 1 } notEmpty => MapCollection(notEmpty, mapper)
+            },
+            var enumerable => MapEnumerable(enumerable, mapper)
+        };
+
+        static TDestination[] MapSpan(Span<TSource> sources, Func<TSource, TDestination> mapper)
+        {
+            var destination = new TDestination[sources.Length];
+            for (var index = 0; index < sources.Length; index++)
+            {
+                destination[index] = mapper(sources[index]);
+            }
+            return destination;
+        }
+
+        static TDestination[] MapCollection(IReadOnlyCollection<TSource> sources, Func<TSource, TDestination> mapper)
+        {
+            var destination = new TDestination[sources.Count];
+            var index = 0;
+            foreach (var source in sources)
+            {
+                destination[index++] = mapper(source);
+            }
+            return destination;
+        }
+
+        static TDestination[] MapEnumerable(IEnumerable<TSource> sources, Func<TSource, TDestination> mapper)
+        {
+            var destination = ImmutableArray.CreateBuilder<TDestination>();
+            foreach (var source in sources)
+            {
+                destination.Add(mapper(source));
+            }
+            return destination.ToArray();
+        }
     }
 }
