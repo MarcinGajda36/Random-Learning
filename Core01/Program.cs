@@ -15,6 +15,7 @@ using MarcinGajda.Collections;
 using MarcinGajda.ContractsT;
 using MarcinGajda.Copy;
 using MarcinGajda.DataflowTests;
+using MarcinGajda.NewSwitches;
 using MarcinGajda.PeriodicCheckers;
 using MarcinGajda.RX_IX_Tests;
 using MarcinGajda.Structs;
@@ -54,6 +55,9 @@ internal class Program
 
     public static async Task Main()
     {
+        var converted1 = NewSwitch.ConvertAll(GetLazyEnumerable(1, 10, 1), x => x.ToString());
+        var converted2 = NewSwitch.ConvertAll(GetLazyEnumerable(1, -1, 1), x => x.ToString());
+
         var hash = SHA3_256.HashData([1, 2, 3]);
 
         await TestThreadStickyTaskScheduler();
@@ -121,6 +125,14 @@ internal class Program
         (_, _, _, int pop1, _, int pop2) = QueryCityDataForYears("New York City", 1960, 2010);
         Console.WriteLine($"Population change, 1960 to 2010: {pop2 - pop1:N0}");
         ParrallelTests();
+    }
+
+    private static IEnumerable<int> GetLazyEnumerable(int start, int end, int step)
+    {
+        for (var i = start; i < end; i += step)
+        {
+            yield return i;
+        }
     }
 
     private static async Task TestThreadStickyTaskScheduler()
