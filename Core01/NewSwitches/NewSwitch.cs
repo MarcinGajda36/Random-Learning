@@ -113,7 +113,7 @@ public static class NewSwitch
             {
                 destination.Add(mapper(source));
             }
-            return destination.ToArray();
+            return ImmutableCollectionsMarshal.AsArray(destination.DrainToImmutable())!;
         }
     }
 }
