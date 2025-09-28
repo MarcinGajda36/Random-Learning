@@ -61,57 +61,57 @@ public static class NewSwitch
 
     public static TDestination[] ConvertAll<TSource, TDestination>(
         IEnumerable<TSource> source,
-        Func<TSource, TDestination> mapper)
+        Func<TSource, TDestination> converter)
     {
         ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(mapper);
+        ArgumentNullException.ThrowIfNull(converter);
         return source switch
         {
             TSource[] array => array switch
             {
                 [] => [],
-                var some => MapSpan(some, mapper),
+                var some => ConvertSpan(some, converter),
             },
             List<TSource> list => list switch
             {
                 [] => [],
-                var some => MapSpan(CollectionsMarshal.AsSpan(some), mapper),
+                var some => ConvertSpan(CollectionsMarshal.AsSpan(some), converter),
             },
             IReadOnlyCollection<TSource> collection => collection switch
             {
                 { Count: < 1 } => [],
-                var some => MapCollection(some, mapper)
+                var some => ConvertCollection(some, converter)
             },
-            var enumerable => MapEnumerable(enumerable, mapper)
+            var enumerable => ConvertEnumerable(enumerable, converter)
         };
 
-        static TDestination[] MapSpan(Span<TSource> sources, Func<TSource, TDestination> mapper)
+        static TDestination[] ConvertSpan(Span<TSource> sources, Func<TSource, TDestination> converter)
         {
             var destination = new TDestination[sources.Length];
             for (var index = 0; index < sources.Length; index++)
             {
-                destination[index] = mapper(sources[index]);
+                destination[index] = converter(sources[index]);
             }
             return destination;
         }
 
-        static TDestination[] MapCollection(IReadOnlyCollection<TSource> sources, Func<TSource, TDestination> mapper)
+        static TDestination[] ConvertCollection(IReadOnlyCollection<TSource> sources, Func<TSource, TDestination> converter)
         {
             var destination = new TDestination[sources.Count];
             var index = 0;
             foreach (var source in sources)
             {
-                destination[index++] = mapper(source);
+                destination[index++] = converter(source);
             }
             return destination;
         }
 
-        static TDestination[] MapEnumerable(IEnumerable<TSource> sources, Func<TSource, TDestination> mapper)
+        static TDestination[] ConvertEnumerable(IEnumerable<TSource> sources, Func<TSource, TDestination> converter)
         {
             var destination = ImmutableArray.CreateBuilder<TDestination>();
             foreach (var source in sources)
             {
-                destination.Add(mapper(source));
+                destination.Add(converter(source));
             }
             return ImmutableCollectionsMarshal.AsArray(destination.DrainToImmutable())!;
         }
