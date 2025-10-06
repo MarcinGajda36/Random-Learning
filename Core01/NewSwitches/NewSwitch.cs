@@ -46,14 +46,14 @@ public static class NewSwitch
     {
         ArgumentNullException.ThrowIfNull(text);
         var leftToCheck = text.AsSpan();
-        while (leftToCheck is [var first, .. var rest, var last])
+        while (leftToCheck is [var first, .. var middle, var last])
         {
             if (first != last)
             {
                 return false;
             }
 
-            leftToCheck = rest;
+            leftToCheck = middle;
         }
 
         return true;
