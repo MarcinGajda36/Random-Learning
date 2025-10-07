@@ -85,7 +85,7 @@ public static class NewSwitch
             var enumerable => ConvertEnumerable(enumerable, converter)
         };
 
-        static TDestination[] ConvertSpan(Span<TSource> sources, Func<TSource, TDestination> converter)
+        static TDestination[] ConvertSpan(ReadOnlySpan<TSource> sources, Func<TSource, TDestination> converter)
         {
             var destination = new TDestination[sources.Length];
             for (var index = 0; index < sources.Length; index++)
@@ -115,23 +115,5 @@ public static class NewSwitch
             }
             return ImmutableCollectionsMarshal.AsArray(destination.DrainToImmutable())!;
         }
-    }
-
-    public class TestRecord(int x) : IEquatable<TestRecord?>
-    {
-        public int X { get; } = x;
-
-        public override bool Equals(object? obj) => Equals(obj as TestRecord);
-        public bool Equals(TestRecord? other) => other is not null && X == other.X;
-        public override int GetHashCode()
-        {
-            var hashCode = new HashCode(); // I wish i could seed it :( 
-            hashCode.Add(x);
-            return hashCode.ToHashCode();
-            return HashCode.Combine(X);
-        }
-
-        public static bool operator ==(TestRecord? left, TestRecord? right) => EqualityComparer<TestRecord>.Default.Equals(left, right);
-        public static bool operator !=(TestRecord? left, TestRecord? right) => !(left == right);
     }
 }
