@@ -132,8 +132,7 @@ public static class NewSwitch
     {
         while (Vector<TElement>.Count >= elements.Length)
         {
-            var next = new Vector<TElement>(elements);
-            initial = default(TOperation).DoVectorized(initial, next);
+            initial = default(TOperation).DoVectorized(initial, new Vector<TElement>(elements));
             elements = elements[Vector<TElement>.Count..];
         }
 
