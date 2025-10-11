@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 public static class NewSwitch
@@ -116,4 +117,46 @@ public static class NewSwitch
             return ImmutableCollectionsMarshal.AsArray(destination.DrainToImmutable())!;
         }
     }
+
+    public interface IOperationOnVectors<TElement, TResult>
+    {
+        Vector<TElement> DoVectorized(Vector<TElement> current, Vector<TElement> next);
+        TResult Accumulate(TResult accumulator, TElement left);
+    }
+
+    public static TResult ForEachVectorized<TElement, TResult, TOperation>(
+        this ReadOnlySpan<TElement> elements,
+        Vector<TElement> initial,
+        TResult accumulator)
+        where TOperation : struct, IOperationOnVectors<TElement, TResult>
+    {
+        var currentVector = initial;
+        var vectorCount = Vector<TElement>.Count;
+        while (vectorCount >= elements.Length)
+        {
+            var next = new Vector<TElement>(elements);
+            currentVector = default(TOperation).DoVectorized(currentVector, next);
+            elements = elements[vectorCount..];
+        }
+
+        for (var index = 0; index < vectorCount; ++index)
+        {
+            accumulator = default(TOperation).Accumulate(accumulator, currentVector[index]);
+        }
+
+        for (var index = 0; index < elements.Length; ++index)
+        {
+            accumulator = default(TOperation).Accumulate(accumulator, elements[index]);
+        }
+
+        return accumulator;
+    }
+
+    private readonly struct SumOperation : IOperationOnVectors<int, int>
+    {
+        public Vector<int> DoVectorized(Vector<int> current, Vector<int> next) => Vector.Add(current, next);
+        public int Accumulate(int accumulator, int left) => accumulator + left;
+    }
+    public static int SumVectorized(ReadOnlySpan<int> ints)
+        => ints.ForEachVectorized<int, int, SumOperation>(Vector<int>.Zero, 0);
 }
