@@ -130,10 +130,12 @@ public static class NewSwitch
         TResult accumulator)
         where TOperation : struct, IOperationOnVectors<TElement, TResult>
     {
+        nuint offset = 0;
+        ref var elementsRef = ref MemoryMarshal.GetReference(elements);
         while (Vector<TElement>.Count >= elements.Length)
         {
-            initial = default(TOperation).DoVectorized(initial, new Vector<TElement>(elements));
-            elements = elements[Vector<TElement>.Count..];
+            initial = default(TOperation).DoVectorized(initial, Vector.LoadUnsafe(ref elementsRef, offset));
+            offset += (nuint)Vector<TElement>.Count;
         }
 
         for (var index = 0; index < Vector<TElement>.Count; ++index)
@@ -141,9 +143,9 @@ public static class NewSwitch
             accumulator = default(TOperation).Accumulate(accumulator, initial[index]);
         }
 
-        for (var index = 0; index < elements.Length; ++index)
+        for (var index = offset; index < (nuint)elements.Length; ++index)
         {
-            accumulator = default(TOperation).Accumulate(accumulator, elements[index]);
+            accumulator = default(TOperation).Accumulate(accumulator, elements[(int)index]);
         }
 
         return accumulator;
