@@ -130,18 +130,16 @@ public static class NewSwitch
         TResult accumulator)
         where TOperation : struct, IOperationOnVectors<TElement, TResult>
     {
-        var currentVector = initial;
-        var vectorCount = Vector<TElement>.Count;
-        while (vectorCount >= elements.Length)
+        while (Vector<TElement>.Count >= elements.Length)
         {
             var next = new Vector<TElement>(elements);
-            currentVector = default(TOperation).DoVectorized(currentVector, next);
-            elements = elements[vectorCount..];
+            initial = default(TOperation).DoVectorized(initial, next);
+            elements = elements[Vector<TElement>.Count..];
         }
 
-        for (var index = 0; index < vectorCount; ++index)
+        for (var index = 0; index < Vector<TElement>.Count; ++index)
         {
-            accumulator = default(TOperation).Accumulate(accumulator, currentVector[index]);
+            accumulator = default(TOperation).Accumulate(accumulator, initial[index]);
         }
 
         for (var index = 0; index < elements.Length; ++index)
