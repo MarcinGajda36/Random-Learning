@@ -124,18 +124,16 @@ public static class NewSwitch
         TResult Accumulate(TResult accumulator, TElement left);
     }
 
-    public static TResult ForEachVectorized<TElement, TResult, TOperation>(
+    public static TResult ForEachVectorized1<TElement, TResult, TOperation>(
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
         where TOperation : struct, IOperationOnVectors<TElement, TResult>
     {
-        nuint offset = 0;
-        ref var elementsRef = ref MemoryMarshal.GetReference(elements);
         while (Vector<TElement>.Count >= elements.Length)
         {
-            initial = default(TOperation).DoVectorized(initial, Vector.LoadUnsafe(ref elementsRef, offset));
-            offset += (nuint)Vector<TElement>.Count;
+            initial = default(TOperation).DoVectorized(initial, new Vector<TElement>(elements));
+            elements = elements[Vector<TElement>.Count..];
         }
 
         for (var index = 0; index < Vector<TElement>.Count; ++index)
@@ -143,7 +141,34 @@ public static class NewSwitch
             accumulator = default(TOperation).Accumulate(accumulator, initial[index]);
         }
 
-        for (var index = offset; index < (nuint)elements.Length; ++index)
+        for (var index = 0; index < elements.Length; ++index)
+        {
+            accumulator = default(TOperation).Accumulate(accumulator, elements[index]);
+        }
+
+        return accumulator;
+    }
+
+    public static TResult ForEachVectorized2<TElement, TResult, TOperation>(
+        this ReadOnlySpan<TElement> elements,
+        Vector<TElement> initial,
+        TResult accumulator)
+        where TOperation : struct, IOperationOnVectors<TElement, TResult>
+    {
+        nuint offsetToElements = 0;
+        ref var elementsRef = ref MemoryMarshal.GetReference(elements);
+        for (var operationsLeft = elements.Length / Vector<TElement>.Count; operationsLeft > 0; --operationsLeft)
+        {
+            initial = default(TOperation).DoVectorized(initial, Vector.LoadUnsafe(ref elementsRef, offsetToElements));
+            offsetToElements += (nuint)Vector<TElement>.Count;
+        }
+
+        for (var index = 0; index < Vector<TElement>.Count; ++index)
+        {
+            accumulator = default(TOperation).Accumulate(accumulator, initial[index]);
+        }
+
+        for (var index = offsetToElements; index < (nuint)elements.Length; ++index)
         {
             accumulator = default(TOperation).Accumulate(accumulator, elements[(int)index]);
         }
