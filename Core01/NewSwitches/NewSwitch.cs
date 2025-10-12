@@ -128,7 +128,7 @@ public static class NewSwitch
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
-        where TOperation : IOperationOnVectors1<TElement, TResult>
+        where TOperation : struct, IOperationOnVectors1<TElement, TResult>
     {
         while (Vector<TElement>.Count >= elements.Length)
         {
@@ -149,7 +149,7 @@ public static class NewSwitch
         return accumulator;
     }
 
-    private class SumOperation1 : IOperationOnVectors1<int, int>
+    private readonly struct SumOperation1 : IOperationOnVectors1<int, int>
     {
         public static Vector<int> DoVectorized(Vector<int> current, Vector<int> next) => Vector.Add(current, next);
         public static int Accumulate(int accumulator, int left) => accumulator + left;
