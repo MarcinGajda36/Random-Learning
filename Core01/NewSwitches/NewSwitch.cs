@@ -118,7 +118,7 @@ public static class NewSwitch
         }
     }
 
-    public interface IOperationOnVectors1<TElement, TResult>
+    public interface IOperationOnVectors<TElement, TResult>
     {
         static abstract Vector<TElement> DoVectorized(Vector<TElement> current, Vector<TElement> next);
         static abstract TResult Accumulate(TResult accumulator, TElement left);
@@ -128,7 +128,7 @@ public static class NewSwitch
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
-        where TOperation : struct, IOperationOnVectors1<TElement, TResult>
+        where TOperation : struct, IOperationOnVectors<TElement, TResult>
     {
         while (elements.Length >= Vector<TElement>.Count)
         {
@@ -149,53 +149,41 @@ public static class NewSwitch
         return accumulator;
     }
 
-    private readonly struct SumOperation1 : IOperationOnVectors1<int, int>
+    private readonly struct SumOperation : IOperationOnVectors<int, int>
     {
         public static Vector<int> DoVectorized(Vector<int> current, Vector<int> next) => Vector.Add(current, next);
         public static int Accumulate(int accumulator, int left) => accumulator + left;
     }
 
     public static int SumVectorized1(ReadOnlySpan<int> ints)
-        => ForEachVectorized1<int, int, SumOperation1>(ints, Vector<int>.Zero, 0);
-
-    public interface IOperationOnVectors2<TElement, TResult>
-    {
-        Vector<TElement> DoVectorized(Vector<TElement> current, Vector<TElement> next);
-        TResult Accumulate(TResult accumulator, TElement left);
-    }
+        => ForEachVectorized1<int, int, SumOperation>(ints, Vector<int>.Zero, 0);
 
     public static TResult ForEachVectorized2<TElement, TResult, TOperation>(
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
-        where TOperation : struct, IOperationOnVectors2<TElement, TResult>
+        where TOperation : struct, IOperationOnVectors<TElement, TResult>
     {
-        nuint offsetToElements = 0;
         ref var elementsRef = ref MemoryMarshal.GetReference(elements);
-        for (var operationsLeft = elements.Length / Vector<TElement>.Count; operationsLeft > 0; --operationsLeft)
+        var offsetToElements = 0;
+        for (; offsetToElements <= elements.Length - Vector<TElement>.Count; offsetToElements += Vector<TElement>.Count)
         {
-            initial = default(TOperation).DoVectorized(initial, Vector.LoadUnsafe(ref elementsRef, offsetToElements));
-            offsetToElements += (nuint)Vector<TElement>.Count;
+            initial = TOperation.DoVectorized(initial, Vector.LoadUnsafe(ref elementsRef, (nuint)offsetToElements));
         }
 
         for (var index = 0; index < Vector<TElement>.Count; ++index)
         {
-            accumulator = default(TOperation).Accumulate(accumulator, initial[index]);
+            accumulator = TOperation.Accumulate(accumulator, initial[index]);
         }
 
-        for (var index = (int)offsetToElements; index < elements.Length; ++index)
+        for (var index = offsetToElements; index < elements.Length; ++index)
         {
-            accumulator = default(TOperation).Accumulate(accumulator, elements[index]);
+            accumulator = TOperation.Accumulate(accumulator, elements[index]);
         }
 
         return accumulator;
     }
 
-    private readonly struct SumOperation2 : IOperationOnVectors2<int, int>
-    {
-        public Vector<int> DoVectorized(Vector<int> current, Vector<int> next) => Vector.Add(current, next);
-        public int Accumulate(int accumulator, int left) => accumulator + left;
-    }
     public static int SumVectorized2(ReadOnlySpan<int> ints)
-        => ForEachVectorized2<int, int, SumOperation2>(ints, Vector<int>.Zero, 0);
+        => ForEachVectorized2<int, int, SumOperation>(ints, Vector<int>.Zero, 0);
 }
