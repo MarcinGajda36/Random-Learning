@@ -156,7 +156,7 @@ public static class NewSwitch
     }
 
     public static int SumVectorized1(ReadOnlySpan<int> ints)
-        => ints.ForEachVectorized1<int, int, SumOperation1>(Vector<int>.Zero, 0);
+        => ForEachVectorized1<int, int, SumOperation1>(ints, Vector<int>.Zero, 0);
 
     public interface IOperationOnVectors2<TElement, TResult>
     {
@@ -197,5 +197,5 @@ public static class NewSwitch
         public int Accumulate(int accumulator, int left) => accumulator + left;
     }
     public static int SumVectorized2(ReadOnlySpan<int> ints)
-        => ints.ForEachVectorized2<int, int, SumOperation2>(Vector<int>.Zero, 0);
+        => ForEachVectorized2<int, int, SumOperation2>(ints, Vector<int>.Zero, 0);
 }
