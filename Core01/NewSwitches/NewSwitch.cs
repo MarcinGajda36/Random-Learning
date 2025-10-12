@@ -130,7 +130,7 @@ public static class NewSwitch
         TResult accumulator)
         where TOperation : struct, IOperationOnVectors1<TElement, TResult>
     {
-        while (Vector<TElement>.Count >= elements.Length)
+        while (elements.Length >= Vector<TElement>.Count)
         {
             initial = TOperation.DoVectorized(initial, new Vector<TElement>(elements));
             elements = elements[Vector<TElement>.Count..];
