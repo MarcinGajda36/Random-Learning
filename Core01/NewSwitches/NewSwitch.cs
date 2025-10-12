@@ -124,41 +124,13 @@ public static class NewSwitch
         static abstract TResult Accumulate(TResult accumulator, TElement left);
     }
 
-    public static TResult ForEachVectorized1<TElement, TResult, TOperation>(
-        this ReadOnlySpan<TElement> elements,
-        Vector<TElement> initial,
-        TResult accumulator)
-        where TOperation : struct, IOperationOnVectors<TElement, TResult>
-    {
-        while (elements.Length >= Vector<TElement>.Count)
-        {
-            initial = TOperation.DoVectorized(initial, new Vector<TElement>(elements));
-            elements = elements[Vector<TElement>.Count..];
-        }
-
-        for (var index = 0; index < Vector<TElement>.Count; ++index)
-        {
-            accumulator = TOperation.Accumulate(accumulator, initial[index]);
-        }
-
-        for (var index = 0; index < elements.Length; ++index)
-        {
-            accumulator = TOperation.Accumulate(accumulator, elements[index]);
-        }
-
-        return accumulator;
-    }
-
     private readonly struct SumOperation : IOperationOnVectors<int, int>
     {
         public static Vector<int> DoVectorized(Vector<int> current, Vector<int> next) => Vector.Add(current, next);
         public static int Accumulate(int accumulator, int left) => accumulator + left;
     }
 
-    public static int SumVectorized1(ReadOnlySpan<int> ints)
-        => ForEachVectorized1<int, int, SumOperation>(ints, Vector<int>.Zero, 0);
-
-    public static TResult ForEachVectorized2<TElement, TResult, TOperation>(
+    public static TResult ForEachVectorized<TElement, TResult, TOperation>(
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
@@ -184,6 +156,6 @@ public static class NewSwitch
         return accumulator;
     }
 
-    public static int SumVectorized2(ReadOnlySpan<int> ints)
-        => ForEachVectorized2<int, int, SumOperation>(ints, Vector<int>.Zero, 0);
+    public static int SumVectorized(ReadOnlySpan<int> ints)
+        => ForEachVectorized<int, int, SumOperation>(ints, Vector<int>.Zero, 0);
 }
