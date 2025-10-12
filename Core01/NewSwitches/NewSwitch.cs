@@ -182,5 +182,5 @@ public static class NewSwitch
         public int Accumulate(int accumulator, int left) => accumulator + left;
     }
     public static int SumVectorized(ReadOnlySpan<int> ints)
-        => ints.ForEachVectorized<int, int, SumOperation>(Vector<int>.Zero, 0);
+        => ints.ForEachVectorized2<int, int, SumOperation>(Vector<int>.Zero, 0);
 }
