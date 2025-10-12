@@ -168,9 +168,9 @@ public static class NewSwitch
             accumulator = default(TOperation).Accumulate(accumulator, initial[index]);
         }
 
-        for (var index = offsetToElements; index < (nuint)elements.Length; ++index)
+        for (var index = (int)offsetToElements; index < elements.Length; ++index)
         {
-            accumulator = default(TOperation).Accumulate(accumulator, elements[(int)index]);
+            accumulator = default(TOperation).Accumulate(accumulator, elements[index]);
         }
 
         return accumulator;
