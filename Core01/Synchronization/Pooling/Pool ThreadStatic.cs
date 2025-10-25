@@ -1,24 +1,16 @@
-﻿using System;
+﻿namespace MarcinGajda.Synchronization.Pooling;
+using System;
 using System.Runtime.CompilerServices;
 
-namespace MarcinGajda.Synchronization.Pooling;
-public class ThreadStaticPool<TValue>
+public sealed class ThreadStaticPool<TValue>(Func<TValue> factory)
 {
-    public struct Lease : IDisposable // This being struct is dangerous right?
+    public sealed class Lease(TValue value, ThreadStaticPool<TValue> parent) : IDisposable
     {
-        readonly TValue value;
-        readonly ThreadStaticPool<TValue> parent;
         bool isDisposed;
 
-        public readonly TValue Value => isDisposed
+        public TValue Value => isDisposed
             ? throw new ObjectDisposedException(nameof(Lease))
             : value;
-
-        public Lease(TValue value, ThreadStaticPool<TValue> parent)
-        {
-            this.value = value;
-            this.parent = parent;
-        }
 
         public void Dispose()
         {
@@ -30,20 +22,15 @@ public class ThreadStaticPool<TValue>
         }
     }
 
-    class Pool
+    sealed class Pool(ThreadStaticPool<TValue> parent)
     {
         const int ArraySize = 6;
-        [InlineArray(ArraySize)] struct TValues { private TValue first; };
+        [InlineArray(ArraySize)]
+        struct TValues { TValue first; };
 
-        readonly Func<TValue> factory;
+        readonly Func<TValue> factory = parent.factory;
         int available;
-        TValues values;
-
-        public Pool(ThreadStaticPool<TValue> parent)
-        {
-            values = new();
-            factory = parent.factory;
-        }
+        TValues values = new();
 
         public TValue GetOrCreate()
         {
@@ -66,18 +53,14 @@ public class ThreadStaticPool<TValue>
         }
     }
 
-    [ThreadStatic] static Pool? pool;
-    readonly Func<TValue> factory;
-
-    public ThreadStaticPool(Func<TValue> factory)
-    {
-        this.factory = factory;
-    }
+    [ThreadStatic]
+    static Pool? pool;
+    readonly Func<TValue> factory = factory;
 
     public TValue Rent()
-        => pool is null
-        ? factory()
-        : pool.GetOrCreate();
+        => pool is { } notNull
+        ? notNull.GetOrCreate()
+        : factory();
 
     public Lease RentLease()
         => new(Rent(), this);
