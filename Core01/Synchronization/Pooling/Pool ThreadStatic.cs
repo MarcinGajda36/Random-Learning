@@ -8,9 +8,14 @@ public sealed class ThreadStaticPool<TValue>(Func<TValue> factory)
     {
         bool isDisposed;
 
-        public TValue Value => isDisposed
-            ? throw new ObjectDisposedException(nameof(Lease))
-            : value;
+        public TValue Value
+        {
+            get
+            {
+                ObjectDisposedException.ThrowIf(isDisposed, this);
+                return value;
+            }
+        }
 
         public void Dispose()
         {
