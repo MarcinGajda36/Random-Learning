@@ -80,7 +80,7 @@ internal static class SReadOnlyListEnumerator2
 {
     public static ReadOnlyListEnumerator2<TArgument1, TElement1, TResult1, TArgument2, TResult2> Create
         <TArgument1, TElement1, TResult1, TArgument2, TResult2>(
-        ReadOnlyListEnumerator1<TArgument1, TElement1, TResult1> Enumerator1,
+        in ReadOnlyListEnumerator1<TArgument1, TElement1, TResult1> Enumerator1,
         TArgument2 Argument,
         Func<TResult1, TArgument2, (bool, TResult2)> Func)
         => new(Enumerator1, Argument, Func);
@@ -126,7 +126,7 @@ internal static class Test
 {
     public static void Test1()
     {
-        int[] arr = new int[] { 1, 2, 3 };
+        int[] arr = [1, 2, 3];
         var results = arr
             .CreateEnumerator()
             .Select(0, static (element, argument) => element + argument)

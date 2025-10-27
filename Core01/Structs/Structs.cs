@@ -82,7 +82,7 @@ public static class Structs
 {
     private static void TestSpan()
     {
-        int[] arr = new int[] { 1, 2, 3, 4 };
+        int[] arr = [1, 2, 3, 4];
         Span<int> span = arr.AsSpan(1, 2);
         int first = span[0];
     }

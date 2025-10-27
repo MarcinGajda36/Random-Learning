@@ -19,7 +19,7 @@ public class RangeExtractionTests
     public void Extract_SingleElementArray_ReturnsElementAsString()
     {
         // Arrange
-        int[] input = { 5 };
+        int[] input = [5];
 
         // Act
         var result = RangeExtraction.Extract(input);
@@ -32,7 +32,7 @@ public class RangeExtractionTests
     public void Extract_ConsecutiveElements_ReturnsRange()
     {
         // Arrange
-        int[] input = { 1, 2, 3, 4, 5 };
+        int[] input = [1, 2, 3, 4, 5];
 
         // Act
         var result = RangeExtraction.Extract(input);
@@ -45,7 +45,7 @@ public class RangeExtractionTests
     public void Extract_NonConsecutiveElements_ReturnsCommaSeparated()
     {
         // Arrange
-        int[] input = { 1, 3, 5, 7 };
+        int[] input = [1, 3, 5, 7];
 
         // Act
         var result = RangeExtraction.Extract(input);
@@ -58,7 +58,7 @@ public class RangeExtractionTests
     public void Extract_MixedElements_ReturnsCorrectRangesAndElements()
     {
         // Arrange
-        int[] input = { 1, 2, 3, 5, 7, 8, 9, 11 };
+        int[] input = [1, 2, 3, 5, 7, 8, 9, 11];
 
         // Act
         var result = RangeExtraction.Extract(input);

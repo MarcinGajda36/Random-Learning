@@ -5,7 +5,7 @@ namespace Benchmarks;
 [MemoryDiagnoser]
 public class Concats
 {
-    private readonly int[] elements = new[] { 1, 2, 3 };
+    private readonly int[] elements = [1, 2, 3];
 
     [Params(10_000)]
     public int Iterations { get; set; }

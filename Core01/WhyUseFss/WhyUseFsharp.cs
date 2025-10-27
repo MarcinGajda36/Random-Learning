@@ -15,7 +15,7 @@ public class ShoppingCart<TItem>
     {
         public ShoppingCart<TItem> Add(TItem item)
         {
-            TItem[] newItems = new[] { item };
+            TItem[] newItems = [item];
             var newState = new ActiveState(newItems);
             return FromState(newState);
         }

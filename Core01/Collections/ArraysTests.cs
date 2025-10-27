@@ -28,7 +28,7 @@ public static class ArraysTests
 
     public static void Test1()
     {
-        int[] arr = { 1, 2, 3, 4 };
+        int[] arr = [1, 2, 3, 4];
         int[][] batched1 = arr.Batch(1).ToArray();
         int[][] batched3 = arr.Batch(3).ToArray();
         int[][] batched10 = arr.Batch(10).ToArray();
@@ -83,7 +83,7 @@ public static class ArraysTests
         }
 
         span.Clear();
-        int[] arr = { 4, 5, 6 };
+        int[] arr = [4, 5, 6];
         Memory<int> mem = arr.AsMemory();
     }
     public static void Test3()

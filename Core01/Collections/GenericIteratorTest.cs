@@ -26,7 +26,7 @@ public static class Test12312312312
 {
     public static void Test()
     {
-        int[] arr = new int[] { 1, 2, 3 };
+        int[] arr = [1, 2, 3];
         var iterator = Iterator.Create(arr, (int x) => x);
     }
 }
