@@ -15,7 +15,7 @@ public class PoolsBenchmarks
     readonly Func<RandomType> createRandomType = () => new RandomType { X = 5 };
 
     record ThreadParam<TPool, TLease>(TPool Pool, Func<TPool, TLease> Rent, Action<TLease> DoSomething, int N)
-        where TLease : struct, IDisposable;
+        where TLease : IDisposable;
 
     [Params(500_000)]
     public int Rents { get; set; }
@@ -48,7 +48,7 @@ public class PoolsBenchmarks
     //}
 
     public void Setup<TPool, TLease>()
-        where TLease : struct, IDisposable
+        where TLease : IDisposable
     {
         threads = new Thread[Threads];
         for (int index = 0; index < Threads; index++)
@@ -67,7 +67,7 @@ public class PoolsBenchmarks
     }
 
     public void Test<TPool, TLease>(TPool pool, Func<TPool, TLease> rent, Action<TLease> doSomething)
-        where TLease : struct, IDisposable
+        where TLease : IDisposable
     {
         var threadParam = new ThreadParam<TPool, TLease>(pool, rent, doSomething, Rents);
         for (int index = 0; index < threads!.Length; index++)
