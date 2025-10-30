@@ -24,13 +24,13 @@ public static class HistoricalToLive_IList
         private List<TValue>? liveBuffer = [];
 
         public IEnumerable<TValue> HandleNextMessage(in Message<TValue> message)
-            => message.Type switch
+            => message switch
             {
-                MessageType.Live => HandleLiveMessage(message.Values),
-                MessageType.Historical => message.Values,
-                MessageType.HistoricalCompleted => HandleHistoricalCompletion(),
-                MessageType.HistoricalError => throw message.Exception!,
-                _ => throw new InvalidOperationException($"Unknown message: '{message}'."),
+                { Type: MessageType.Live, Values: var values } => HandleLiveMessage(values),
+                { Type: MessageType.Historical, Values: var values } => values,
+                { Type: MessageType.HistoricalCompleted } => HandleHistoricalCompletion(),
+                { Type: MessageType.HistoricalError, Exception: { } exception } => throw exception,
+                var unknown => throw new InvalidOperationException($"Unknown message: '{unknown}'."),
             };
 
         private List<TValue> HandleHistoricalCompletion()
@@ -69,10 +69,10 @@ public static class HistoricalToLive_IList
 
     private static IObservable<TValue> HandleConcat<TValue>(this IObservable<Message<TValue>> merged)
         => merged
-            .Scan(
-                new Concat<TValue>([], new ConcatState<TValue>()),
-                static (previous, message) => HandleNextMessage(in previous, in message))
-            .SelectMany(state => state.Return);
+        .Scan(
+            new Concat<TValue>([], new ConcatState<TValue>()),
+            static (previous, message) => HandleNextMessage(in previous, in message))
+        .SelectMany(state => state.Return);
 
     private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
         => previous with { Return = previous.State.HandleNextMessage(in message) };
@@ -83,14 +83,16 @@ public static class HistoricalToLive_IList
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
         .Materialize()
-        .Select(notification => notification.Kind switch
+        .Select(notification => notification switch
         {
-            NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, [notification.Value], null),
-            NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, [], notification.Exception!),
-            NotificationKind.OnCompleted => new Message<TValue>(MessageType.HistoricalCompleted, [], null),
-            _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
+            { Kind: NotificationKind.OnNext, Value: var value } => new Message<TValue>(MessageType.Historical, [value], null),
+            { Kind: NotificationKind.OnError, Exception: { } exception } => new Message<TValue>(MessageType.HistoricalError, [], exception),
+            { Kind: NotificationKind.OnCompleted } => new Message<TValue>(MessageType.HistoricalCompleted, [], null),
+            var unknown => throw new InvalidOperationException($"Unknown notification: '{unknown}'."),
         });
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IEnumerable<TValue> historical)
-        => Observable.Return(new Message<TValue>(MessageType.Historical, historical, null));
+        => Observable
+        .Return(new Message<TValue>(MessageType.Historical, historical, null))
+        .Append(new Message<TValue>(MessageType.HistoricalCompleted, [], null));
 }
