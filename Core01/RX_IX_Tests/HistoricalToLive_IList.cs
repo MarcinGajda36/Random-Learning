@@ -1,10 +1,11 @@
-﻿namespace MarcinGajda.RX_IX_Tests;
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+
+namespace MarcinGajda.RX_IX_Tests;
 
 public static class HistoricalToLive_IList
 {
@@ -54,13 +55,24 @@ public static class HistoricalToLive_IList
 
     public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
         IObservable<TValue> live,
-        IObservable<TValue> historical)
+        IObservable<TValue> historicalObservable)
         => GetLiveMessages(live)
-        .Merge(GetHistoricalMessages(historical))
-        .Scan(
-            new Concat<TValue>([], new ConcatState<TValue>()),
-            static (previous, message) => HandleNextMessage(in previous, in message))
-        .SelectMany(state => state.Return);
+        .Merge(GetHistoricalMessages(historicalObservable))
+        .HandleConcat();
+
+    public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
+        IObservable<TValue> live,
+        IEnumerable<TValue> historicalEnumerable)
+        => GetLiveMessages(live)
+        .Merge(GetHistoricalMessages(historicalEnumerable))
+        .HandleConcat();
+
+    private static IObservable<TValue> HandleConcat<TValue>(this IObservable<Message<TValue>> merged)
+        => merged
+            .Scan(
+                new Concat<TValue>([], new ConcatState<TValue>()),
+                static (previous, message) => HandleNextMessage(in previous, in message))
+            .SelectMany(state => state.Return);
 
     private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
         => previous with { Return = previous.State.HandleNextMessage(in message) };
@@ -70,13 +82,15 @@ public static class HistoricalToLive_IList
 
     private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IObservable<TValue> historical)
         => historical
-        .ToList()
         .Materialize()
         .Select(notification => notification.Kind switch
         {
-            NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, notification.Value, null),
+            NotificationKind.OnNext => new Message<TValue>(MessageType.Historical, [notification.Value], null),
             NotificationKind.OnError => new Message<TValue>(MessageType.HistoricalError, [], notification.Exception!),
             NotificationKind.OnCompleted => new Message<TValue>(MessageType.HistoricalCompleted, [], null),
             _ => throw new InvalidOperationException($"Unknown notification: '{notification}'."),
         });
+
+    private static IObservable<Message<TValue>> GetHistoricalMessages<TValue>(IEnumerable<TValue> historical)
+        => Observable.Return(new Message<TValue>(MessageType.Historical, historical, null));
 }
