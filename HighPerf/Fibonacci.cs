@@ -17,7 +17,7 @@ public class Fibonacci
 
         var previous = 0;
         var current = 1;
-        while (number-- > 0)
+        while (--number > 0)
         {
             var oldCurrent = current;
             current += previous;
