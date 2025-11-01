@@ -1,4 +1,5 @@
 ﻿namespace MarcinGajda.Synchronization.Pooling;
+
 using System;
 using System.Runtime.CompilerServices;
 
