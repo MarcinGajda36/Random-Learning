@@ -56,9 +56,9 @@ public static class Vectores
         => ForEach<TNumber, TResult, SumOperation<TNumber, TResult>>(numbers, Vector<TNumber>.Zero, initialResult);
 
     public static TResult AverageVectorized<TNumber, TResult>(ReadOnlySpan<TNumber> numbers)
-        // This where TNumber is also annoying:
-        // 1) i want TResult instead of double
-        // 2) if i put double there then average will only work on <double, double>
+        // This IAdditionOperators, IDivisionOperators are not working:
+        // 1) double doesn't know 'double / int'
+        // 2) long doesn't know int + long
         where TNumber : INumberBase<TNumber>
         where TResult : INumberBase<TResult>, IAdditionOperators<TResult, TNumber, TResult>, IDivisionOperators<TResult, int, TResult>
     {
