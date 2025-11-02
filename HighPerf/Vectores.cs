@@ -66,8 +66,7 @@ public static class Vectores
     public static double Test()
     {
         ReadOnlySpan<int> numbers = [1, 2, 3, 4, 5, 6];
-        var sum = AverageVectorized(numbers, 0d);
-        var average = sum / numbers.Length;
+        var average = AverageVectorized(numbers, 0d);
         return average;
     }
 }
