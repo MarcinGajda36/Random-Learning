@@ -59,10 +59,10 @@ public static class Vectores
         // This where TNumber is also annoying:
         // 1) i want TResult instead of double
         // 2) if i put double there then average will only work on <double, double>
-        where TNumber : INumberBase<TNumber>, IDivisionOperators<TNumber, double, TResult>
-        where TResult : INumberBase<TResult>
+        where TNumber : INumberBase<TNumber>
+        where TResult : INumberBase<TResult>, IAdditionOperators<TResult, TNumber, TResult>, IDivisionOperators<TResult, int, TResult>
     {
-        var sum = ForEach<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
+        var sum = ForEach<TNumber, TResult, SumOperation<TNumber, TResult>>(numbers, Vector<TNumber>.Zero, TResult.Zero);
         return sum / numbers.Length;
     }
 
