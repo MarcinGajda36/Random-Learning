@@ -20,7 +20,7 @@ public static class Vectores
         public static TAccumulator Accumulate(TAccumulator accumulator, TNumber left) => accumulator + left;
     }
 
-    public static TResult ForEachVectorized<TElement, TResult, TOperation>(
+    public static TResult ForEach<TElement, TResult, TOperation>(
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
@@ -48,12 +48,12 @@ public static class Vectores
 
     public static TNumber SumVectorized<TNumber>(ReadOnlySpan<TNumber> numbers)
         where TNumber : INumberBase<TNumber>
-        => ForEachVectorized<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
+        => ForEach<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
 
     public static TResult SumVectorized<TNumber, TResult>(ReadOnlySpan<TNumber> numbers, TResult initialResult)
         where TNumber : INumberBase<TNumber>
         where TResult : INumberBase<TResult>, IAdditionOperators<TResult, TNumber, TResult> // This is annoying x1
-        => ForEachVectorized<TNumber, TResult, SumOperation<TNumber, TResult>>(numbers, Vector<TNumber>.Zero, initialResult);
+        => ForEach<TNumber, TResult, SumOperation<TNumber, TResult>>(numbers, Vector<TNumber>.Zero, initialResult);
 
     public static TResult AverageVectorized<TNumber, TResult>(ReadOnlySpan<TNumber> numbers)
         // This where TNumber is also annoying:
@@ -62,7 +62,7 @@ public static class Vectores
         where TNumber : INumberBase<TNumber>, IDivisionOperators<TNumber, double, TResult>
         where TResult : INumberBase<TResult>
     {
-        var sum = ForEachVectorized<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
+        var sum = ForEach<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
         return sum / numbers.Length;
     }
 
