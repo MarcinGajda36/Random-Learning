@@ -12,11 +12,12 @@ public static class Vectores
         static abstract TResult Accumulate(TResult accumulator, TElement left);
     }
 
-    private readonly struct SumOperation<TNumber> : IOperationOnVectors<TNumber, TNumber>
+    private readonly struct SumOperation<TNumber, TAccumulator> : IOperationOnVectors<TNumber, TAccumulator>
         where TNumber : INumberBase<TNumber>
+        where TAccumulator : INumberBase<TAccumulator>, IAdditionOperators<TAccumulator, TNumber, TAccumulator>
     {
         public static Vector<TNumber> DoVectorized(Vector<TNumber> current, Vector<TNumber> next) => Vector.Add(current, next);
-        public static TNumber Accumulate(TNumber accumulator, TNumber left) => accumulator + left;
+        public static TAccumulator Accumulate(TAccumulator accumulator, TNumber left) => accumulator + left;
     }
 
     public static TResult ForEachVectorized<TElement, TResult, TOperation>(
@@ -45,7 +46,31 @@ public static class Vectores
         return accumulator;
     }
 
-    public static TNumber SumVectorized<TNumber>(ReadOnlySpan<TNumber> ints)
+    public static TNumber SumVectorized<TNumber>(ReadOnlySpan<TNumber> numbers)
         where TNumber : INumberBase<TNumber>
-        => ForEachVectorized<TNumber, TNumber, SumOperation<TNumber>>(ints, Vector<TNumber>.Zero, TNumber.Zero);
+        => ForEachVectorized<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
+
+    public static TResult SumVectorized<TNumber, TResult>(ReadOnlySpan<TNumber> numbers, TResult initialResult)
+        where TNumber : INumberBase<TNumber>
+        where TResult : INumberBase<TResult>, IAdditionOperators<TResult, TNumber, TResult> // This is annoying x1
+        => ForEachVectorized<TNumber, TResult, SumOperation<TNumber, TResult>>(numbers, Vector<TNumber>.Zero, initialResult);
+
+    public static TResult AverageVectorized<TNumber, TResult>(ReadOnlySpan<TNumber> numbers)
+        // This where TNumber is also annoying:
+        // 1) i want TResult instead of double
+        // 2) if i put double there then average will only work on <double, double>
+        where TNumber : INumberBase<TNumber>, IDivisionOperators<TNumber, double, TResult>
+        where TResult : INumberBase<TResult>
+    {
+        var sum = ForEachVectorized<TNumber, TNumber, SumOperation<TNumber, TNumber>>(numbers, Vector<TNumber>.Zero, TNumber.Zero);
+        return sum / numbers.Length;
+    }
+
+    public static double Test()
+    {
+        ReadOnlySpan<int> numbers = [1, 2, 3, 4, 5, 6];
+        var sum = SumVectorized(numbers);
+        var average = sum / numbers.Length;
+        return average;
+    }
 }
