@@ -117,45 +117,4 @@ public static class NewSwitch
             return ImmutableCollectionsMarshal.AsArray(destination.DrainToImmutable())!;
         }
     }
-
-    public interface IOperationOnVectors<TElement, TResult>
-    {
-        static abstract Vector<TElement> DoVectorized(Vector<TElement> current, Vector<TElement> next);
-        static abstract TResult Accumulate(TResult accumulator, TElement left);
-    }
-
-    private readonly struct SumOperation : IOperationOnVectors<int, int>
-    {
-        public static Vector<int> DoVectorized(Vector<int> current, Vector<int> next) => Vector.Add(current, next);
-        public static int Accumulate(int accumulator, int left) => accumulator + left;
-    }
-
-    public static TResult ForEachVectorized<TElement, TResult, TOperation>(
-        this ReadOnlySpan<TElement> elements,
-        Vector<TElement> initial,
-        TResult accumulator)
-        where TOperation : struct, IOperationOnVectors<TElement, TResult>
-    {
-        ref var elementsRef = ref MemoryMarshal.GetReference(elements);
-        var offsetToElements = 0;
-        for (; offsetToElements <= elements.Length - Vector<TElement>.Count; offsetToElements += Vector<TElement>.Count)
-        {
-            initial = TOperation.DoVectorized(initial, Vector.LoadUnsafe(ref elementsRef, (nuint)offsetToElements));
-        }
-
-        for (var index = 0; index < Vector<TElement>.Count; ++index)
-        {
-            accumulator = TOperation.Accumulate(accumulator, initial[index]);
-        }
-
-        for (var index = offsetToElements; index < elements.Length; ++index)
-        {
-            accumulator = TOperation.Accumulate(accumulator, elements[index]);
-        }
-
-        return accumulator;
-    }
-
-    public static int SumVectorized(ReadOnlySpan<int> ints)
-        => ForEachVectorized<int, int, SumOperation>(ints, Vector<int>.Zero, 0);
 }
