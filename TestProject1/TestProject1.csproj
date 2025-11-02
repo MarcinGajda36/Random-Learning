@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HighPerf\HighPerf.csproj" />
     <ProjectReference Include="..\LeetCode\LeetCode.csproj" />
   </ItemGroup>
 
