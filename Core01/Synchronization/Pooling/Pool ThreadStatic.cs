@@ -1,9 +1,10 @@
 ﻿namespace MarcinGajda.Synchronization.Pooling;
 
 using System;
-using System.Runtime.CompilerServices;
 
-public sealed class ThreadStaticPool<TValue>(Func<TValue> factory)
+public sealed class ThreadStaticPool<TValue>(
+    Func<TValue> factory,
+    int perThreadSize = 6)
 {
     public sealed class Lease(TValue value, ThreadStaticPool<TValue> parent) : IDisposable
     {
@@ -30,13 +31,9 @@ public sealed class ThreadStaticPool<TValue>(Func<TValue> factory)
 
     sealed class Pool(ThreadStaticPool<TValue> parent)
     {
-        const int ArraySize = 6;
-        [InlineArray(ArraySize)]
-        struct TValues { TValue first; };
-
         readonly Func<TValue> factory = parent.factory;
+        readonly TValue[] values = new TValue[parent.perThreadSize];
         int available;
-        TValues values = new();
 
         public TValue GetOrCreate()
         {
@@ -52,7 +49,7 @@ public sealed class ThreadStaticPool<TValue>(Func<TValue> factory)
 
         public void Return(TValue value)
         {
-            if (available != ArraySize)
+            if (available != values.Length)
             {
                 values[available++] = value;
             }
@@ -62,6 +59,7 @@ public sealed class ThreadStaticPool<TValue>(Func<TValue> factory)
     [ThreadStatic]
     static Pool? pool;
     readonly Func<TValue> factory = factory;
+    readonly int perThreadSize = perThreadSize;
 
     public TValue Rent()
         => pool is { } notNull
