@@ -7,17 +7,17 @@ namespace MarcinGajda.Synchronization.Synchronizers;
 
 internal class ConcurrentExclusiveSynchronizer
 {
-    private interface IOperation
+    interface IOperation
     {
         Task ExecuteAsync();
     }
 
-    private sealed class Operation<TResult> : IOperation, IAsyncDisposable
+    sealed class Operation<TResult> : IOperation, IAsyncDisposable
     {
-        private readonly TaskCompletionSource<TResult> completionSource = new();
-        private readonly Func<CancellationToken, Task<TResult>> operation;
-        private readonly CancellationToken cancellationToken;
-        private readonly CancellationTokenRegistration taskCancellation;
+        readonly TaskCompletionSource<TResult> completionSource = new();
+        readonly Func<CancellationToken, Task<TResult>> operation;
+        readonly CancellationToken cancellationToken;
+        readonly CancellationTokenRegistration taskCancellation;
 
         public Task<TResult> Task => completionSource.Task;
 
@@ -51,8 +51,8 @@ internal class ConcurrentExclusiveSynchronizer
         public ValueTask DisposeAsync() => taskCancellation.DisposeAsync();
     }
 
-    private readonly ActionBlock<IOperation> exclusive;
-    private readonly ActionBlock<IOperation> concurrent;
+    readonly ActionBlock<IOperation> exclusive;
+    readonly ActionBlock<IOperation> concurrent;
 
     public ConcurrentExclusiveSynchronizer(ConcurrentExclusiveSchedulerPair? schedulerPair = null)
     {
@@ -80,7 +80,7 @@ internal class ConcurrentExclusiveSynchronizer
     public Task<TResult> ConcurrentAsync<TResult>(Func<CancellationToken, Task<TResult>> operation, CancellationToken cancellationToken)
         => ExecuteOperationAsync(concurrent, operation, cancellationToken);
 
-    private static async Task<TResult> ExecuteOperationAsync<TResult>(
+    static async Task<TResult> ExecuteOperationAsync<TResult>(
         ActionBlock<IOperation> runner,
         Func<CancellationToken, Task<TResult>> toRun,
         CancellationToken cancellationToken)
@@ -90,6 +90,6 @@ internal class ConcurrentExclusiveSynchronizer
         return await operation.Task;
     }
 
-    private static Task ExecuteAsync(IOperation operation)
+    static Task ExecuteAsync(IOperation operation)
         => operation.ExecuteAsync();
 }
