@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 
 namespace SpansAndStuff;
+
 public static class Vectors
 {
     public static void EqualsAny()
@@ -27,7 +28,7 @@ public static class Vectors
             {
                 // This has bad default of NoCheck and i see default 'Online' here:
                 // https://learn.microsoft.com/en-us/dotnet/framework/wcf/feature-details/working-with-certificates#certificate-revocation-list
-                CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
+                CertificateRevocationCheckMode = X509RevocationMode.Online,
                 CertificateChainPolicy = new() // This when set turns CertificateRevocationCheck to Online and override property CertificateRevocationCheck
             },
             PooledConnectionLifetime = TimeSpan.FromMinutes(15) // Recreate every 15 minutes

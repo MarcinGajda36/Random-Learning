@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -65,6 +66,7 @@ public static class Vectores
 
     public static double Test()
     {
+        IBufferWriter<int> bufferWriter = new ArrayBufferWriter<int>();
         ReadOnlySpan<int> numbers = [1, 2, 3, 4, 5, 6];
         var average = AverageVectorized(numbers, 0d);
         return average;

@@ -15,16 +15,16 @@ let shortInput = [|
     "7pqrstsixteen";
 |]
 
-let wordToNumer = [|
-    ("one", 1); 
-    ("two", 2); 
-    ("three", 3); 
-    ("four", 4); 
-    ("five", 5); 
-    ("six", 6); 
-    ("seven", 7); 
-    ("eight", 8); 
-    ("nine", 9); 
+let wordToNumber = [|
+    "one", 1; 
+    "two", 2; 
+    "three", 3; 
+    "four", 4; 
+    "five", 5; 
+    "six", 6; 
+    "seven", 7; 
+    "eight", 8; 
+    "nine", 9; 
 |]
 
 
@@ -38,9 +38,9 @@ let getAllWordIndexes (word: string) (text: string) =
 
 let findAllDigits text = 
     let getIndexAndValue index c = 
-        if Char.IsDigit c then (index, Char.GetNumericValue c |> int) else (-1, 0)
+        if Char.IsDigit c then index, Char.GetNumericValue c |> int else -1, 0
     let words = 
-        wordToNumer |> Seq.collect (fun (word, digit) -> getAllWordIndexes word text |> Seq.map (fun index -> (index, digit)))
+        wordToNumber |> Seq.collect (fun (word, digit) -> getAllWordIndexes word text |> Seq.map (fun index -> index, digit))
     let digits = text |> Seq.mapi getIndexAndValue
     digits 
     |> Seq.append words
@@ -54,7 +54,7 @@ let fullNumber indexedDigits =
         |> Seq.toArray
     let first = Array.head ordered
     let last = Array.last ordered
-    (string first) + (string last) |> int
+    string first + string last |> int
     
 let numbers = 
     fullInput
