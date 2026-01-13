@@ -8,12 +8,16 @@ using System.Runtime.InteropServices;
 
 public static class NewSwitch
 {
-    public static string? Test2(IDictionary<int, string> dictionary, int key) => dictionary switch
-    {
-        null => null,
-        var dict when dict.TryGetValue(key, out var val) => val,
-        _ => null,
-    };
+    public static string? TryGetValue(IDictionary<int, string>? dictionary, int key)
+        => dictionary switch
+        {
+            null => null,
+            { } dict => dict.TryGetValue(key, out var value) switch
+            {
+                true => value,
+                false => null
+            },
+        };
 
     public static bool IsPalindrome1(string text)
     {
