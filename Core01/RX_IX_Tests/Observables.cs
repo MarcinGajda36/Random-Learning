@@ -29,7 +29,7 @@ public static class Observables
     {
         using var subject = new Subject<string>();
         subject.OnNext("a");
-        subject.Subscribe(Console.WriteLine);
+        _ = subject.Subscribe(Console.WriteLine);
         subject.OnNext("b");
         subject.OnCompleted();
         subject.OnNext("c");
@@ -40,7 +40,7 @@ public static class Observables
         subject.OnNext("1");
         subject.OnNext("2");
         subject.OnNext("3");
-        subject.Subscribe(Console.WriteLine);
+        _ = subject.Subscribe(Console.WriteLine);
         subject.OnNext("4");
     }
 
@@ -49,7 +49,7 @@ public static class Observables
         using var subject = new BehaviorSubject<string>("a");
         subject.OnNext("b");
         subject.OnNext("c");
-        subject.Subscribe(Console.WriteLine);
+        _ = subject.Subscribe(Console.WriteLine);
         subject.OnNext("d");
     }
     public static void AsyncSubjectTest()
@@ -57,14 +57,14 @@ public static class Observables
         using var subject = new AsyncSubject<string>();
         subject.OnNext("b");
         subject.OnNext("c");
-        subject.Subscribe(Console.WriteLine);
+        _ = subject.Subscribe(Console.WriteLine);
         subject.OnNext("d");
         subject.OnCompleted();
     }
     public static async void Throws()
     {
         var throws = Observable.Throw<int>(new Exception());
-        await throws;
+        _ = await throws;
     }
     public static async void Create()
     {
@@ -100,7 +100,7 @@ public static class Observables
     }
     public static void Generate()
     {
-        Observable.Range(10, 15).Subscribe(Console.WriteLine);
+        _ = Observable.Range(10, 15).Subscribe(Console.WriteLine);
         Console.WriteLine();
         Console.WriteLine();
         Console.WriteLine();
@@ -113,7 +113,7 @@ public static class Observables
                 state => state + 1,
                 state => state.ToString());
         }
-        MyRange(10, 15).Subscribe(Console.WriteLine);
+        _ = MyRange(10, 15).Subscribe(Console.WriteLine);
     }
     public static void StartAction()
     {
@@ -210,7 +210,7 @@ public static class Observables
     public static async void Randomm()
     {
 
-        Observable.Range(1, 10)
+        _ = Observable.Range(1, 10)
             .ToAsyncEnumerable()
             .ToObservable();
 
@@ -268,7 +268,7 @@ public static class Observables
             .And(Observable.Repeat(1))
             .And(Observable.Repeat(new { a = 5 }));
 
-        Observable.When(plain.Then((arg1, arg2, arg3) => arg3));
+        _ = Observable.When(plain.Then((arg1, arg2, arg3) => arg3));
     }
     public static IObservable<Site> GetSource() => default;
     public class Site
@@ -288,7 +288,7 @@ public static class Observables
         };
 
         var token = scheduler.Schedule(1, work);
-        Console.ReadLine();
+        _ = Console.ReadLine();
         Console.WriteLine("Canceling");
         token.Dispose();
         Console.WriteLine("Canceled");
@@ -328,7 +328,7 @@ public static class Observables
         var q = source.AsQbservable();
         Console.WriteLine(q.ToString());
         var sub = q.Subscribe(Console.WriteLine);
-        Console.ReadKey();
+        _ = Console.ReadKey();
     }
 
     public static void RefCounts()
@@ -353,7 +353,7 @@ public static class Observables
         var obs = list.AsObservable();
         using (var sub = obs.Subscribe(Console.WriteLine))
         {
-            list.Post(1);
+            _ = list.Post(1);
             await Task.Delay(100)
                 .ConfigureAwait(true);
         }
@@ -367,7 +367,7 @@ public static class Observables
 
     public static Task Splitt()
     {
-        Observable.Range(0, 10)
+        _ = Observable.Range(0, 10)
             .Scan(ImmutableDictionary<int, string>.Empty,
             (accumulator, element) =>
             {
@@ -393,7 +393,7 @@ public static class Observables
             select (x, y);
 
         Console.WriteLine("elements");
-        await elements.Do(x => Console.WriteLine(x));
+        _ = await elements.Do(x => Console.WriteLine(x));
 
         var query =
             from x in Observable.FromAsync(() => Task.FromResult(1))
@@ -402,7 +402,7 @@ public static class Observables
             select (x, y, z);
 
         Console.WriteLine("query");
-        await query.Do(x => Console.WriteLine(x));
+        _ = await query.Do(x => Console.WriteLine(x));
 
         var whtType =
             from number in Enumerable.Range(0, 100).ToObservable()
@@ -411,7 +411,7 @@ public static class Observables
             select idk;
 
         Console.WriteLine("whtType");
-        await whtType.Do(x => Console.WriteLine(x));
+        _ = await whtType.Do(Console.WriteLine);
 
     }
 }

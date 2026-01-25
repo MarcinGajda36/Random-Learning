@@ -1,17 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32126.317
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core01", "Core01\Core01.csproj", "{F1AF8355-79E4-43DA-816F-D6D4BF375C90}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpansAndStuff", "SpansAndStuff\SpansAndStuff.csproj", "{77B22146-460B-459B-8513-13668A8D14A3}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FsCsConnection", "FsCsConnection\FsCsConnection.fsproj", "{D09E0C8B-F8F4-4586-9A01-E91CB8657314}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcService1", "GrpcService1\GrpcService1.csproj", "{73201DEC-0D40-4EF2-B575-DA05259741FD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcClient", "GrpcClient\GrpcClient.csproj", "{3CBD2572-AA05-4C91-A7B2-DC8547E2394D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeetCode", "LeetCode\LeetCode.csproj", "{3FC4AB4A-F99E-4015-881D-2452259EF64E}"
 EndProject
@@ -59,14 +55,6 @@ Global
 		{D09E0C8B-F8F4-4586-9A01-E91CB8657314}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D09E0C8B-F8F4-4586-9A01-E91CB8657314}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D09E0C8B-F8F4-4586-9A01-E91CB8657314}.Release|Any CPU.Build.0 = Release|Any CPU
-		{73201DEC-0D40-4EF2-B575-DA05259741FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73201DEC-0D40-4EF2-B575-DA05259741FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{73201DEC-0D40-4EF2-B575-DA05259741FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{73201DEC-0D40-4EF2-B575-DA05259741FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3CBD2572-AA05-4C91-A7B2-DC8547E2394D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3CBD2572-AA05-4C91-A7B2-DC8547E2394D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3CBD2572-AA05-4C91-A7B2-DC8547E2394D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3CBD2572-AA05-4C91-A7B2-DC8547E2394D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3FC4AB4A-F99E-4015-881D-2452259EF64E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3FC4AB4A-F99E-4015-881D-2452259EF64E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FC4AB4A-F99E-4015-881D-2452259EF64E}.Release|Any CPU.ActiveCfg = Release|Any CPU
