@@ -5,51 +5,59 @@ using System.Linq;
 
 public class LargestGoodLand
 {
-    public record XYLength(int StartX, int StartY, int Length);
-    public static XYLength LargestGoodSquare(int[][] land)
+    public record Square(int StartX, int StartY, int Length);
+    public static Square LargestGoodSquare(int[][] land)
     {
-        List<XYLength> lengths = [];
-        for (int y = 0; y < land.Length; y++)
+        List<Square> squares = [];
+        for (int startY = 0; startY < land.Length; startY++)
         {
-            var row = land[y];
-            for (int x = 0; x < row.Length; x++)
+            var startYRow = land[startY];
+            for (int startX = 0; startX < startYRow.Length; startX++)
             {
-                if (row[x] == 0)
+                if (startYRow[startX] == 0)
                 {
                     continue;
                 }
-                lengths.Add(new(x, y, 1));
-                // 011
-                // 011
-                // 000
-                for (var lengthToCheck = 2; x + (lengthToCheck - 1) < row.Length; lengthToCheck++)
+                squares.Add(new(startX, startY, 1));
+                for (var lengthToCheck = 2; startX + (lengthToCheck - 1) < startYRow.Length; lengthToCheck++)
                 {
                     var offsetToAdd = lengthToCheck - 1;
-                    var xToCheck = x + offsetToAdd;
-                    if (row[xToCheck] == 1)
+                    var startXWithOffset = startX + offsetToAdd;
+                    if (startYRow[startXWithOffset] == 0)
                     {
-                        // TODO check y’s
-                        for (int yOffset = 1; y + yOffset < lengthToCheck; yOffset++)
-                        {
-                            var rowToCheck = land[y + yOffset];
-                            for (int secondaryXOffset = 0; x + secondaryXOffset <= xToCheck; secondaryXOffset++)
-                            {
-                                if (rowToCheck[x + secondaryXOffset] == 0)
-                                {
-                                    break;
-                                }
-                                if (x + secondaryXOffset == xToCheck && yOffset == (lengthToCheck - 1))
-                                {
-                                    lengths.Add(new(x, y, lengthToCheck));
-                                }
-                            }
-                        }
+                        break;
+                    }
+
+                    if (IsGoodSquare(land, startY, startX, lengthToCheck))
+                    {
+                        squares.Add(new(startX, startY, lengthToCheck));
                     }
                 }
             }
         }
-        return lengths.Any()
-            ? lengths.MaxBy(x => x.Length)
+        return squares.Count != 0
+            ? squares.MaxBy(x => x.Length)
             : new(-1, -1, -1);
+    }
+
+    private static bool IsGoodSquare(int[][] land, int startY, int startX, int lengthToCheck)
+    {
+        for (int yOffset = 1; startY + yOffset < land.Length; yOffset++)
+        {
+            var rowToCheck = land[startY + yOffset];
+            for (int startXOffset = lengthToCheck - 1; startXOffset >= 0; startXOffset--)
+            {
+                if (rowToCheck[startX + startXOffset] == 0)
+                {
+                    return false;
+                }
+
+                if (startX + startXOffset == startX && yOffset == (lengthToCheck - 1))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

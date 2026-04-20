@@ -1,4 +1,0 @@
-﻿{
-  StartX: 1,
-  Length: 2
-}
