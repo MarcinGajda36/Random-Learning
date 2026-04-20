@@ -19,7 +19,7 @@ public class Tests
             var r = new[] { 1, 2, 3, 6, 9, 8, 7, 4, 5 };
             var snail = SnailSolution.Snail(array);
             Test(snail, r);
-            await Verify(snail);
+            _ = await Verify(snail);
         }
 
         public string Int2dToString(int[][] a)
@@ -35,13 +35,41 @@ public class Tests
         [Test]
         public async Task FirstSnapshotTest()
         {
-            await Verify(new { x = 1, y = 5, z = "abc" });
+            _ = await Verify(new { x = 1, y = 5, z = "abc" });
         }
 
         [Test]
         public async Task FirstThrowingSnapshotTest()
         {
-            await ThrowsTask(() => throw new Exception());
+            _ = await ThrowsTask(() => throw new Exception());
         }
+    }
+
+
+
+    [Test]
+    public async Task LargestGoodSquareTests01()
+    {
+        int[][] arr =
+            [
+            [0,1,1],
+            [0,1,1],
+            [0,0,0]
+            ];
+        _ = await Verify(LargestGoodLand.LargestGoodSquare(arr));
+    }
+
+    [Test]
+    public async Task LargestGoodSquareTests02()
+    {
+        int[][] arr =
+            [
+            [0,1,1,0,0],
+            [0,1,1,1,1],
+            [0,0,1,1,1],
+            [0,0,1,1,1],
+            [0,0,0,0,0],
+            ];
+        _ = await Verify(LargestGoodLand.LargestGoodSquare(arr));
     }
 }
