@@ -1,5 +1,5 @@
 ﻿{
-  BottomRightX: 4,
-  BottomRightY: 3,
+  RightX: 4,
+  BottomY: 3,
   Length: 3
 }
