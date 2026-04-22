@@ -2,7 +2,7 @@
 
 using LeetCode;
 
-public class LargestGoodSquareTests
+public class LargestGoodLand01Tests
 {
     [Test]
     public async Task LargestGoodSquareTests01()
@@ -13,7 +13,7 @@ public class LargestGoodSquareTests
             [0,1,1],
             [0,0,0]
             ];
-        _ = await Verify(LargestGoodLand.LargestGoodSquare(arr));
+        _ = await Verify(LargestGoodLand01.LargestGoodSquare(arr));
     }
 
     [Test]
@@ -27,6 +27,6 @@ public class LargestGoodSquareTests
             [0,0,1,1,1],
             [0,0,0,0,0],
             ];
-        _ = await Verify(LargestGoodLand.LargestGoodSquare(arr));
+        _ = await Verify(LargestGoodLand01.LargestGoodSquare(arr));
     }
 }

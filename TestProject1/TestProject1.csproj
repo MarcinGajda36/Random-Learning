@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -32,6 +32,12 @@
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LargestGoodLand01Tests.LargestGoodSquareTests01.verified.txt">
+      <DependentUpon>LargestGoodLand01Tests.cs</DependentUpon>
+    </None>
   </ItemGroup>
 
 </Project>
