@@ -5,7 +5,7 @@ using System;
 // https://leetcode.com/problems/longest-substring-without-repeating-characters/
 public class LongestSubstringWithoutRepeatingCharacters
 {
-    // Attempt 3:
+    // Attempt 3: works and fast 
     // extremally hard to get right, had a lot of bugs and deadlocks, 
     // Runtime Beats 95.62%
     // Memory Beats 96.12%
@@ -33,7 +33,7 @@ public class LongestSubstringWithoutRepeatingCharacters
         return longestSoFar;
     }
 
-    // Attempt 2: 
+    // Attempt 2: works but slow
     // idk, had deadlock by not moving primaryIdx in all cases
     // also moved primaryIdx too far, missing substrings in as first try, change to primaryIdx++ fixed it and added computation
     //public int LengthOfLongestSubstring(string haystack)
@@ -62,7 +62,7 @@ public class LongestSubstringWithoutRepeatingCharacters
     //    return longestSoFar;
     //}
 
-    // Attempt 1: 
+    // Attempt 1: incomplete
     // idk, caused deadlock bny forgetting 'leftToSearch = rest;' and it feelt harder then it had to be
     // missed cases like dvdwc, where i skipped to next d but vdwc was longest
     // public int LengthOfLongestSubstring(string haystack) {
