@@ -3,36 +3,64 @@
 using System;
 
 // https://leetcode.com/problems/longest-substring-without-repeating-characters/
-internal class LongestSubstringWithoutRepeatingCharacters
+public class LongestSubstringWithoutRepeatingCharacters
 {
+    // Attempt 3:
+    // extremally hard to get right, had a lot of bugs and deadlocks, 
+    // Runtime Beats 95.62%
+    // Memory Beats 96.12%
+    public int LengthOfLongestSubstring(string source)
+    {
+        int longestSoFar = 0;
+        var sourceAsSpan = source.AsSpan();
+        ReadOnlySpan<char> currentSubstring = [];
+        for (var primaryIdx = 0; primaryIdx < sourceAsSpan.Length; primaryIdx++)
+        {
+            var primaryChar = sourceAsSpan[primaryIdx];
+            var duplicationIdx = currentSubstring.IndexOf(primaryChar);
+            if (duplicationIdx == -1)
+            {
+                currentSubstring = sourceAsSpan[(primaryIdx - currentSubstring.Length)..(primaryIdx + 1)];
+            }
+            else
+            {
+                longestSoFar = Math.Max(longestSoFar, currentSubstring.Length);
+                var duplicationIdxInSource = primaryIdx - currentSubstring.Length + duplicationIdx;
+                currentSubstring = sourceAsSpan[(duplicationIdxInSource + 1)..(primaryIdx + 1)];
+            }
+        }
+        longestSoFar = Math.Max(longestSoFar, currentSubstring.Length);
+        return longestSoFar;
+    }
+
     // Attempt 2: 
     // idk, had deadlock by not moving primaryIdx in all cases
     // also moved primaryIdx too far, missing substrings in as first try, change to primaryIdx++ fixed it and added computation
-    public int LengthOfLongestSubstring(string haystack)
-    {
-        int longestSoFar = 0;
-        var leftToSearch = haystack.AsSpan();
-        for (var primaryIdx = 0; primaryIdx < leftToSearch.Length; primaryIdx++)
-        {
-            ReadOnlySpan<char> currentSubstring = [];
-            for (var substringOffset = 0; substringOffset + primaryIdx < leftToSearch.Length; substringOffset++)
-            {
-                var nextCharIdx = primaryIdx + substringOffset;
-                var nextChar = leftToSearch[nextCharIdx];
-                if (currentSubstring.Contains(nextChar))
-                {
-                    break;
-                }
-                else
-                {
-                    currentSubstring = leftToSearch[primaryIdx..(nextCharIdx + 1)];
-                }
-            }
-            var currentLength = currentSubstring.Length;
-            longestSoFar = Math.Max(currentLength, longestSoFar);
-        }
-        return longestSoFar;
-    }
+    //public int LengthOfLongestSubstring(string haystack)
+    //{
+    //    int longestSoFar = 0;
+    //    var leftToSearch = haystack.AsSpan();
+    //    for (var primaryIdx = 0; primaryIdx < leftToSearch.Length; primaryIdx++)
+    //    {
+    //        ReadOnlySpan<char> currentSubstring = [];
+    //        for (var substringOffset = 0; substringOffset + primaryIdx < leftToSearch.Length; substringOffset++)
+    //        {
+    //            var nextCharIdx = primaryIdx + substringOffset;
+    //            var nextChar = leftToSearch[nextCharIdx];
+    //            if (currentSubstring.Contains(nextChar))
+    //            {
+    //                break;
+    //            }
+    //            else
+    //            {
+    //                currentSubstring = leftToSearch[primaryIdx..(nextCharIdx + 1)];
+    //            }
+    //        }
+    //        var currentLength = currentSubstring.Length;
+    //        longestSoFar = Math.Max(currentLength, longestSoFar);
+    //    }
+    //    return longestSoFar;
+    //}
 
     // Attempt 1: 
     // idk, caused deadlock bny forgetting 'leftToSearch = rest;' and it feelt harder then it had to be
