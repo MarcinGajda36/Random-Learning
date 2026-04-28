@@ -26,8 +26,8 @@ public class TwoSums
         for (var currentIdx = 0; currentIdx < nums.Length; currentIdx++)
         {
             var current = nums[currentIdx];
-            var distance = target - current;
-            if (indexByDistance.TryGetValue(distance, out var previousIdx))
+            var complement = target - current; // I named this variable 'distance' first, then found better name 'complement' browsing other solutions
+            if (indexByDistance.TryGetValue(complement, out var previousIdx))
             {
                 return [previousIdx, currentIdx];
             }
