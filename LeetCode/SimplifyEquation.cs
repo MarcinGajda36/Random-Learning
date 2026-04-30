@@ -31,7 +31,7 @@ public class SimplifyEquation
                     }
                     break;
                 case '-':
-                    sign *= -1; // Too naive for nested parenthesis, i would need maybe dictionary<parenthesisDepth, sign>?
+                    sign *= -1; // TODO: Too naive for nested parenthesis, or even -(a-b) maybe, i would need maybe dictionary<parenthesisDepth, sign>?
                     break;
                 case ')':
                     parenthesisDepth--;
