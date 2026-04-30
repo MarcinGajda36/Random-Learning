@@ -1,5 +1,6 @@
 ﻿namespace LeetCode;
 
+using System;
 using System.Collections.Generic;
 
 public class BinarySearch
@@ -33,11 +34,12 @@ public class BinarySearch
 
     public static int FindIndexOf02<TElement>(IReadOnlyList<TElement> haystack, TElement toFind)
     {
+        ArgumentNullException.ThrowIfNull(haystack);
         const int NotFound = -1;
         return haystack switch
         {
             // I like how switches help me think through cases 
-            null or [] => NotFound,
+            [] => NotFound,
             [var one] => Comparer<TElement>.Default.Compare(one, toFind) == 0 ? 0 : NotFound,
             var many => FindInMany(many, toFind),
         };
