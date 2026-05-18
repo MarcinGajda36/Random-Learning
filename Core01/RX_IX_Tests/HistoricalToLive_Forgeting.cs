@@ -1,6 +1,7 @@
 ﻿namespace MarcinGajda.RX_IX_Tests;
 
 using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -45,5 +46,47 @@ internal class HistoricalToLive_Forgetting
         {
             observer.OnError(completion.Exception);
         }
+    }
+
+    public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
+        IObservable<TValue> live,
+        IEnumerable<TValue> historical)
+    {
+        var liveChannel = Channel.CreateUnbounded<TValue>();
+        return Observable.Create<TValue>(async (observer, cancelationToken) =>
+        {
+            using var liveSubscription = live.Subscribe(
+                (value) => liveChannel.Writer.TryWrite(value),
+                (exception) => liveChannel.Writer.TryComplete(exception),
+                () => liveChannel.Writer.TryComplete());
+
+            foreach (var value in historical)
+            {
+                observer.OnNext(value);
+            }
+
+            await ConsumeChannel(observer, liveChannel.Reader, cancelationToken);
+        });
+    }
+
+    public static IObservable<TValue> ConcatLiveAfterHistory<TValue>(
+        IObservable<TValue> live,
+        IAsyncEnumerable<TValue> historical)
+    {
+        var liveChannel = Channel.CreateUnbounded<TValue>();
+        return Observable.Create<TValue>(async (observer, cancelationToken) =>
+        {
+            using var liveSubscription = live.Subscribe(
+                (value) => liveChannel.Writer.TryWrite(value),
+                (exception) => liveChannel.Writer.TryComplete(exception),
+                () => liveChannel.Writer.TryComplete());
+
+            await foreach (var value in historical)
+            {
+                observer.OnNext(value);
+            }
+
+            await ConsumeChannel(observer, liveChannel.Reader, cancelationToken);
+        });
     }
 }
