@@ -72,7 +72,7 @@ public static class HistoricalToLive_IList
         .Scan(
             new Concat<TValue>([], new ConcatState<TValue>()),
             static (previous, message) => HandleNextMessage(in previous, in message))
-        .SelectMany(state => state.Return);
+        .SelectMany(state => state.Return); // TODO This return can hold reference to entire history preventing GC, can i make it consuming one time iterator? 
 
     private static Concat<TValue> HandleNextMessage<TValue>(in Concat<TValue> previous, in Message<TValue> message)
         => previous with { Return = previous.State.HandleNextMessage(in message) };
