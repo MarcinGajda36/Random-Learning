@@ -50,7 +50,7 @@ public static class Vectores
         return accumulator;
     }
 
-    public static TResult ForEach<TElement, TResult, TOperation>(
+    public static TResult ForEach<TElement, TResult, TOperation>( // I suspect this is slower then ForEach2 but in 'peeling the onion' approach it feels like sweet-spot
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
