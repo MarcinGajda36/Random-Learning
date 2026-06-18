@@ -10,7 +10,8 @@ public static class Vectores
     public interface IOperationOnVectors<TElement, TResult>
     {
         static abstract Vector<TElement> DoVectorized(Vector<TElement> current, Vector<TElement> next);
-        static abstract TResult Accumulate(TResult accumulator, TElement left);
+        static abstract TResult AccumulateVector(TResult accumulator, Vector<TElement> current);
+        static abstract TResult AccumulateLeftovers(TResult accumulator, TElement left);
     }
 
     private readonly struct SumOperation<TNumber, TAccumulator> : IOperationOnVectors<TNumber, TAccumulator>
@@ -18,10 +19,11 @@ public static class Vectores
         where TAccumulator : INumberBase<TAccumulator>
     {
         public static Vector<TNumber> DoVectorized(Vector<TNumber> current, Vector<TNumber> next) => Vector.Add(current, next);
-        public static TAccumulator Accumulate(TAccumulator accumulator, TNumber left) => accumulator + TAccumulator.CreateChecked(left);
+        public static TAccumulator AccumulateVector(TAccumulator accumulator, Vector<TNumber> current) => accumulator + TAccumulator.CreateChecked(Vector.Sum(current));
+        public static TAccumulator AccumulateLeftovers(TAccumulator accumulator, TNumber left) => accumulator + TAccumulator.CreateChecked(left);
     }
 
-    public static TResult ForEach<TElement, TResult, TOperation>(
+    public static TResult ForEach2<TElement, TResult, TOperation>(
         this ReadOnlySpan<TElement> elements,
         Vector<TElement> initial,
         TResult accumulator)
@@ -36,12 +38,35 @@ public static class Vectores
 
         for (var index = 0; index < Vector<TElement>.Count; ++index)
         {
-            accumulator = TOperation.Accumulate(accumulator, initial[index]);
+            accumulator = TOperation.AccumulateLeftovers(accumulator, initial[index]);
         }
+        // or accumulator = TOperation.AccumulateVector(accumulator, initial);
 
         for (var index = offsetToElements; index < elements.Length; ++index)
         {
-            accumulator = TOperation.Accumulate(accumulator, elements[index]);
+            accumulator = TOperation.AccumulateLeftovers(accumulator, elements[index]);
+        }
+
+        return accumulator;
+    }
+
+    public static TResult ForEach<TElement, TResult, TOperation>(
+        this ReadOnlySpan<TElement> elements,
+        Vector<TElement> initial,
+        TResult accumulator)
+        where TOperation : IOperationOnVectors<TElement, TResult>
+    {
+        var vectorCount = Vector<TElement>.Count; // I can press 'Inline temporary ...' if i want
+        while (elements.Length >= vectorCount)
+        {
+            initial = TOperation.DoVectorized(initial, new Vector<TElement>(elements));
+            elements = elements[vectorCount..];
+        }
+
+        accumulator = TOperation.AccumulateVector(accumulator, initial);
+        foreach (var element in elements)
+        {
+            accumulator = TOperation.AccumulateLeftovers(accumulator, element);
         }
 
         return accumulator;
@@ -66,7 +91,7 @@ public static class Vectores
 
     public static double Test()
     {
-        IBufferWriter<int> bufferWriter = new ArrayBufferWriter<int>();
+        _ = new ArrayBufferWriter<int>();
         ReadOnlySpan<int> numbers = [1, 2, 3, 4, 5, 6];
         var average = AverageVectorized(numbers, 0d);
         return average;
