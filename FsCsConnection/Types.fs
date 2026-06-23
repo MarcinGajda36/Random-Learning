@@ -63,8 +63,24 @@ type Test0002 = {
 let testinstance1 = { Test1 = "" }
 let testinstance2 = { test2 = "" }
 
-let x = 
+let choice = 
     if 5 > 0 then 
         Choice1Of2 1 
     else
         Choice2Of2 ""
+
+type MyUnion = 
+    | X of string
+    | Y of string
+
+let x = X "asdads"
+let y = Y "dasdasd"
+
+let what xOrY = 
+    match xOrY with 
+    | X x -> printf "x: %s" x
+    | Y y -> printf "y: %s" y
+
+what x
+what y
+System.Text.Json.JsonSerializer.Serialize(x)
