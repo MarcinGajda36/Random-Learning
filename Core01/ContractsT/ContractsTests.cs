@@ -26,11 +26,11 @@ public class ContractsTests
     }
 }
 
-public abstract class Equatable<T>
+public abstract class Equatable<T> : IEquatable<T>
 {
     protected abstract bool EqualsCore(T other);
 
-    public bool Equals(T other)
+    public bool Equals(T? other)
     {
         // Compared to interfaces abstract class lets me do some pre and post validations and create guarantees across implementers 
         ArgumentNullException.ThrowIfNull(other);
