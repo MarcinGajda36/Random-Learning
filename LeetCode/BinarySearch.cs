@@ -40,18 +40,21 @@ public class BinarySearch
         {
             // I like how switches help me think through cases 
             [] => NotFound,
-            [var one] => Comparer<TElement>.Default.Compare(one, toFind) == 0 ? 0 : NotFound,
+            [var one] => FineInOne(one, toFind),
             var many => FindInMany(many, toFind),
         };
 
-        static int FindInMany(IReadOnlyList<TElement> haystack, TElement toFind)
+        static int FineInOne(TElement one, TElement toFind)
+            => Comparer<TElement>.Default.Compare(one, toFind) == 0 ? 0 : NotFound;
+
+        static int FindInMany(IReadOnlyList<TElement> many, TElement toFind)
         {
             var lowerLimit = 0;
-            var upperLimit = haystack.Count - 1;
+            var upperLimit = many.Count - 1;
             while (lowerLimit <= upperLimit && upperLimit >= lowerLimit)
             {
                 var indexToCheck = (upperLimit + lowerLimit) / 2;
-                var candidate = haystack[indexToCheck];
+                var candidate = many[indexToCheck];
                 switch (Comparer<TElement>.Default.Compare(candidate, toFind))
                 {
                     case > 0:
