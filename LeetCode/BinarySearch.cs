@@ -51,7 +51,7 @@ public class BinarySearch
         {
             var lowerLimit = 0;
             var upperLimit = many.Count - 1;
-            while (lowerLimit <= upperLimit && upperLimit >= lowerLimit)
+            while (lowerLimit <= upperLimit && upperLimit >= lowerLimit) // The second condition is useless right?
             {
                 var indexToCheck = (upperLimit + lowerLimit) / 2;
                 var candidate = many[indexToCheck];
