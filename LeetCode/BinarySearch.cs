@@ -34,6 +34,46 @@ public class BinarySearch
         return -1;
     }
 
+    // The syntax [1,2,3] allows overload of IReadOnlyList<> and ReadOnlySpan<> at the same time, but 2 concreate types are ambiguous 
+    public static int FindIndexOf01<TElement>(ReadOnlySpan<TElement> haystack, TElement toFind)
+    {
+        if (haystack is not { Length: > 0 })
+            return -1;
+
+        var lowerLimit = 0;
+        var upperLimit = haystack.Length - 1;
+        while (lowerLimit <= upperLimit && upperLimit >= lowerLimit)
+        {
+            var indexToCheck = (upperLimit + lowerLimit) / 2;
+            var candidate = haystack[indexToCheck];
+            switch (Comparer<TElement>.Default.Compare(candidate, toFind))
+            {
+                case > 0:
+                    upperLimit = indexToCheck - 1;
+                    break;
+                case 0:
+                    return indexToCheck;
+                case < 0:
+                    lowerLimit = indexToCheck + 1;
+                    break;
+            }
+        }
+
+        return -1;
+    }
+
+    // If i add precise type overloads then syntax [1,2,3] is ambiguous
+    //public static int FindIndexOf01<TElement>(TElement[] haystack, TElement toFind)
+    //    => FindIndexOf01(haystack.AsSpan(), toFind);
+
+    //public static int FindIndexOf01<TElement>(List<TElement> haystack, TElement toFind)
+    //    => FindIndexOf01(CollectionsMarshal.AsSpan(haystack), toFind);
+
+    //public static int FindIndexOf01<TElement>(ImmutableArray<TElement> haystack, TElement toFind)
+    //    => FindIndexOf01(haystack.AsSpan(), toFind);
+
+    // If i change IReadOnlyList<TElement> to TCollection where TCollection : IReadOnlyList<TElement> then syntax [1,2,3] stops working, new int[]{1,2,3} still works
+    // I suspect precise type overloads are the answer in that case
     public static int FindIndexOf02<TElement>(IReadOnlyList<TElement> haystack, TElement toFind)
     {
         ArgumentNullException.ThrowIfNull(haystack);

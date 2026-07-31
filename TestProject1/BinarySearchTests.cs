@@ -43,6 +43,6 @@ internal class BinarySearchTests
     [Test]
     public void BinarySearchTests07()
     {
-        Assert.That(BinarySearch.FindIndexOf01([1, 2, 3, 4, 5, 6], 4), Is.EqualTo(3));
+        Assert.That(BinarySearch.FindIndexOf01(new int[] { 1, 2, 3, 4, 5, 6 }, 4), Is.EqualTo(3));
     }
 }
