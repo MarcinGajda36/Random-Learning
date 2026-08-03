@@ -1,6 +1,8 @@
 
 namespace WebApplication1;
 
+using System.Threading.RateLimiting;
+
 public class Program
 {
     public static void Main(string[] args)
@@ -13,6 +15,12 @@ public class Program
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         _ = builder.Services.AddOpenApi();
 
+        _ = builder.Services.AddRateLimiter(
+            options => options.GlobalLimiter = PartitionedRateLimiter.Create(
+                (HttpContext key) => RateLimitPartition.GetConcurrencyLimiter(
+                    key,
+                    key => new ConcurrencyLimiterOptions { PermitLimit = 100, QueueLimit = 200 })));
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -20,9 +28,8 @@ public class Program
         {
             _ = app.MapOpenApi();
         }
-
+        _ = app.UseRateLimiter();// new RateLimiterOptions { }
         _ = app.UseHttpsRedirection();
-
         _ = app.UseAuthorization();
 
         var summaries = new[]
