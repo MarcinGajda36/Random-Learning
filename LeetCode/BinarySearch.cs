@@ -7,6 +7,21 @@ using System.Runtime.InteropServices;
 
 public class BinarySearch
 {
+    public int MyMethod(params int[] ints)
+    {
+        return 1;
+    }
+
+    public int MyMethod(int a, int b, int c)
+    {
+        return 1;
+    }
+
+    public int MyMethodInvoker()
+    {
+        return MyMethod(1, 2, 3); // The params overload first lets me add overrides later with specifics argument counts 
+    }
+
     public static int FindIndexOf01<TElement>(IReadOnlyList<TElement> haystack, TElement toFind)
     {
         if (haystack is not { Count: > 0 })
