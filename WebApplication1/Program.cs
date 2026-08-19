@@ -2,6 +2,7 @@
 namespace WebApplication1;
 
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 
 public class Program
 {
@@ -51,6 +52,17 @@ public class Program
         })
         .WithName("GetWeatherForecast");
 
+        app.MapHub<MySignalRHub>("/MySignalRHub", options => { });
+
         app.Run();
+    }
+
+    class WhatIsThisClassDoing();
+    class MySignalRHub : Hub<WhatIsThisClassDoing>
+    {
+        public async Task MyWorkAsync(int argument1, int argument2, CancellationToken cancellationToken)
+        {
+            await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
+        }
     }
 }
